@@ -34,6 +34,7 @@ public interface IResolver<T extends Symptom> extends AutoCloseable {
    * {@link IResolver#resolve} is invoked to fix one or more problems identified in the
    * {@link Diagnosis} instance.
    *
+   * @param diagnosis the anomaly detected by a detector
    * @return all the actions executed by this resolver to mitigate the problems
    */
   Collection<Action> resolve(Diagnosis<T> diagnosis);

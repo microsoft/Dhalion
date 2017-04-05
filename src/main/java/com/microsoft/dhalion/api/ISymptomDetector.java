@@ -25,6 +25,7 @@ public interface ISymptomDetector<T extends Symptom> extends AutoCloseable {
 
   /**
    * Detects a problem or issue with the distributed application
+   * @return the collection of issues detected by the symptom detectors
    */
   Collection<T> detect();
 

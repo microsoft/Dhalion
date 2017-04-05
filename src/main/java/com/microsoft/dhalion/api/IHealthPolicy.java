@@ -39,8 +39,10 @@ public interface IHealthPolicy extends AutoCloseable {
   void close();
 
   /**
-   * All policies need to be informed about an update event. System will invoke this method on all
+   * All policies need to be notified about an update event. System will invoke this method on all
    * policies in case a policy's {@link IResolver} updates the distribution application.
+   *
+   * @param action the action taken by a resolver
    */
   void onUpdate(Action action);
 }
