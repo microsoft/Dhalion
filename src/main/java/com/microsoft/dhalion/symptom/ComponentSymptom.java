@@ -13,60 +13,40 @@
 // limitations under the License.
 package com.microsoft.dhalion.symptom;
 
-import java.util.Collection;
-
-import com.microsoft.dhalion.metrics.MetricsInfo;
+import com.microsoft.dhalion.app.ComponentInfo;
+import com.microsoft.dhalion.metrics.ComponentMetricsData;
 
 /**
  * {@link ComponentSymptom} represents a issue with a component in a distributed system. The issue
  * could be result of multiple {@link InstanceSymptom}s.
  */
 public class ComponentSymptom extends Symptom {
-  private ComponentInfo componentInfo;
-  private Collection<InstanceSymptom> instanceSymptoms;
+  protected ComponentInfo componentInfo;
+  protected ComponentMetricsData metricsData;
 
-  public ComponentSymptom(ComponentInfo componentInfo) {
+  public ComponentSymptom(ComponentInfo componentInfo, ComponentMetricsData metricsData) {
     this.componentInfo = componentInfo;
-  }
-
-  public void addInstanceSymptom(InstanceSymptom instanceSymptom) {
-    instanceSymptoms.add(instanceSymptom);
+    this.metricsData = metricsData;
   }
 
   @Override
   public String toString() {
     return "ComponentSymptom{" +
         "componentInfo=" + componentInfo +
-        ", instancesSymptoms=" + instanceSymptoms +
+        ", metricsData=" + metricsData +
         '}';
   }
 
-  public ComponentInfo getComponentInfo() {
-    return componentInfo;
+  public ComponentSymptom(ComponentInfo componentInfo) {
+    this.componentInfo = componentInfo;
   }
 
-  public Collection<InstanceSymptom> getInstanceSymptoms() {
-    return instanceSymptoms;
+  public ComponentMetricsData getMetricsData() {
+    return metricsData;
   }
 
-  public boolean hasMetric(String metricName) {
-    return hasMetric(metricName, null);
-  }
-
-  public boolean hasMetric(String metricName, MetricsInfo.MetricValue value) {
-    return instanceSymptoms
-        .stream()
-        .filter(x -> x.hasMetric(metricName, value).isPresent())
-        .findAny()
-        .isPresent();
-  }
-
-  public boolean hasMetricBelowLimit(String metricName, MetricsInfo.MetricValue limit) {
-    return instanceSymptoms
-        .stream()
-        .filter(x -> x.hasMetricBelowLimit(metricName, limit).isPresent())
-        .findAny()
-        .isPresent();
+  public static ComponentSymptom from(ComponentMetricsData data) {
+    return new ComponentSymptom(new ComponentInfo(data.getName()), data);
   }
 }
 

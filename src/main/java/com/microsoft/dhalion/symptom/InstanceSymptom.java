@@ -14,19 +14,19 @@
 package com.microsoft.dhalion.symptom;
 
 import java.util.Collection;
-import java.util.Optional;
 
-import com.microsoft.dhalion.metrics.MetricsInfo;
+import com.microsoft.dhalion.app.InstanceInfo;
+import com.microsoft.dhalion.metrics.InstanceMetricsData;
 
 /**
- * {@link InstanceSymptom} hasMetric relevant {@link MetricsInfo} of an unhealthy
+ * {@link InstanceSymptom} hasMetric relevant {@link InstanceMetricsData} of an unhealthy
  * {@link InstanceInfo}
  */
 public class InstanceSymptom extends Symptom {
   private InstanceInfo instanceInfo;
-  private Collection<MetricsInfo> metrics;
+  private Collection<InstanceMetricsData> metrics;
 
-  public InstanceSymptom(InstanceInfo instanceInfo, Collection<MetricsInfo> metrics) {
+  public InstanceSymptom(InstanceInfo instanceInfo, Collection<InstanceMetricsData> metrics) {
     this.instanceInfo = instanceInfo;
     this.metrics = metrics;
   }
@@ -35,18 +35,18 @@ public class InstanceSymptom extends Symptom {
     return instanceInfo;
   }
 
-  public Optional<MetricsInfo> hasMetric(String metricName) {
-    return hasMetric(metricName, null);
-  }
+//  public Optional<InstanceMetricsData> hasMetric(String metricName) {
+//    return hasMetric(metricName, null);
+//  }
 
-  public Optional<MetricsInfo> hasMetric(String metricName, MetricsInfo.MetricValue value) {
-    return metrics
-        .stream()
-        .filter(x -> x.getName().equals(metricName) && x.getValue().equals(value))
-        .findFirst();
-  }
+//  public Optional<InstanceMetricsData> hasMetric(String metricName, InstanceMetricsData.MetricValue value) {
+//    return metrics
+//        .stream()
+//        .filter(x -> x.getName().equals(metricName) && x.getValue().equals(value))
+//        .findFirst();
+//  }
 
-  public Optional<MetricsInfo> hasMetricBelowLimit(String metricName, MetricsInfo.MetricValue value) {
-    return metrics.stream().filter(x -> value.compareTo(x.getValue()) > 0).findFirst();
-  }
+//  public Optional<InstanceMetricsData> hasMetricBelowLimit(String metricName, InstanceMetricsData.MetricValue value) {
+//    return metrics.stream().filter(x -> value.compareTo(x.getValue()) > 0).findFirst();
+//  }
 }
