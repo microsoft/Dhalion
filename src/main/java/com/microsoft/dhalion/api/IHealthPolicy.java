@@ -14,7 +14,12 @@
 
 package com.microsoft.dhalion.api;
 
+import java.util.List;
+
 import com.microsoft.dhalion.resolver.Action;
+import com.microsoft.dhalion.resolver.Proposal;
+import com.microsoft.dhalion.symptom.Diagnosis;
+import com.microsoft.dhalion.symptom.Symptom;
 
 /**
  * A {@link IHealthPolicy} strives to keep a distributed application healthy. It uses one or more of
@@ -28,10 +33,26 @@ public interface IHealthPolicy extends AutoCloseable {
   void initialize();
 
   /**
-   * Invoked periodically, this method orchestrates execution of {@link ISymptomDetector}s,
-   * {@link IDiagnoser}s and {@link IResolver}s to keep the system healthy
+   * Invoked periodically, this method executes one or more {@link ISymptomDetector}s.
    */
-  void execute();
+  List<? extends Symptom> executeDetectors();
+
+  /**
+   * Typically invoked after {@link ISymptomDetector}s, this method executes one or more
+   * {@link IDiagnoser}s.
+   */
+  List<Diagnosis<? extends Symptom>> executeDiagnosers(List<? extends Symptom> symptoms);
+
+  /**
+   * Returns a list of {@link Proposal}s based on the set of {@link Diagnosis} objects.
+   */
+  List<Proposal> selectProposals(List<Diagnosis<? extends Symptom>> diagnosis);
+
+  /**
+   * Typically invoked after {@link IDiagnoser}s, this method executes one or more {@link IResolver}
+   * to fix any identified issues.
+   */
+  List<Action> executeResolvers(List<Proposal> proposals);
 
   /**
    * Release all acquired resources and prepare for termination of this instance
