@@ -4,7 +4,7 @@
  * This program is made available under the terms of the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-package com.microsoft.dhalion.symptom;
+package com.microsoft.dhalion.detector;
 
 /**
  * A {@link Symptom} identifies an anomaly or a potential health issue in a specific component or

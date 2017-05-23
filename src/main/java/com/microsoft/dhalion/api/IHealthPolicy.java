@@ -9,9 +9,9 @@ package com.microsoft.dhalion.api;
 
 import java.util.List;
 
+import com.microsoft.dhalion.diagnoser.Diagnoses;
 import com.microsoft.dhalion.resolver.Action;
-import com.microsoft.dhalion.symptom.Diagnosis;
-import com.microsoft.dhalion.symptom.Symptom;
+import com.microsoft.dhalion.detector.Symptom;
 
 /**
  * A {@link IHealthPolicy} strives to keep a distributed application healthy. It uses one or more of
@@ -36,14 +36,14 @@ public interface IHealthPolicy extends AutoCloseable {
    * Typically invoked after {@link IDetector}s, this method executes one or more
    * {@link IDiagnoser}s.
    */
-  default List<Diagnosis> executeDiagnosers(List<? extends Symptom> symptoms) {
+  default List<Diagnoses> executeDiagnosers(List<? extends Symptom> symptoms) {
     return null;
   }
 
   /**
-   * Selects the most suitable {@link IResolver} based on the set of {@link Diagnosis} objects.
+   * Selects the most suitable {@link IResolver} based on the set of {@link Diagnoses} objects.
    */
-  default IResolver selectResolver(List<Diagnosis> diagnosis) {
+  default IResolver selectResolver(List<Diagnoses> diagnosis) {
     return null;
   }
 

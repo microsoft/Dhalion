@@ -4,25 +4,27 @@
  * This program is made available under the terms of the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-package com.microsoft.dhalion.symptom;
+package com.microsoft.dhalion.diagnoser;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.microsoft.dhalion.detector.Symptom;
+
 /**
- * A {@link Diagnosis} instance is a representation of a possible causes of one or more
- * {@link Symptom}s. A {@link Symptom} could result in creation of one or more {@link Diagnosis}.
- * Similarly, correlated {@link Symptom}s can result in generation of a {@link Diagnosis} instance.
+ * A {@link Diagnoses} instance is a representation of a possible causes of one or more
+ * {@link Symptom}s. A {@link Symptom} could result in creation of one or more {@link Diagnoses}.
+ * Similarly, correlated {@link Symptom}s can result in generation of a {@link Diagnoses} instance.
  */
-public class Diagnosis {
+public class Diagnoses {
   private String id;
   private List<? extends Symptom> symptoms;
 
-  public Diagnosis() {
+  public Diagnoses() {
     symptoms = new ArrayList<>();
   }
 
-  public Diagnosis(List<? extends Symptom> correlatedSymptoms) {
+  public Diagnoses(List<? extends Symptom> correlatedSymptoms) {
     this.symptoms = correlatedSymptoms;
   }
 
@@ -32,7 +34,7 @@ public class Diagnosis {
 
   @Override
   public String toString() {
-    return "Diagnosis{" +
+    return "Diagnoses{" +
         "symptom=" + symptoms +
         '}';
   }

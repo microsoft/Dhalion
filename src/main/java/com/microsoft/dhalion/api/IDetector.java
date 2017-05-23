@@ -8,7 +8,7 @@ package com.microsoft.dhalion.api;
 
 import java.util.List;
 
-import com.microsoft.dhalion.symptom.Symptom;
+import com.microsoft.dhalion.detector.Symptom;
 
 public interface IDetector extends AutoCloseable {
   /**
