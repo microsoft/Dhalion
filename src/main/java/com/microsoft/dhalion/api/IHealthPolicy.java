@@ -10,47 +10,56 @@ package com.microsoft.dhalion.api;
 import java.util.List;
 
 import com.microsoft.dhalion.resolver.Action;
-import com.microsoft.dhalion.resolver.Proposal;
 import com.microsoft.dhalion.symptom.Diagnosis;
 import com.microsoft.dhalion.symptom.Symptom;
 
 /**
  * A {@link IHealthPolicy} strives to keep a distributed application healthy. It uses one or more of
- * of {@link ISymptomDetector}s, {@link IDiagnoser}s and {@link IResolver}s to achieve this. It is
+ * of {@link IDetector}s, {@link IDiagnoser}s and {@link IResolver}s to achieve this. It is
  * expected that the policy will be executed periodically.
  */
 public interface IHealthPolicy extends AutoCloseable {
   /**
    * Initializes this instance and should be invoked once by the system before its use.
    */
-  void initialize();
+  default void initialize() {
+  }
 
   /**
-   * Invoked periodically, this method executes one or more {@link ISymptomDetector}s.
+   * Invoked periodically, this method executes one or more {@link IDetector}s.
    */
-  List<? extends Symptom> executeDetectors();
+  default List<? extends Symptom> executeDetectors() {
+    return null;
+  }
 
   /**
-   * Typically invoked after {@link ISymptomDetector}s, this method executes one or more
+   * Typically invoked after {@link IDetector}s, this method executes one or more
    * {@link IDiagnoser}s.
    */
-  List<Diagnosis<? extends Symptom>> executeDiagnosers(List<? extends Symptom> symptoms);
+  default List<Diagnosis> executeDiagnosers(List<? extends Symptom> symptoms) {
+    return null;
+  }
 
   /**
-   * Returns a list of {@link Proposal}s based on the set of {@link Diagnosis} objects.
+   * Selects the most suitable {@link IResolver} based on the set of {@link Diagnosis} objects.
    */
-  List<Proposal> selectProposals(List<Diagnosis<? extends Symptom>> diagnosis);
+  default IResolver selectResolver(List<Diagnosis> diagnosis) {
+    return null;
+  }
 
   /**
    * Typically invoked after {@link IDiagnoser}s, this method executes one or more {@link IResolver}
    * to fix any identified issues.
    */
-  List<Action> executeResolvers(List<Proposal> proposals);
+  default List<Action> executeResolvers(IResolver resolver) {
+    return null;
+  }
 
   /**
    * Release all acquired resources and prepare for termination of this instance
    */
-  void close();
+  default void close() {
+  }
 
   /**
    * All policies need to be notified about an update event. System will invoke this method on all
@@ -58,5 +67,6 @@ public interface IHealthPolicy extends AutoCloseable {
    *
    * @param action the action taken by a resolver
    */
-  void onUpdate(Action action);
+  default void onUpdate(Action action) {
+  }
 }

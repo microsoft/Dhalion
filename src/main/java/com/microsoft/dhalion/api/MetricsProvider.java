@@ -12,7 +12,7 @@ import com.microsoft.dhalion.metrics.ComponentMetricsData;
 
 /**
  * A {@link MetricsProvider} implementation will fetch and provide metrics to the consumers. For
- * e.g. a {@link ISymptomDetector} may use it to get execute latency for a component.
+ * e.g. a {@link IDetector} may use it to get execute latency for a component.
  */
 public interface MetricsProvider extends AutoCloseable {
 

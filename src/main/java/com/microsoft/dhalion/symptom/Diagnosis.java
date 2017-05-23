@@ -6,31 +6,28 @@
  */
 package com.microsoft.dhalion.symptom;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A {@link Diagnosis} instance is a representation of a possible causes of one or more
  * {@link Symptom}s. A {@link Symptom} could result in creation of one or more {@link Diagnosis}.
  * Similarly, correlated {@link Symptom}s can result in generation of a {@link Diagnosis} instance.
  */
-public class Diagnosis<T extends Symptom> {
-  private Set<T> symptoms;
+public class Diagnosis {
+  private String id;
+  private List<? extends Symptom> symptoms;
 
   public Diagnosis() {
-    symptoms = new HashSet<>();
+    symptoms = new ArrayList<>();
   }
 
-  public Diagnosis(Set<T> correlatedSymptoms) {
+  public Diagnosis(List<? extends Symptom> correlatedSymptoms) {
     this.symptoms = correlatedSymptoms;
   }
 
-  public Set<T> getSymptoms() {
+  public List<? extends Symptom> getSymptoms() {
     return symptoms;
-  }
-
-  public void addSymptom(T item) {
-    symptoms.add(item);
   }
 
   @Override

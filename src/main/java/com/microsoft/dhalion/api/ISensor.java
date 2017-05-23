@@ -17,12 +17,16 @@ public interface ISensor extends AutoCloseable {
   /**
    * @return returns a map of component id to metric value for all components
    */
-  Map<String, ComponentMetricsData> get();
+  default Map<String, ComponentMetricsData> get(){
+    return null;
+  }
 
   /**
    * @return returns a map of component id to metric value for specific components
    */
-  Map<String, ComponentMetricsData> get(String... components);
+  default Map<String, ComponentMetricsData> get(String... components) {
+    return null;
+  }
 
   /**
    * Release all acquired resources and prepare for termination of this instance

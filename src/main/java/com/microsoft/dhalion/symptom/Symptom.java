@@ -12,8 +12,9 @@ package com.microsoft.dhalion.symptom;
  * latency.
  */
 public abstract class Symptom {
-  long observedAt;
-  long duration;
+  private String id;
+  private long observedAt;
+  private long duration;
 
   public long getObservedAt() {
     return observedAt;

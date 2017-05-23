@@ -6,21 +6,25 @@
  */
 package com.microsoft.dhalion.api;
 
-import java.util.Collection;
+import java.util.List;
 
 import com.microsoft.dhalion.symptom.Symptom;
 
-public interface ISymptomDetector<T extends Symptom> extends AutoCloseable {
+public interface IDetector extends AutoCloseable {
   /**
    * Initializes this instance and should be invoked once by the system before its use.
    */
-  void initialize();
+  default void initialize() {
+  }
 
   /**
-   * Detects a problem or issue with the distributed application
-   * @return the collection of issues detected by the symptom detectors
+   * Detects a problem or anomaly with the distributed application
+   *
+   * @return a list of issues detected by the symptom detectors
    */
-  Collection<T> detect();
+  default List<? extends Symptom> detect() {
+    return null;
+  }
 
   /**
    * Release all acquired resources and prepare for termination of this instance
