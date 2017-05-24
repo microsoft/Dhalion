@@ -8,7 +8,7 @@ package com.microsoft.dhalion.api;
 
 import java.util.Map;
 
-import com.microsoft.dhalion.metrics.ComponentMetricsData;
+import com.microsoft.dhalion.metrics.ComponentMetrics;
 
 /**
  * A {@link ISensor} typically provides a system metric. For e.g. execute count
@@ -17,14 +17,14 @@ public interface ISensor extends AutoCloseable {
   /**
    * @return returns a map of component id to metric value for all components
    */
-  default Map<String, ComponentMetricsData> get(){
+  default Map<String, ComponentMetrics> get(){
     return null;
   }
 
   /**
    * @return returns a map of component id to metric value for specific components
    */
-  default Map<String, ComponentMetricsData> get(String... components) {
+  default Map<String, ComponentMetrics> get(String... components) {
     return null;
   }
 

@@ -9,17 +9,17 @@ package com.microsoft.dhalion.detector;
 import java.util.Collection;
 
 import com.microsoft.dhalion.app.InstanceInfo;
-import com.microsoft.dhalion.metrics.InstanceMetricsData;
+import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 /**
- * {@link InstanceSymptom} hasMetric relevant {@link InstanceMetricsData} of an unhealthy
+ * {@link InstanceSymptom} hasMetric relevant {@link InstanceMetrics} of an unhealthy
  * {@link InstanceInfo}
  */
 public class InstanceSymptom extends Symptom {
   private InstanceInfo instanceInfo;
-  private Collection<InstanceMetricsData> metrics;
+  private Collection<InstanceMetrics> metrics;
 
-  public InstanceSymptom(InstanceInfo instanceInfo, Collection<InstanceMetricsData> metrics) {
+  public InstanceSymptom(InstanceInfo instanceInfo, Collection<InstanceMetrics> metrics) {
     this.instanceInfo = instanceInfo;
     this.metrics = metrics;
   }
@@ -28,18 +28,18 @@ public class InstanceSymptom extends Symptom {
     return instanceInfo;
   }
 
-//  public Optional<InstanceMetricsData> hasMetric(String metricName) {
+//  public Optional<InstanceMetrics> hasMetric(String metricName) {
 //    return hasMetric(metricName, null);
 //  }
 
-//  public Optional<InstanceMetricsData> hasMetric(String metricName, InstanceMetricsData.MetricValue value) {
+//  public Optional<InstanceMetrics> hasMetric(String metricName, InstanceMetrics.MetricValue value) {
 //    return metrics
 //        .stream()
 //        .filter(x -> x.getName().equals(metricName) && x.getValue().equals(value))
 //        .findFirst();
 //  }
 
-//  public Optional<InstanceMetricsData> hasMetricBelowLimit(String metricName, InstanceMetricsData.MetricValue value) {
+//  public Optional<InstanceMetrics> hasMetricBelowLimit(String metricName, InstanceMetrics.MetricValue value) {
 //    return metrics.stream().filter(x -> value.compareTo(x.getValue()) > 0).findFirst();
 //  }
 }

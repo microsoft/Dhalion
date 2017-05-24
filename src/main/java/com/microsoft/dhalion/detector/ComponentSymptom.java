@@ -7,7 +7,7 @@
 package com.microsoft.dhalion.detector;
 
 import com.microsoft.dhalion.app.ComponentInfo;
-import com.microsoft.dhalion.metrics.ComponentMetricsData;
+import com.microsoft.dhalion.metrics.ComponentMetrics;
 
 /**
  * {@link ComponentSymptom} represents a issue with a component in a distributed system. The issue
@@ -15,9 +15,9 @@ import com.microsoft.dhalion.metrics.ComponentMetricsData;
  */
 public class ComponentSymptom extends Symptom {
   protected ComponentInfo componentInfo;
-  protected ComponentMetricsData metricsData;
+  protected ComponentMetrics metricsData;
 
-  public ComponentSymptom(ComponentInfo componentInfo, ComponentMetricsData metricsData) {
+  public ComponentSymptom(ComponentInfo componentInfo, ComponentMetrics metricsData) {
     this.componentInfo = componentInfo;
     this.metricsData = metricsData;
   }
@@ -34,11 +34,11 @@ public class ComponentSymptom extends Symptom {
     this.componentInfo = componentInfo;
   }
 
-  public ComponentMetricsData getMetricsData() {
+  public ComponentMetrics getMetricsData() {
     return metricsData;
   }
 
-  public static ComponentSymptom from(ComponentMetricsData data) {
+  public static ComponentSymptom from(ComponentMetrics data) {
     return new ComponentSymptom(new ComponentInfo(data.getName()), data);
   }
 }
