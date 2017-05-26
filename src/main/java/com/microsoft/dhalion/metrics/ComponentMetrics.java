@@ -46,6 +46,11 @@ public class ComponentMetrics {
     return metrics.get(instanceName);
   }
 
+  /**
+   * @param instance name of the instance for which metrics are desired
+   * @param metric metric name
+   * @return all known metric values for the requested instance
+   */
   public Map<Long, Double> getMetricValues(String instance, String metric) {
     InstanceMetrics instanceMetrics = getMetrics(instance);
     if (instanceMetrics == null) {
@@ -53,6 +58,21 @@ public class ComponentMetrics {
     }
 
     return instanceMetrics.getMetricValues(metric);
+  }
+
+  /**
+   * @param instance name of the instance for which metrics are desired
+   * @param metric metric name
+   * @return the only known metric values for the requested instance. Throw error if more than one
+   * metric value is known. Use {@link ComponentMetrics#getMetricValues} in such a case.
+   */
+  public Double getMetricValue(String instance, String metric) {
+    InstanceMetrics instanceMetrics = getMetrics(instance);
+    if (instanceMetrics == null) {
+      return null;
+    }
+
+    return instanceMetrics.getMetricValue(metric);
   }
 
   public String getName() {

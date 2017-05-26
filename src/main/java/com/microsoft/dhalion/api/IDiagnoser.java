@@ -6,13 +6,14 @@
  */
 package com.microsoft.dhalion.api;
 
+import java.util.List;
 import java.util.Map;
 
-import com.microsoft.dhalion.diagnoser.Diagnoses;
 import com.microsoft.dhalion.detector.Symptom;
+import com.microsoft.dhalion.diagnoser.Diagnosis;
 
 /**
- * A {@link IDiagnoser} evaluates one or more {@link Symptom}s and produces a {@link Diagnoses}, if
+ * A {@link IDiagnoser} evaluates one or more {@link Symptom}s and produces a {@link Diagnosis}, if
  * any, representing a possible problem responsible for the observed {@link Symptom}s.
  */
 public interface IDiagnoser extends AutoCloseable {
@@ -25,9 +26,9 @@ public interface IDiagnoser extends AutoCloseable {
   /**
    * Evaluates available {@link Symptom}s and determines if a problem exists
    *
-   * @return a {@link Diagnoses} instance representing a problem
+   * @return a {@link Diagnosis} instance representing a problem
    */
-  default Diagnoses diagnose(Map<String, ? extends Symptom> symptoms) {
+  default Diagnosis diagnose(List<Symptom> symptoms) {
     return null;
   }
 

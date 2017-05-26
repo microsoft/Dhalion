@@ -33,12 +33,45 @@ public class InstanceMetrics {
     metrics.put(name, metricValues);
   }
 
+  /**
+   * Adds a metric and its value for the instance. This is a shorthand method for
+   * {@link InstanceMetrics#addMetric(String, Map)} method. The assumption is that the metric will
+   * have only one value.
+   *
+   * @param name metric name
+   * @param value metric value
+   */
+  public void addMetric(String name, double value) {
+    Map<Long, Double> metricValues = new HashMap<>();
+    metricValues.put(System.currentTimeMillis(), value);
+    addMetric(name, metricValues);
+  }
+
   public Collection<String> getMetrics() {
     return metrics.keySet();
   }
 
-  public Map<Long, Double> getMetricValues(String name) {
-    return metrics.get(name);
+  /**
+   * @return all known values for the given metric name for this instance
+   */
+  public Map<Long, Double> getMetricValues(String metricName) {
+    return metrics.get(metricName);
+  }
+
+  /**
+   * @return the only known value of this metric. Use
+   * {@link InstanceMetrics#getMetricValues(String)} when more than one value is known.
+   */
+  public Double getMetricValue(String metricName) {
+    Map<Long, Double> values = getMetricValues(metricName);
+    if (values == null || values.isEmpty()) {
+      return null;
+    }
+
+    if (values.size() > 1) {
+      throw new IllegalStateException();
+    }
+    return values.values().iterator().next();
   }
 
   public String getName() {

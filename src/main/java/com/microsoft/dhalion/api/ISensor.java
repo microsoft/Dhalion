@@ -27,10 +27,4 @@ public interface ISensor extends AutoCloseable {
   default Map<String, ComponentMetrics> get(String... components) {
     return null;
   }
-
-  /**
-   * Release all acquired resources and prepare for termination of this instance
-   */
-  default void close() {
-  }
 }

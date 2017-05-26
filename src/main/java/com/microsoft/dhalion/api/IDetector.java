@@ -22,13 +22,7 @@ public interface IDetector extends AutoCloseable {
    *
    * @return a list of issues detected by the symptom detectors
    */
-  default List<? extends Symptom> detect() {
+  default List<Symptom> detect() {
     return null;
-  }
-
-  /**
-   * Release all acquired resources and prepare for termination of this instance
-   */
-  default void close() {
   }
 }

@@ -12,19 +12,19 @@ import java.util.List;
 import com.microsoft.dhalion.detector.Symptom;
 
 /**
- * A {@link Diagnoses} instance is a representation of a possible causes of one or more
- * {@link Symptom}s. A {@link Symptom} could result in creation of one or more {@link Diagnoses}.
- * Similarly, correlated {@link Symptom}s can result in generation of a {@link Diagnoses} instance.
+ * A {@link Diagnosis} instance is a representation of a possible causes of one or more
+ * {@link Symptom}s. A {@link Symptom} could result in creation of one or more {@link Diagnosis}.
+ * Similarly, correlated {@link Symptom}s can result in generation of a {@link Diagnosis} instance.
  */
-public class Diagnoses {
+public class Diagnosis {
   private String id;
-  private List<? extends Symptom> symptoms;
+  private List<Symptom> symptoms;
 
-  public Diagnoses() {
+  public Diagnosis() {
     symptoms = new ArrayList<>();
   }
 
-  public Diagnoses(List<? extends Symptom> correlatedSymptoms) {
+  public Diagnosis(List<Symptom> correlatedSymptoms) {
     this.symptoms = correlatedSymptoms;
   }
 
@@ -34,7 +34,7 @@ public class Diagnoses {
 
   @Override
   public String toString() {
-    return "Diagnoses{" +
+    return "Diagnosis{" +
         "symptom=" + symptoms +
         '}';
   }

@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 
 import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.api.IResolver;
-import com.microsoft.dhalion.resolver.Action;
-import com.microsoft.dhalion.diagnoser.Diagnoses;
 import com.microsoft.dhalion.detector.Symptom;
+import com.microsoft.dhalion.resolver.Action;
+import com.microsoft.dhalion.diagnoser.Diagnosis;
 
 public class PoliciesExecutor {
   private static final Logger LOG = Logger.getLogger(PoliciesExecutor.class.getName());
@@ -60,8 +60,8 @@ public class PoliciesExecutor {
         }
 
         LOG.info("Executing Policy: " + policy.getClass().getSimpleName());
-        List<? extends Symptom> symptoms = policy.executeDetectors();
-        List<Diagnoses> diagnosis = policy.executeDiagnosers(symptoms);
+        List<Symptom> symptoms = policy.executeDetectors();
+        List<Diagnosis> diagnosis = policy.executeDiagnosers(symptoms);
         IResolver resolver = policy.selectResolver(diagnosis);
         List<Action> actions = policy.executeResolvers(resolver);
 

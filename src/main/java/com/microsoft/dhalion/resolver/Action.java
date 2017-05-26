@@ -7,11 +7,11 @@
 package com.microsoft.dhalion.resolver;
 
 import com.microsoft.dhalion.api.IResolver;
-import com.microsoft.dhalion.diagnoser.Diagnoses;
+import com.microsoft.dhalion.diagnoser.Diagnosis;
 
 /**
  * {@link Action} is a representation of a action taken by {@link IResolver} to fix a
- * {@link Diagnoses}
+ * {@link Diagnosis}
  */
 public class Action {
 }
