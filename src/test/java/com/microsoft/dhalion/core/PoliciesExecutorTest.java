@@ -25,11 +25,13 @@ public class PoliciesExecutorTest {
   @Test
   public void verifyPeriodicPolicyInvocation() throws Exception {
     IHealthPolicy mockPolicy1 = mock(IHealthPolicy.class);
+    when(mockPolicy1.getInterval()).thenReturn(20l);
     IHealthPolicy mockPolicy2 = mock(IHealthPolicy.class);
+    when(mockPolicy2.getInterval()).thenReturn(50l);
 
-    HashMap<IHealthPolicy, Long> policies = new HashMap<>();
-    policies.put(mockPolicy1, 20l);
-    policies.put(mockPolicy2, 50l);
+    List<IHealthPolicy> policies = new ArrayList<>();
+    policies.add(mockPolicy1);
+    policies.add(mockPolicy2);
     PoliciesExecutor executor = new PoliciesExecutor(policies);
     executor.start();
 
@@ -50,9 +52,10 @@ public class PoliciesExecutorTest {
     when(mockPolicy.executeDiagnosers(symptoms)).thenReturn(diagnosis);
     when(mockPolicy.selectResolver(diagnosis)).thenReturn(resolver);
     when(mockPolicy.executeResolvers(resolver)).thenReturn(actions);
+    when(mockPolicy.getInterval()).thenReturn(20l);
 
-    HashMap<IHealthPolicy, Long> policies = new HashMap<>();
-    policies.put(mockPolicy, 10l);
+    List<IHealthPolicy> policies = new ArrayList<>();
+    policies.add(mockPolicy);
     PoliciesExecutor executor = new PoliciesExecutor(policies);
     executor.start();
 

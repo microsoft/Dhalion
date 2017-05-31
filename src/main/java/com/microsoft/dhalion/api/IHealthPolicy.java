@@ -63,4 +63,14 @@ public interface IHealthPolicy extends AutoCloseable {
    */
   default void onUpdate(Action action) {
   }
+
+  /**
+   * Health policy is expected to be executed periodically. This interval defines the delay between
+   * two executions of the policy
+   *
+   * @return the interval after which the policy should be re-executed.
+   */
+  default long getInterval() {
+    return 300 * 1000;
+  }
 }

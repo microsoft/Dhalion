@@ -8,7 +8,6 @@
 package com.microsoft.dhalion.core;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -20,22 +19,16 @@ import java.util.stream.Collectors;
 import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.api.IResolver;
 import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.resolver.Action;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.resolver.Action;
 
 public class PoliciesExecutor {
   private static final Logger LOG = Logger.getLogger(PoliciesExecutor.class.getName());
   private final List<PolicySchedulingInfo> policies;
   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-  public static void main(String[] args) {
-    new PoliciesExecutor(new HashMap<>()).start();
-  }
-
-  public PoliciesExecutor(Map<IHealthPolicy, Long> policies) {
-    this.policies = policies.entrySet().stream()
-        .map(entry -> new PolicySchedulingInfo(entry.getValue(), entry.getKey()))
-        .collect(Collectors.toList());
+  public PoliciesExecutor(List<IHealthPolicy> policies) {
+    this.policies = policies.stream().map(PolicySchedulingInfo::new).collect(Collectors.toList());
   }
 
   public void start() {
@@ -87,8 +80,8 @@ public class PoliciesExecutor {
     private long lastExecutionTimeMills = 0;
     private IHealthPolicy policy;
 
-    public PolicySchedulingInfo(long intervalMills, IHealthPolicy policy) {
-      this.intervalMills = intervalMills;
+    public PolicySchedulingInfo(IHealthPolicy policy) {
+      this.intervalMills = policy.getInterval();
       this.policy = policy;
     }
 
