@@ -9,9 +9,9 @@ package com.microsoft.dhalion.core;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -31,8 +31,8 @@ public class PoliciesExecutor {
     this.policies = policies.stream().map(PolicySchedulingInfo::new).collect(Collectors.toList());
   }
 
-  public void start() {
-    executor.scheduleWithFixedDelay(() -> {
+  public ScheduledFuture<?> start() {
+    ScheduledFuture<?> future = executor.scheduleWithFixedDelay(() -> {
       // schedule the next execution cycle
       Long nextScheduleDelay = policies.stream()
           .map(x -> x.getDelay()).min(Comparator.naturalOrder()).orElse(1000l);
@@ -43,7 +43,6 @@ public class PoliciesExecutor {
         } catch (InterruptedException e) {
           LOG.warning("Interrupted while waiting for next policy execution cycle");
         }
-
       }
 
       for (PolicySchedulingInfo policySchedulingInfo : policies) {
@@ -69,6 +68,8 @@ public class PoliciesExecutor {
       }
 
     }, 1, 1, TimeUnit.MILLISECONDS);
+
+    return future;
   }
 
   public void destroy() {
@@ -85,7 +86,7 @@ public class PoliciesExecutor {
       this.policy = policy;
     }
 
-    public long getDelay() {
+    long getDelay() {
       long currentTime = System.currentTimeMillis();
       long nextExecutionTime =
           lastExecutionTimeMills == 0 ? currentTime : lastExecutionTimeMills + intervalMills;
