@@ -6,8 +6,8 @@
  */
 package com.microsoft.dhalion.diagnoser;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.microsoft.dhalion.detector.Symptom;
 
@@ -17,25 +17,36 @@ import com.microsoft.dhalion.detector.Symptom;
  * Similarly, correlated {@link Symptom}s can result in generation of a {@link Diagnosis} instance.
  */
 public class Diagnosis {
-  private String id;
-  private List<Symptom> symptoms;
+  private String name;
+  private Map<String, Symptom> symptoms;
 
-  public Diagnosis() {
-    symptoms = new ArrayList<>();
+  public Diagnosis(String diagnosisName) {
+    this(diagnosisName, new HashMap<>());
   }
 
-  public Diagnosis(List<Symptom> correlatedSymptoms) {
+  public Diagnosis(String diagnosisName, Symptom symptom) {
+    this(diagnosisName, new HashMap<>());
+    symptoms.put(symptom.getName(), symptom);
+  }
+
+  public Diagnosis(String diagnosisName, Map<String, Symptom> correlatedSymptoms) {
+    this.name = diagnosisName;
     this.symptoms = correlatedSymptoms;
   }
 
-  public List<? extends Symptom> getSymptoms() {
+  public String getName() {
+    return name;
+  }
+
+  public Map<String, Symptom> getSymptoms() {
     return symptoms;
   }
 
   @Override
   public String toString() {
     return "Diagnosis{" +
-        "symptom=" + symptoms +
+        "name='" + name + '\'' +
+        ", symptoms=" + symptoms +
         '}';
   }
 }

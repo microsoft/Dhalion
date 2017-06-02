@@ -20,8 +20,15 @@ public class InstanceMetrics {
   // a map of metric name and its values
   private Map<String, Map<Long, Double>> metrics = new HashMap<>();
 
-  public InstanceMetrics(String name) {
-    this.name = name;
+  public InstanceMetrics(String instanceName) {
+    this(instanceName, null, 0.0);
+  }
+
+  public InstanceMetrics(String instanceName, String metricName, double value) {
+    this.name = instanceName;
+    if (metricName != null) {
+      addMetric(metricName, value);
+    }
   }
 
   public void addMetric(String name, Map<Long, Double> values) {
@@ -38,13 +45,13 @@ public class InstanceMetrics {
    * {@link InstanceMetrics#addMetric(String, Map)} method. The assumption is that the metric will
    * have only one value.
    *
-   * @param name metric name
+   * @param metricName metric name
    * @param value metric value
    */
-  public void addMetric(String name, double value) {
+  public void addMetric(String metricName, double value) {
     Map<Long, Double> metricValues = new HashMap<>();
     metricValues.put(System.currentTimeMillis(), value);
-    addMetric(name, metricValues);
+    addMetric(metricName, metricValues);
   }
 
   public Collection<String> getMetrics() {
@@ -105,5 +112,13 @@ public class InstanceMetrics {
     }
 
     return mergedData;
+  }
+
+  @Override
+  public String toString() {
+    return "InstanceMetrics{" +
+        "name='" + name +
+        ", metrics=" + metrics +
+        '}';
   }
 }

@@ -6,7 +6,6 @@
  */
 package com.microsoft.dhalion.detector;
 
-import com.microsoft.dhalion.app.ComponentInfo;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
 /**
@@ -15,11 +14,10 @@ import com.microsoft.dhalion.metrics.ComponentMetrics;
  */
 public class Symptom {
   protected String name;
-  protected ComponentInfo componentInfo;
   protected ComponentMetrics metrics;
 
-  public Symptom(ComponentInfo componentInfo, ComponentMetrics metrics) {
-    this.componentInfo = componentInfo;
+  public Symptom(String symptomName, ComponentMetrics metrics) {
+    this.name = name;
     this.metrics = metrics;
   }
 
@@ -27,22 +25,14 @@ public class Symptom {
     return name;
   }
 
-  public Symptom(ComponentInfo componentInfo) {
-    this.componentInfo = componentInfo;
-  }
-
   public ComponentMetrics getMetrics() {
     return metrics;
-  }
-
-  public static Symptom from(ComponentMetrics data) {
-    return new Symptom(new ComponentInfo(data.getName()), data);
   }
 
   @Override
   public String toString() {
     return "Symptom{" +
-        "componentInfo=" + componentInfo +
+        "name=" + name +
         ", metrics=" + metrics +
         '}';
   }

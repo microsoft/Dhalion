@@ -19,14 +19,22 @@ public class ComponentMetrics {
   // a map of metric name and its value
   private HashMap<String, InstanceMetrics> metrics = new HashMap<>();
 
-  public ComponentMetrics(String name) {
-    this(name, null);
+  public ComponentMetrics(String compName) {
+    this(compName, null);
   }
 
-  public ComponentMetrics(String name, Map<String, InstanceMetrics> instanceMetricsData) {
-    this.name = name;
+  public ComponentMetrics(String compName, String instanceName, String metricName, double value) {
+    this(compName, null);
+    if (instanceName != null) {
+      InstanceMetrics instanceMetrics = new InstanceMetrics(instanceName, metricName, value);
+      addInstanceMetric(instanceMetrics);
+    }
+  }
+
+  public ComponentMetrics(String compName, Map<String, InstanceMetrics> instanceMetricsData) {
+    this.name = compName;
     if (instanceMetricsData != null) {
-      metrics.putAll(instanceMetricsData);
+      instanceMetricsData.values().stream().forEach(x -> addInstanceMetric(x));
     }
   }
 
@@ -101,5 +109,13 @@ public class ComponentMetrics {
     }
 
     return mergedData;
+  }
+
+  @Override
+  public String toString() {
+    return "ComponentMetrics{" +
+        "name='" + name + '\'' +
+        ", metrics=" + metrics +
+        '}';
   }
 }
