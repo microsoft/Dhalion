@@ -6,6 +6,9 @@
  */
 package com.microsoft.dhalion.detector;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
 /**
@@ -13,20 +16,35 @@ import com.microsoft.dhalion.metrics.ComponentMetrics;
  * distributed application. For e.g. identification of irregular processing latency.
  */
 public class Symptom {
-  protected String name;
-  protected ComponentMetrics metrics;
+  private String name;
+  private Map<String, ComponentMetrics> metrics = new HashMap<>();
 
   public Symptom(String symptomName, ComponentMetrics metrics) {
-    this.name = name;
-    this.metrics = metrics;
+    this.name = symptomName;
+    addComponentMetrics(metrics);
+  }
+
+  public synchronized void addComponentMetrics(ComponentMetrics metrics) {
+    this.metrics.put(metrics.getName(), metrics);
   }
 
   public String getName() {
     return name;
   }
 
-  public ComponentMetrics getMetrics() {
+  public Map<String, ComponentMetrics> getComponents() {
     return metrics;
+  }
+
+  /**
+   * @return the only component exhibiting this symptom
+   */
+  public synchronized ComponentMetrics getComponent() {
+    if (metrics.size() > 1) {
+      throw new IllegalStateException();
+    }
+
+    return metrics.values().iterator().next();
   }
 
   @Override
