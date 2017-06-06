@@ -19,6 +19,10 @@ public class Symptom {
   private String name;
   private Map<String, ComponentMetrics> metrics = new HashMap<>();
 
+  public Symptom(String symptomName) {
+    this.name = symptomName;
+  }
+
   public Symptom(String symptomName, ComponentMetrics metrics) {
     this.name = symptomName;
     addComponentMetrics(metrics);
