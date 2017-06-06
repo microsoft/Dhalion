@@ -58,13 +58,6 @@ public class PoliciesExecutor {
         List<Action> actions = policy.executeResolvers(resolver);
 
         policySchedulingInfo.lastExecutionTimeMills = System.currentTimeMillis();
-
-        // notify all action listeners
-        if (actions != null) {
-          for (Action action : actions) {
-            policies.stream().forEach(x -> x.policy.onUpdate(action));
-          }
-        }
       }
 
     }, 1, 1, TimeUnit.MILLISECONDS);
