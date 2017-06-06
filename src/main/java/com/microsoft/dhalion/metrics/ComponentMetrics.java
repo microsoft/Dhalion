@@ -111,6 +111,21 @@ public class ComponentMetrics {
     return mergedData;
   }
 
+  /**
+   * Get the aggregated metric values for a given component.
+   * @param metricName The name of the metric.
+   * @return The aggregated value of the metric metricName for the component componentName.
+   */
+  public Double getAggregatedMetricsValue(String metricName) {
+    Double result = 0.0;
+    final InstanceMetrics instanceMetrics = metrics.get(metricName);
+    final Map<Long, Double> metricValues = instanceMetrics.getMetricValues(metricName);
+    for (Double aDouble : metricValues.values()) {
+      result += aDouble;
+    }
+    return result;
+  }
+
   @Override
   public String toString() {
     return "ComponentMetrics{" +
