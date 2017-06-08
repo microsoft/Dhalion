@@ -16,7 +16,7 @@ import com.microsoft.dhalion.resolver.Action;
  * Input to a {@link IResolver} is a {@link Diagnosis} instance and based on that, it executes
  * appropriate action to bring a linked component or system back to a healthy state.
  */
-public interface IResolver extends AutoCloseable {
+public interface IResolver {
   /**
    * This method is invoked once to initialize the {@link IResolver} instance
    */

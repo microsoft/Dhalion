@@ -5,12 +5,12 @@
  * See the LICENSE file in the project root for more information.
  */
 
-package com.microsoft.dhalion.core;
+package com.microsoft.dhalion.events;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class EventDispatcher<T> {
+public class EventDispatcher<T> implements EventHandler<T> {
   Set<EventHandler<T>> handlers = new HashSet<>();
 
   public synchronized void addHandler(EventHandler<T> handler) {
@@ -20,7 +20,8 @@ public class EventDispatcher<T> {
     handlers.add(handler);
   }
 
-  public void dispatch(T event) {
+  @Override
+  public void onEvent(T event) {
     handlers.forEach(x -> x.onEvent(event));
   }
 }

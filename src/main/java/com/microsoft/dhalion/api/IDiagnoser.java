@@ -16,7 +16,7 @@ import com.microsoft.dhalion.diagnoser.Diagnosis;
  * A {@link IDiagnoser} evaluates one or more {@link Symptom}s and produces a {@link Diagnosis}, if
  * any, representing a possible problem responsible for the observed {@link Symptom}s.
  */
-public interface IDiagnoser extends AutoCloseable {
+public interface IDiagnoser {
   /**
    * Initializes this instance and should be invoked once by the system before its use.
    */

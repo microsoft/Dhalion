@@ -10,7 +10,7 @@ import java.util.List;
 
 import com.microsoft.dhalion.detector.Symptom;
 
-public interface IDetector extends AutoCloseable {
+public interface IDetector {
   /**
    * Initializes this instance and should be invoked once by the system before its use.
    */
@@ -24,5 +24,11 @@ public interface IDetector extends AutoCloseable {
    */
   default List<Symptom> detect() {
     return null;
+  }
+
+  /**
+   * Release all acquired resources and prepare for termination of this instance
+   */
+  default void close() {
   }
 }

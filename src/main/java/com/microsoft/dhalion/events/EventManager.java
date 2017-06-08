@@ -5,7 +5,9 @@
  * See the LICENSE file in the project root for more information.
  */
 
-package com.microsoft.dhalion.core;
+package com.microsoft.dhalion.events;
+
+import com.microsoft.dhalion.policy.PoliciesExecutor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +34,6 @@ public class EventManager {
       return;
     }
 
-    dispatcher.dispatch(event);
+    dispatcher.onEvent(event);
   }
 }
