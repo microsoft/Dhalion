@@ -46,7 +46,7 @@ public class InstanceMetrics {
    * have only one value.
    *
    * @param metricName metric name
-   * @param value metric value
+   * @param value      metric value
    */
   public void addMetric(String metricName, double value) {
     Map<Long, Double> metricValues = new HashMap<>();
@@ -54,7 +54,11 @@ public class InstanceMetrics {
     addMetric(metricName, metricValues);
   }
 
-  public Collection<String> getMetrics() {
+  public Map<String, Map<Long, Double>> getMetrics() {
+    return metrics;
+  }
+
+  public Collection<String> getMetricNames() {
     return metrics.keySet();
   }
 
