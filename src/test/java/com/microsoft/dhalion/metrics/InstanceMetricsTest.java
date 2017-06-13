@@ -35,7 +35,7 @@ public class InstanceMetricsTest {
     InstanceMetrics mergedInstanceMetrics
         = InstanceMetrics.merge(instanceMetrics1, instanceMetrics2);
 
-    assertEquals(2, mergedInstanceMetrics.getMetrics().size());
+    assertEquals(2, mergedInstanceMetrics.getMetricNames().size());
     assertNotNull(mergedInstanceMetrics.getMetricValues("m1"));
     assertNotNull(mergedInstanceMetrics.getMetricValues("m2"));
     assertEquals(2, mergedInstanceMetrics.getMetricValues("m1").size());
