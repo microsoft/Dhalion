@@ -54,8 +54,12 @@ public class InstanceMetrics {
     addMetric(metricName, metricValues);
   }
 
-  public Collection<String> getMetrics() {
+  public Collection<String> getMetricNames() {
     return metrics.keySet();
+  }
+
+  public Map<String, Map<Long, Double>> getMetrics() {
+    return metrics;
   }
 
   /**
