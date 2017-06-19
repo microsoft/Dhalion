@@ -77,7 +77,7 @@ public class ComponentMetricsTest {
     instanceMetricsMap.put("i2", instanceMetrics);
 
     ComponentMetrics componentMetrics1 = new ComponentMetrics("c1", instanceMetricsMap);
-    assertEquals(1, componentMetrics1.getMetrics("i2").getMetricNames().size());
+    assertEquals(1, componentMetrics1.getMetrics("i2").getMetrics().size());
 
     instanceMetricsMap.clear();
     instanceMetrics = new InstanceMetrics("i2");
@@ -88,8 +88,8 @@ public class ComponentMetricsTest {
 
     ComponentMetrics result = ComponentMetrics.merge(componentMetrics1, componentMetrics2);
     assertEquals(2, result.getMetrics().size());
-    assertEquals(2, result.getMetrics("i1").getMetricNames().size());
-    assertEquals(2, result.getMetrics("i1").getMetricNames().size());
+    assertEquals(2, result.getMetrics("i1").getMetrics().size());
+    assertEquals(2, result.getMetrics("i1").getMetrics().size());
   }
 
   private void addTestMetrics(InstanceMetrics instance, String metricName, int... values) {

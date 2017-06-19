@@ -35,13 +35,13 @@ public class InstanceMetricsTest {
     InstanceMetrics mergedInstanceMetrics
         = InstanceMetrics.merge(instanceMetrics1, instanceMetrics2);
 
-    assertEquals(2, mergedInstanceMetrics.getMetricNames().size());
-    assertNotNull(mergedInstanceMetrics.getMetricValues("m1"));
-    assertNotNull(mergedInstanceMetrics.getMetricValues("m2"));
-    assertEquals(2, mergedInstanceMetrics.getMetricValues("m1").size());
-    assertEquals(2, mergedInstanceMetrics.getMetricValues("m2").size());
-    assertEquals(123, mergedInstanceMetrics.getMetricValues("m1").get(123l).intValue());
-    assertEquals(432, mergedInstanceMetrics.getMetricValues("m2").get(432l).intValue());
+    assertEquals(2, mergedInstanceMetrics.getMetrics().size());
+    assertNotNull(mergedInstanceMetrics.getMetrics().get("m1"));
+    assertNotNull(mergedInstanceMetrics.getMetrics().get("m2"));
+    assertEquals(2, mergedInstanceMetrics.getMetrics().get("m1").size());
+    assertEquals(2, mergedInstanceMetrics.getMetrics().get("m2").size());
+    assertEquals(123, mergedInstanceMetrics.getMetrics().get("m1").get(123l).intValue());
+    assertEquals(432, mergedInstanceMetrics.getMetrics().get("m2").get(432l).intValue());
   }
 
   @Test(expected = IllegalArgumentException.class)

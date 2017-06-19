@@ -6,7 +6,6 @@
  */
 package com.microsoft.dhalion.metrics;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,31 +57,13 @@ public class InstanceMetrics {
     return metrics;
   }
 
-  public Collection<String> getMetricNames() {
-    return metrics.keySet();
-  }
-
-  /**
-   * @return all known values for the given metric name for this instance
-   */
-  public Map<Long, Double> getMetricValues(String metricName) {
-    return metrics.get(metricName);
-  }
-
-  /**
-   * @return the only known value of this metric. Use
-   * {@link InstanceMetrics#getMetricValues(String)} when more than one value is known.
-   */
-  public Double getMetricValue(String metricName) {
-    Map<Long, Double> values = getMetricValues(metricName);
+  public Double getMetricValueSum(String metricName) {
+    Map<Long, Double> values = getMetrics().get(metricName);
     if (values == null || values.isEmpty()) {
       return null;
     }
 
-    if (values.size() > 1) {
-      throw new IllegalStateException();
-    }
-    return values.values().iterator().next();
+    return values.values().stream().mapToDouble(x -> x.doubleValue()).sum();
   }
 
   public String getName() {
@@ -109,10 +90,10 @@ public class InstanceMetrics {
   public static InstanceMetrics merge(InstanceMetrics data1, InstanceMetrics data2) {
     InstanceMetrics mergedData = new InstanceMetrics(data1.getName());
     for (String metric : data1.metrics.keySet()) {
-      mergedData.addMetric(metric, data1.getMetricValues(metric));
+      mergedData.addMetric(metric, data1.getMetrics().get(metric));
     }
     for (String metric : data2.metrics.keySet()) {
-      mergedData.addMetric(metric, data2.getMetricValues(metric));
+      mergedData.addMetric(metric, data2.getMetrics().get(metric));
     }
 
     return mergedData;

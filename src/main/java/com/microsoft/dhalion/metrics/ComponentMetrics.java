@@ -65,22 +65,21 @@ public class ComponentMetrics {
       return null;
     }
 
-    return instanceMetrics.getMetricValues(metric);
+    return instanceMetrics.getMetrics().get(metric);
   }
 
   /**
    * @param instance name of the instance for which metrics are desired
    * @param metric metric name
-   * @return the only known metric values for the requested instance. Throw error if more than one
-   * metric value is known. Use {@link ComponentMetrics#getMetricValues} in such a case.
+   * @return sum of all the values of the requested metric for the instance.
    */
-  public Double getMetricValue(String instance, String metric) {
+  public Double getMetricValueSum(String instance, String metric) {
     InstanceMetrics instanceMetrics = getMetrics(instance);
     if (instanceMetrics == null) {
       return null;
     }
 
-    return instanceMetrics.getMetricValue(metric);
+    return instanceMetrics.getMetricValueSum(metric);
   }
 
   public String getName() {
