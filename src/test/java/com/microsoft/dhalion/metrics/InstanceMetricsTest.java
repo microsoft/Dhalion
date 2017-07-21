@@ -9,6 +9,7 @@ package com.microsoft.dhalion.metrics;
 
 import org.junit.Test;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,16 +19,16 @@ import static org.junit.Assert.assertNotNull;
 public class InstanceMetricsTest {
   @Test
   public void mergesDisjointInstances() {
-    Map<Long, Double> m1Values = new HashMap<>();
-    m1Values.put(123l, 123.0);
-    m1Values.put(234l, 234.0);
+    Map<Instant, Double> m1Values = new HashMap<>();
+    m1Values.put(Instant.ofEpochSecond(123), 123.0);
+    m1Values.put(Instant.ofEpochSecond(234), 234.0);
 
     InstanceMetrics instanceMetrics1 = new InstanceMetrics("i1");
     instanceMetrics1.addMetric("m1", m1Values);
 
-    Map<Long, Double> m2Values = new HashMap<>();
-    m2Values.put(321l, 321.0);
-    m2Values.put(432l, 432.0);
+    Map<Instant, Double> m2Values = new HashMap<>();
+    m2Values.put(Instant.ofEpochSecond(321), 321.0);
+    m2Values.put(Instant.ofEpochSecond(432), 432.0);
 
     InstanceMetrics instanceMetrics2 = new InstanceMetrics("i1");
     instanceMetrics2.addMetric("m2", m2Values);
@@ -40,8 +41,8 @@ public class InstanceMetricsTest {
     assertNotNull(mergedInstanceMetrics.getMetrics().get("m2"));
     assertEquals(2, mergedInstanceMetrics.getMetrics().get("m1").size());
     assertEquals(2, mergedInstanceMetrics.getMetrics().get("m2").size());
-    assertEquals(123, mergedInstanceMetrics.getMetrics().get("m1").get(123l).intValue());
-    assertEquals(432, mergedInstanceMetrics.getMetrics().get("m2").get(432l).intValue());
+    assertEquals(123, mergedInstanceMetrics.getMetrics().get("m1").get(Instant.ofEpochSecond(123)).intValue());
+    assertEquals(432, mergedInstanceMetrics.getMetrics().get("m2").get(Instant.ofEpochSecond(432)).intValue());
   }
 
   @Test(expected = IllegalArgumentException.class)

@@ -5,7 +5,7 @@
 
   <groupId>com.microsoft.dhalion</groupId>
   <artifactId>dhalion</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.1_2</version>
   <packaging>jar</packaging>
 
   <name>dhalion</name>

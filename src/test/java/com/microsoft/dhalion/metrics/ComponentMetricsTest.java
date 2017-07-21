@@ -7,10 +7,11 @@
 
 package com.microsoft.dhalion.metrics;
 
+import org.junit.Test;
+
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.junit.Test;
 
 import static org.junit.Assert.*;
 
@@ -39,9 +40,9 @@ public class ComponentMetricsTest {
 
     assertEquals(2, componentMetrics.getMetrics().size());
     assertEquals(1, componentMetrics.getMetricValues("i1", "m1").size());
-    assertEquals(123, componentMetrics.getMetricValues("i1", "m1").get(123l).intValue());
+    assertEquals(123, componentMetrics.getMetricValues("i1", "m1").get(Instant.ofEpochSecond(123)).intValue());
     assertEquals(1, componentMetrics.getMetricValues("i2", "m1").size());
-    assertEquals(321, componentMetrics.getMetricValues("i2", "m1").get(321l).intValue());
+    assertEquals(321, componentMetrics.getMetricValues("i2", "m1").get(Instant.ofEpochSecond(321)).intValue());
 
     assertNull(componentMetrics.getMetrics("does not exist"));
   }
@@ -93,9 +94,9 @@ public class ComponentMetricsTest {
   }
 
   private void addTestMetrics(InstanceMetrics instance, String metricName, int... values) {
-    HashMap<Long, Double> valueMap = new HashMap<>();
+    HashMap<Instant, Double> valueMap = new HashMap<>();
     for (int value : values) {
-      valueMap.put((long) value, (double) value);
+      valueMap.put(Instant.ofEpochSecond(value), (double) value);
 
     }
     instance.addMetric(metricName, valueMap);

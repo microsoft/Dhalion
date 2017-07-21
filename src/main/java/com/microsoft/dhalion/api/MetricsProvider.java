@@ -8,6 +8,8 @@ package com.microsoft.dhalion.api;
 
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 
 /**
@@ -20,13 +22,13 @@ public interface MetricsProvider {
    * Returns metric value for all instances of one or more components of a distributed app. For e.g.
    * returns total number of records processed in 60 seconds by all instances of a storm bolt.
    *
-   * @param metric      id of the metric
-   * @param durationSec the duration for which the metric was aggregated
-   * @param component   ids of the components for which the metric is needed
+   * @param metric    id of the metric
+   * @param duration  the duration for which the metric was aggregated
+   * @param component ids of the components for which the metric is needed
    * @return the map of component id to component metrics
    */
   default Map<String, ComponentMetrics> getComponentMetrics(String metric,
-                                                            int durationSec,
+                                                            Duration duration,
                                                             String... component) {
     return null;
   }
@@ -38,15 +40,15 @@ public interface MetricsProvider {
    * instance. For e.g. the implementation may return 3 records, one per minute, for an instance for
    * a 3 minute long time window.
    *
-   * @param metric       id of the metric
-   * @param startTimeSec metric aggregation window start time, endTime = startTimeSec - durationSec
-   * @param durationSec  the duration for which the metric was aggregated
-   * @param component    ids of the components for which the metric is needed
+   * @param metric    id of the metric
+   * @param startTime metric aggregation window start time, endTime = startTime - duration
+   * @param duration  the duration for which the metric was aggregated
+   * @param component ids of the components for which the metric is needed
    * @return the map of component id to component metrics
    */
   default Map<String, ComponentMetrics> getComponentMetrics(String metric,
-                                                            int startTimeSec,
-                                                            int durationSec,
+                                                            Instant startTime,
+                                                            Duration duration,
                                                             String... component) {
     return null;
   }

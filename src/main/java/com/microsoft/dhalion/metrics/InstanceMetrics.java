@@ -6,6 +6,7 @@
  */
 package com.microsoft.dhalion.metrics;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +18,7 @@ public class InstanceMetrics {
   protected final String name;
 
   // a map of metric name and its values
-  private Map<String, Map<Long, Double>> metrics = new HashMap<>();
+  private Map<String, Map<Instant, Double>> metrics = new HashMap<>();
 
   public InstanceMetrics(String instanceName) {
     this(instanceName, null, 0.0);
@@ -30,11 +31,11 @@ public class InstanceMetrics {
     }
   }
 
-  public void addMetric(String name, Map<Long, Double> values) {
+  public void addMetric(String name, Map<Instant, Double> values) {
     if (metrics.containsKey(name)) {
       throw new IllegalArgumentException("Metric exists: " + name);
     }
-    Map<Long, Double> metricValues = new HashMap<>();
+    Map<Instant, Double> metricValues = new HashMap<>();
     metricValues.putAll(values);
     metrics.put(name, metricValues);
   }
@@ -48,17 +49,17 @@ public class InstanceMetrics {
    * @param value      metric value
    */
   public void addMetric(String metricName, double value) {
-    Map<Long, Double> metricValues = new HashMap<>();
-    metricValues.put(System.currentTimeMillis(), value);
+    Map<Instant, Double> metricValues = new HashMap<>();
+    metricValues.put(Instant.now(), value);
     addMetric(metricName, metricValues);
   }
 
-  public Map<String, Map<Long, Double>> getMetrics() {
+  public Map<String, Map<Instant, Double>> getMetrics() {
     return metrics;
   }
 
   public Double getMetricValueSum(String metricName) {
-    Map<Long, Double> values = getMetrics().get(metricName);
+    Map<Instant, Double> values = getMetrics().get(metricName);
     if (values == null || values.isEmpty()) {
       return null;
     }
@@ -71,7 +72,7 @@ public class InstanceMetrics {
   }
 
   public boolean hasMetricAboveLimit(String metricName, double limit) {
-    Map<Long, Double> values = metrics.get(metricName);
+    Map<Instant, Double> values = metrics.get(metricName);
     if (values == null) {
       return false;
     }

@@ -6,6 +6,7 @@
  */
 package com.microsoft.dhalion.metrics;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,10 +57,10 @@ public class ComponentMetrics {
 
   /**
    * @param instance name of the instance for which metrics are desired
-   * @param metric metric name
+   * @param metric   metric name
    * @return all known metric values for the requested instance
    */
-  public Map<Long, Double> getMetricValues(String instance, String metric) {
+  public Map<Instant, Double> getMetricValues(String instance, String metric) {
     InstanceMetrics instanceMetrics = getMetrics(instance);
     if (instanceMetrics == null) {
       return null;
@@ -70,7 +71,7 @@ public class ComponentMetrics {
 
   /**
    * @param instance name of the instance for which metrics are desired
-   * @param metric metric name
+   * @param metric   metric name
    * @return sum of all the values of the requested metric for the instance.
    */
   public Double getMetricValueSum(String instance, String metric) {
