@@ -8,8 +8,37 @@
   <version>0.0.1_2</version>
   <packaging>jar</packaging>
 
-  <name>dhalion</name>
-  <url>http://maven.apache.org</url>
+  <name>${project.groupId}:${project.artifactId}</name>
+  <url>https://github.com/Microsoft/Dhalion</url>
+  <description>Dhalion is a framework self-regulation and auto-tuning of streaming applications</description>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Ashvin Agrawal</name>
+      <email>ashvin@apache.org</email>
+      <organization>Microsoft</organization>
+      <url>https://github.com/Microsoft</url>
+    </developer>
+    <developer>
+      <name>Avrilia Floratou</name>
+      <email>avflor@microsoft.com</email>
+      <organization>Microsoft</organization>
+      <url>https://github.com/Microsoft</url>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git://github.com/Microsoft/Dhalion.git</connection>
+    <developerConnection>scm:git:ssh://github.com:Microsoft/Dhalion.git</developerConnection>
+    <url>https://github.com/Microsoft/Dhalion</url>
+  </scm>
 
   <build>
     <plugins>
