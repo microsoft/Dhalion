@@ -83,6 +83,22 @@ public class ComponentMetrics {
     return instanceMetrics.getMetricValueSum(metric);
   }
 
+  public MetricsStats computeMinMaxStats(String metric) {
+    double metricMax = 0;
+    double metricMin = Double.MAX_VALUE;
+    for (InstanceMetrics instance : this.getMetrics().values()) {
+
+      Double metricValue = instance.getMetricValueSum(metric);
+      if (metricValue == null) {
+        continue;
+      }
+      metricMax = metricMax < metricValue ? metricValue : metricMax;
+      metricMin = metricMin > metricValue ? metricValue : metricMin;
+    }
+    return new MetricsStats(metricMin, metricMax);
+  }
+
+
   public String getName() {
     return name;
   }

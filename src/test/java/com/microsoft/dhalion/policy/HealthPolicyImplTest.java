@@ -10,6 +10,7 @@ package com.microsoft.dhalion.policy;
 import com.microsoft.dhalion.api.IDetector;
 import com.microsoft.dhalion.api.IDiagnoser;
 import com.microsoft.dhalion.api.IResolver;
+import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.policy.HealthPolicyImpl.ClockTimeProvider;
 import org.junit.Assert;
 import org.junit.Test;
@@ -43,6 +44,10 @@ public class HealthPolicyImplTest {
 
   @Test
   public void testInitialize() {
+    ArrayList<ISensor> sensors = new ArrayList<>();
+    ISensor sensor = mock(ISensor.class);
+    sensors.add(sensor);
+
     ArrayList<IDetector> detectors = new ArrayList<>();
     IDetector detector = mock(IDetector.class);
     detectors.add(detector);
@@ -56,7 +61,7 @@ public class HealthPolicyImplTest {
     resolvers.add(resolver);
 
     HealthPolicyImpl policy = new HealthPolicyImpl();
-    policy.initialize(detectors, diagnosers, resolvers);
+    policy.initialize(sensors, detectors, diagnosers, resolvers);
 
     policy.executeDetectors();
     policy.executeDiagnosers(new ArrayList<>());
