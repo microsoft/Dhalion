@@ -12,8 +12,11 @@ import com.microsoft.dhalion.api.IDetector;
 import com.microsoft.dhalion.api.IDiagnoser;
 import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.api.IResolver;
+import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.metrics.MetricsCollector;
+import com.microsoft.dhalion.metrics.StatsCollector;
 import com.microsoft.dhalion.resolver.Action;
 
 import java.util.ArrayList;
@@ -26,6 +29,7 @@ public class HealthPolicyImpl implements IHealthPolicy {
   protected List<IDetector> detectors = new ArrayList<>();
   protected List<IDiagnoser> diagnosers = new ArrayList<>();
   protected List<IResolver> resolvers = new ArrayList<>();
+  protected List<ISensor> sensors = new ArrayList<>();
 
   protected long intervalMillis = TimeUnit.MINUTES.toMillis(1);
   private long lastExecutionTimeMills = 0;
@@ -35,10 +39,19 @@ public class HealthPolicyImpl implements IHealthPolicy {
   ClockTimeProvider clock = new ClockTimeProvider();
 
   @Override
-  public void initialize(List<IDetector> detectors, List<IDiagnoser> diagnosers, List<IResolver> resolvers) {
+  public void initialize(List<ISensor> sensors, List<IDetector> detectors, List<IDiagnoser>
+      diagnosers, List<IResolver> resolvers) {
+    this.sensors = sensors;
     this.detectors = detectors;
     this.diagnosers = diagnosers;
     this.resolvers = resolvers;
+  }
+
+  public void registerSensors(ISensor... sensors) {
+    if (sensors == null) {
+      throw new IllegalArgumentException("Null instance cannot be added.");
+    }
+    Arrays.stream(sensors).forEach(sensor -> this.sensors.add(sensor));
   }
 
   public void registerDetectors(IDetector... detectors) {
@@ -167,6 +180,26 @@ public class HealthPolicyImpl implements IHealthPolicy {
     if (resolvers != null) {
       resolvers.forEach(value -> value.close());
     }
+  }
+
+  @Override
+  public List<ISensor> getSensors() {
+    return this.sensors;
+  }
+
+  @Override
+  public List<IDetector> getDetectors() {
+    return this.detectors;
+  }
+
+  @Override
+  public List<IDiagnoser> getDiagnosers() {
+    return this.diagnosers;
+  }
+
+  @Override
+  public List<IResolver> getResolvers() {
+    return this.resolvers;
   }
 
   @VisibleForTesting

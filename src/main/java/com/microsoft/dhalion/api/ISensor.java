@@ -33,4 +33,6 @@ public interface ISensor {
    */
   default void close() {
   }
+
+  default String getMetricName() { return null; }
 }
