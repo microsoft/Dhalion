@@ -83,9 +83,10 @@ public class ComponentMetrics {
     return instanceMetrics.getMetricValueSum(metric);
   }
 
-  public MetricsStats computeMinMaxStats(String metric) {
+  public MetricsStats computeStats(String metric) {
     double metricMax = 0;
     double metricMin = Double.MAX_VALUE;
+    double sum = 0;
     for (InstanceMetrics instance : this.getMetrics().values()) {
 
       Double metricValue = instance.getMetricValueSum(metric);
@@ -94,8 +95,9 @@ public class ComponentMetrics {
       }
       metricMax = metricMax < metricValue ? metricValue : metricMax;
       metricMin = metricMin > metricValue ? metricValue : metricMin;
+      sum += metricValue;
     }
-    return new MetricsStats(metricMin, metricMax);
+    return new MetricsStats(metricMin, metricMax, sum);
   }
 
 

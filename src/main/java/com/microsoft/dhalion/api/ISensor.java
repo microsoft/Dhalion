@@ -9,6 +9,7 @@ package com.microsoft.dhalion.api;
 import java.util.Map;
 
 import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.metrics.MetricsStats;
 
 /**
  * A {@link ISensor} typically provides a system metric. For e.g. execute count
@@ -35,4 +36,7 @@ public interface ISensor {
   }
 
   default String getMetricName() { return null; }
+
+  default MetricsStats getStats(String component) {return null;}
+
 }

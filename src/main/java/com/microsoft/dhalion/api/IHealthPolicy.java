@@ -23,7 +23,7 @@ public interface IHealthPolicy {
   /**
    * Initializes this instance and should be invoked once by the system before its use.
    */
-  void initialize(List<ISensor> sensors, List<IDetector> detectors, List<IDiagnoser> diagnosers,
+  void initialize(List<IDetector> detectors, List<IDiagnoser> diagnosers,
                   List<IResolver> resolvers);
 
   /**
@@ -60,8 +60,6 @@ public interface IHealthPolicy {
    */
   default void close() {
   }
-
-  List<ISensor> getSensors();
 
   List<IDetector> getDetectors();
 

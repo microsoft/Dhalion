@@ -44,9 +44,6 @@ public class HealthPolicyImplTest {
 
   @Test
   public void testInitialize() {
-    ArrayList<ISensor> sensors = new ArrayList<>();
-    ISensor sensor = mock(ISensor.class);
-    sensors.add(sensor);
 
     ArrayList<IDetector> detectors = new ArrayList<>();
     IDetector detector = mock(IDetector.class);
@@ -61,7 +58,7 @@ public class HealthPolicyImplTest {
     resolvers.add(resolver);
 
     HealthPolicyImpl policy = new HealthPolicyImpl();
-    policy.initialize(sensors, detectors, diagnosers, resolvers);
+    policy.initialize(detectors, diagnosers, resolvers);
 
     policy.executeDetectors();
     policy.executeDiagnosers(new ArrayList<>());
