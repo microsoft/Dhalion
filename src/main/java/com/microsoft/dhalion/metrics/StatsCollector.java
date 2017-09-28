@@ -34,7 +34,7 @@ public class StatsCollector {
   public Optional<Double> getMetricData(String metricName, String componentName) {
     synchronized (this.metricStats) {
       Map<String, Double> componentStats = metricStats.get(metricName);
-      if (componentStats != null) {
+      if(componentStats != null) {
         if (metricStats.containsKey(componentName)) {
           return Optional.of(componentStats.get(componentName));
         }

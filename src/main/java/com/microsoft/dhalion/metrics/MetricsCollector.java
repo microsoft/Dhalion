@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+
 import com.microsoft.dhalion.api.ISensor;
 
 public class MetricsCollector implements Runnable {
@@ -25,6 +26,7 @@ public class MetricsCollector implements Runnable {
     this.sensors = sensors;
   }
 
+  @Override
   public void run() {
     for (int i = 0; i < sensors.size(); i++) {
       Map<String, ComponentMetrics> metrics = sensors.get(i).get();
