@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.metrics.MetricsStats;
 
 /**
  * A {@link Symptom} identifies an anomaly or a potential health issue in a specific component of a
@@ -18,6 +19,7 @@ import com.microsoft.dhalion.metrics.ComponentMetrics;
 public class Symptom {
   private String name;
   private Map<String, ComponentMetrics> metrics = new HashMap<>();
+  private MetricsStats stats;
 
   public Symptom(String symptomName) {
     this.name = symptomName;
@@ -25,6 +27,12 @@ public class Symptom {
 
   public Symptom(String symptomName, ComponentMetrics metrics) {
     this.name = symptomName;
+    addComponentMetrics(metrics);
+  }
+
+  public Symptom(String symptomName, ComponentMetrics metrics, MetricsStats stats) {
+    this.name = symptomName;
+    this.stats = stats;
     addComponentMetrics(metrics);
   }
 
@@ -38,6 +46,10 @@ public class Symptom {
 
   public Map<String, ComponentMetrics> getComponents() {
     return metrics;
+  }
+
+  public MetricsStats getStats() {
+    return stats;
   }
 
   /**
