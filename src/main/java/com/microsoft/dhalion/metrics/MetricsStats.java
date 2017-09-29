@@ -19,17 +19,17 @@ public class MetricsStats {
 
   private double metricMax = 0;
   private double metricMin = Double.MAX_VALUE;
-  private double metricSum = 0;
+  private double metricAvg = 0;
 
 
   public MetricsStats(double metricMin, double metricMax, double metricSum) {
     this.metricMax = metricMax;
     this.metricMin = metricMin;
-    this.metricSum = metricSum;
+    this.metricAvg = metricSum;
   }
 
-  public double getMetricSum() {
-    return metricSum;
+  public double getMetricAvg() {
+    return metricAvg;
   }
 
   public double getMetricMax() {
@@ -40,7 +40,7 @@ public class MetricsStats {
     return metricMin;
   }
 
-  public void setMetricSum(double metricSum) {this.metricSum = metricSum;}
+  public void setMetricAvg(double metricSum) {this.metricAvg = metricSum;}
 
   public void setMetricMax(double metricMax) { this.metricMax = metricMax;}
 

@@ -17,38 +17,42 @@ import com.microsoft.dhalion.metrics.MetricsStats;
  * distributed application. For e.g. identification of irregular processing latency.
  */
 public class Symptom {
-  private String name;
+  private String symptomName;
   private Map<String, ComponentMetrics> metrics = new HashMap<>();
-  private MetricsStats stats;
+  private Map<String, MetricsStats> stats = new HashMap<>();
 
   public Symptom(String symptomName) {
-    this.name = symptomName;
+    this.symptomName = symptomName;
   }
 
   public Symptom(String symptomName, ComponentMetrics metrics) {
-    this.name = symptomName;
+    this.symptomName = symptomName;
     addComponentMetrics(metrics);
   }
 
   public Symptom(String symptomName, ComponentMetrics metrics, MetricsStats stats) {
-    this.name = symptomName;
-    this.stats = stats;
+    this.symptomName = symptomName;
     addComponentMetrics(metrics);
+    addStats(metrics.getComponentName(), stats);
   }
 
   public synchronized void addComponentMetrics(ComponentMetrics metrics) {
-    this.metrics.put(metrics.getName(), metrics);
+    this.metrics.put(metrics.getComponentName(), metrics);
   }
 
-  public String getName() {
-    return name;
+  public synchronized void addStats(String componentName, MetricsStats componentStats) {
+    this.stats.put(componentName, componentStats);
+  }
+
+  public String getSymptomName() {
+    return symptomName;
   }
 
   public Map<String, ComponentMetrics> getComponents() {
     return metrics;
   }
 
-  public MetricsStats getStats() {
+  public Map<String, MetricsStats> getStats() {
     return stats;
   }
 
@@ -66,8 +70,9 @@ public class Symptom {
   @Override
   public String toString() {
     return "Symptom{" +
-        "name=" + name +
+        "name=" + symptomName +
         ", metrics=" + metrics +
+        ", stats=" + stats +
         '}';
   }
 }

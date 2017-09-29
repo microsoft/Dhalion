@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class InstanceMetrics {
   // id of the instance
-  protected final String name;
+  protected final String instanceName;
 
   // a map of metric name and its values
   private Map<String, Map<Instant, Double>> metrics = new HashMap<>();
@@ -25,7 +25,7 @@ public class InstanceMetrics {
   }
 
   public InstanceMetrics(String instanceName, String metricName, double value) {
-    this.name = instanceName;
+    this.instanceName = instanceName;
     if (metricName != null) {
       addMetric(metricName, value);
     }
@@ -68,7 +68,7 @@ public class InstanceMetrics {
   }
 
   public String getName() {
-    return name;
+    return instanceName;
   }
 
   public boolean hasMetricAboveLimit(String metricName, double limit) {
@@ -103,7 +103,7 @@ public class InstanceMetrics {
   @Override
   public String toString() {
     return "InstanceMetrics{" +
-        "name='" + name +
+        "name='" + instanceName +
         ", metrics=" + metrics +
         '}';
   }
