@@ -18,11 +18,14 @@ import com.microsoft.dhalion.api.IDetector;
 import com.microsoft.dhalion.api.IDiagnoser;
 import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.api.IResolver;
+import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.resolver.Action;
+import com.microsoft.dhalion.state.State;
 
 public class HealthPolicyImpl implements IHealthPolicy {
+  protected List<ISensor> sensors = new ArrayList<>();
   protected List<IDetector> detectors = new ArrayList<>();
   protected List<IDiagnoser> diagnosers = new ArrayList<>();
   protected List<IResolver> resolvers = new ArrayList<>();
@@ -34,11 +37,19 @@ public class HealthPolicyImpl implements IHealthPolicy {
   private long oneTimeDelayTimestamp = 0;
 
   @Override
-  public void initialize(List<IDetector> detectors, List<IDiagnoser>
+  public void initialize(List<ISensor> sensors, List<IDetector> detectors, List<IDiagnoser>
       diagnosers, List<IResolver> resolvers) {
+    this.sensors = sensors;
     this.detectors = detectors;
     this.diagnosers = diagnosers;
     this.resolvers = resolvers;
+  }
+
+  public void registerSensors(ISensor... sensors) {
+    if (sensors == null) {
+      throw new IllegalArgumentException("Null instance cannot be added.");
+    }
+    Arrays.stream(sensors).forEach(sensor -> this.sensors.add(sensor));
   }
 
   public void registerDetectors(IDetector... detectors) {
@@ -85,6 +96,16 @@ public class HealthPolicyImpl implements IHealthPolicy {
    */
   public void setOneTimeDelay(TimeUnit unit, long value) {
     oneTimeDelayTimestamp = clock.currentTimeMillis() + unit.toMillis(value);
+  }
+
+  @Override
+  public void executeSensors(State stateSnapshot) {
+    if (sensors == null) {
+      return;
+    }
+    sensors.stream().forEach(sensor -> sensor.initialize(stateSnapshot));
+    sensors.stream().forEach(sensor -> stateSnapshot.addToState(sensor.fetchMetrics(),
+        sensor.fetchStats(), sensor.getMetricName()));
   }
 
   @Override
@@ -158,6 +179,9 @@ public class HealthPolicyImpl implements IHealthPolicy {
 
   @Override
   public void close() {
+    if (sensors != null) {
+      sensors.forEach(value -> value.close());
+    }
     if (detectors != null) {
       detectors.forEach(value -> value.close());
     }

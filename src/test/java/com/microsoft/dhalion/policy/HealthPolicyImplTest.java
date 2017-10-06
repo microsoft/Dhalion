@@ -7,19 +7,23 @@
 
 package com.microsoft.dhalion.policy;
 
+import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+
 import com.microsoft.dhalion.api.IDetector;
 import com.microsoft.dhalion.api.IDiagnoser;
 import com.microsoft.dhalion.api.IResolver;
 import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.policy.HealthPolicyImpl.ClockTimeProvider;
+import com.microsoft.dhalion.state.State;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-
 import static org.mockito.Matchers.anyList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class HealthPolicyImplTest {
   @Test
@@ -45,6 +49,10 @@ public class HealthPolicyImplTest {
   @Test
   public void testInitialize() {
 
+    ArrayList<ISensor> sensors = new ArrayList<>();
+    ISensor sensor = mock(ISensor.class);
+    sensors.add(sensor);
+
     ArrayList<IDetector> detectors = new ArrayList<>();
     IDetector detector = mock(IDetector.class);
     detectors.add(detector);
@@ -58,12 +66,16 @@ public class HealthPolicyImplTest {
     resolvers.add(resolver);
 
     HealthPolicyImpl policy = new HealthPolicyImpl();
-    policy.initialize(detectors, diagnosers, resolvers);
+    policy.initialize(sensors, detectors, diagnosers, resolvers);
 
+    State stateSnapshot = new State();
+    stateSnapshot.initialize();
+    policy.executeSensors(stateSnapshot);
     policy.executeDetectors();
     policy.executeDiagnosers(new ArrayList<>());
     policy.executeResolver(resolver, new ArrayList<>());
 
+    verify(sensor, times(1)).fetchMetrics();
     verify(detector, times(1)).detect();
     verify(diagnoser, times(1)).diagnose(anyList());
     verify(resolver, times(1)).resolve(anyList());
@@ -103,17 +115,20 @@ public class HealthPolicyImplTest {
 
   @Test
   public void testClose() {
+    ISensor sensor = mock(ISensor.class);
     IDetector detector = mock(IDetector.class);
     IResolver resolver = mock(IResolver.class);
     IDiagnoser diagnoser = mock(IDiagnoser.class);
 
     HealthPolicyImpl policy = new HealthPolicyImpl();
+    policy.registerSensors(sensor);
     policy.registerDetectors(detector);
     policy.registerDiagnosers(diagnoser);
     policy.registerResolvers(resolver);
 
     policy.close();
 
+    verify(sensor, times(1)).close();
     verify(detector, times(1)).close();
     verify(diagnoser, times(1)).close();
     verify(resolver, times(1)).close();

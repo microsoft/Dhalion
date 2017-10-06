@@ -7,11 +7,6 @@
 
 package com.microsoft.dhalion.policy;
 
-import com.microsoft.dhalion.api.IHealthPolicy;
-import com.microsoft.dhalion.api.IResolver;
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.diagnoser.Diagnosis;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -20,13 +15,22 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import com.microsoft.dhalion.api.IHealthPolicy;
+import com.microsoft.dhalion.api.IResolver;
+import com.microsoft.dhalion.detector.Symptom;
+import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.state.State;
+
 public class PoliciesExecutor {
   private static final Logger LOG = Logger.getLogger(PoliciesExecutor.class.getName());
   private final List<IHealthPolicy> policies;
   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+  private State stateSnapshot;
 
   public PoliciesExecutor(List<IHealthPolicy> policies) {
     this.policies = policies;
+    stateSnapshot = new State();
+    stateSnapshot.initialize();
   }
 
   public ScheduledFuture<?> start() {
@@ -49,6 +53,8 @@ public class PoliciesExecutor {
         }
 
         LOG.info("Executing Policy: " + policy.getClass().getSimpleName());
+        stateSnapshot.clearStateSnapshot();
+        policy.executeSensors(stateSnapshot);
         List<Symptom> symptoms = policy.executeDetectors();
         List<Diagnosis> diagnosis = policy.executeDiagnosers(symptoms);
         IResolver resolver = policy.selectResolver(diagnosis);
