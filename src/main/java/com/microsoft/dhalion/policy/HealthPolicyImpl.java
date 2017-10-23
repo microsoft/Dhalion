@@ -15,9 +15,8 @@ import com.microsoft.dhalion.api.IResolver;
 import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
-import com.microsoft.dhalion.metrics.MetricsCollector;
-import com.microsoft.dhalion.metrics.StatsCollector;
 import com.microsoft.dhalion.resolver.Action;
+import com.microsoft.dhalion.state.MetricsState;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,17 +25,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class HealthPolicyImpl implements IHealthPolicy {
+  protected List<ISensor> sensors = new ArrayList<>();
   protected List<IDetector> detectors = new ArrayList<>();
   protected List<IDiagnoser> diagnosers = new ArrayList<>();
   protected List<IResolver> resolvers = new ArrayList<>();
-  protected List<ISensor> sensors = new ArrayList<>();
 
   protected long intervalMillis = TimeUnit.MINUTES.toMillis(1);
-  private long lastExecutionTimeMills = 0;
-  private long oneTimeDelayTimestamp = 0;
-
   @VisibleForTesting
   ClockTimeProvider clock = new ClockTimeProvider();
+  private long lastExecutionTimeMills = 0;
+  private long oneTimeDelayTimestamp = 0;
 
   @Override
   public void initialize(List<ISensor> sensors, List<IDetector> detectors, List<IDiagnoser>
@@ -98,6 +96,15 @@ public class HealthPolicyImpl implements IHealthPolicy {
    */
   public void setOneTimeDelay(TimeUnit unit, long value) {
     oneTimeDelayTimestamp = clock.currentTimeMillis() + unit.toMillis(value);
+  }
+
+  @Override
+  public void executeSensors(MetricsState metricsState) {
+    if (sensors == null) {
+      return;
+    }
+
+    sensors.stream().forEach(sensor -> metricsState.addMetricsAndStats(sensor.fetchMetrics(), sensor.getStats()));
   }
 
   @Override
@@ -171,6 +178,9 @@ public class HealthPolicyImpl implements IHealthPolicy {
 
   @Override
   public void close() {
+    if (sensors != null) {
+      sensors.forEach(value -> value.close());
+    }
     if (detectors != null) {
       detectors.forEach(value -> value.close());
     }
@@ -180,11 +190,6 @@ public class HealthPolicyImpl implements IHealthPolicy {
     if (resolvers != null) {
       resolvers.forEach(value -> value.close());
     }
-  }
-
-  @Override
-  public List<ISensor> getSensors() {
-    return this.sensors;
   }
 
   @Override

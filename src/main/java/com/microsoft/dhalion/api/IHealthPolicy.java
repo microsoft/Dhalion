@@ -7,12 +7,13 @@
 
 package com.microsoft.dhalion.api;
 
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.resolver.Action;
-
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import com.microsoft.dhalion.state.MetricsState;
 
 /**
  * A {@link IHealthPolicy} strives to keep a distributed application healthy. It uses one or more of
@@ -26,8 +27,14 @@ public interface IHealthPolicy {
   void initialize(List<ISensor> sensors, List<IDetector> detectors, List<IDiagnoser> diagnosers,
                   List<IResolver> resolvers);
 
+
   /**
-   * Invoked periodically, this method executes one or more {@link IDetector}s.
+   * Invoked periodically, this method executes one or more {@link ISensor}s.
+   */
+  void executeSensors(MetricsState metricsState);
+
+  /**
+   * Typically invoked after {@link ISensor}s this method executes one or more {@link IDetector}s.
    */
   List<Symptom> executeDetectors();
 
@@ -60,8 +67,6 @@ public interface IHealthPolicy {
    */
   default void close() {
   }
-
-  List<ISensor> getSensors();
 
   List<IDetector> getDetectors();
 

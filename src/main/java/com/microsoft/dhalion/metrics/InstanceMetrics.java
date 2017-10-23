@@ -6,6 +6,8 @@
  */
 package com.microsoft.dhalion.metrics;
 
+import com.microsoft.dhalion.common.DuplicateMetricException;
+
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +17,7 @@ import java.util.Map;
  */
 public class InstanceMetrics {
   // id of the instance
-  protected final String name;
+  protected final String instanceName;
 
   // a map of metric name and its values
   private Map<String, Map<Instant, Double>> metrics = new HashMap<>();
@@ -25,7 +27,7 @@ public class InstanceMetrics {
   }
 
   public InstanceMetrics(String instanceName, String metricName, double value) {
-    this.name = instanceName;
+    this.instanceName = instanceName;
     if (metricName != null) {
       addMetric(metricName, value);
     }
@@ -33,11 +35,21 @@ public class InstanceMetrics {
 
   public void addMetric(String name, Map<Instant, Double> values) {
     if (metrics.containsKey(name)) {
-      throw new IllegalArgumentException("Metric exists: " + name);
+      throw new DuplicateMetricException("Metric exists: " + name);
     }
     Map<Instant, Double> metricValues = new HashMap<>();
     metricValues.putAll(values);
     metrics.put(name, metricValues);
+  }
+
+  public InstanceMetrics createNewInstanceMetrics(String metricName) {
+    InstanceMetrics instance = new InstanceMetrics(this.getName());
+    for (Map.Entry<String, Map<Instant, Double>> entry : metrics.entrySet()) {
+      if (entry.getKey().equals(metricName)) {
+        instance.addMetric(metricName, entry.getValue());
+      }
+    }
+    return instance;
   }
 
   /**
@@ -68,7 +80,7 @@ public class InstanceMetrics {
   }
 
   public String getName() {
-    return name;
+    return instanceName;
   }
 
   public boolean hasMetricAboveLimit(String metricName, double limit) {
@@ -103,7 +115,7 @@ public class InstanceMetrics {
   @Override
   public String toString() {
     return "InstanceMetrics{" +
-        "name='" + name +
+        "name='" + instanceName +
         ", metrics=" + metrics +
         '}';
   }

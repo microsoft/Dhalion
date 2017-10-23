@@ -26,7 +26,7 @@ public class Diagnosis {
 
   public Diagnosis(String diagnosisName, Symptom symptom) {
     this(diagnosisName, new HashMap<>());
-    symptoms.put(symptom.getName(), symptom);
+    symptoms.put(symptom.getSymptomName(), symptom);
   }
 
   public Diagnosis(String diagnosisName, Map<String, Symptom> correlatedSymptoms) {

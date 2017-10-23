@@ -15,10 +15,10 @@ import java.util.Map;
  */
 public class ComponentMetrics {
   // id of the component
-  protected String name;
+  protected String componentName;
 
   // a map of instance name to its metric values
-  private HashMap<String, InstanceMetrics> metrics = new HashMap<>();
+  private HashMap<String, InstanceMetrics> instanceData = new HashMap<>();
 
   public ComponentMetrics(String compName) {
     this(compName, null);
@@ -33,7 +33,7 @@ public class ComponentMetrics {
   }
 
   public ComponentMetrics(String compName, Map<String, InstanceMetrics> instanceMetricsData) {
-    this.name = compName;
+    this.componentName = compName;
     if (instanceMetricsData != null) {
       instanceMetricsData.values().stream().forEach(x -> addInstanceMetric(x));
     }
@@ -41,18 +41,29 @@ public class ComponentMetrics {
 
   public void addInstanceMetric(InstanceMetrics instanceMetrics) {
     String instanceName = instanceMetrics.getName();
-    if (metrics.containsKey(instanceName)) {
-      throw new IllegalArgumentException("Instance metrics exist: " + name);
+    if (instanceData.containsKey(instanceName)) {
+      throw new IllegalArgumentException("Instance metrics exist: " + componentName);
     }
-    metrics.put(instanceName, instanceMetrics);
+    instanceData.put(instanceName, instanceMetrics);
   }
 
-  public HashMap<String, InstanceMetrics> getMetrics() {
-    return metrics;
+  public HashMap<String, InstanceMetrics> getInstanceData() {
+    return instanceData;
   }
 
-  public InstanceMetrics getMetrics(String instanceName) {
-    return metrics.get(instanceName);
+  public ComponentMetrics getComponentMetric(String metricName) {
+    ComponentMetrics componentMetric = new ComponentMetrics(this.getComponentName());
+    for (Map.Entry<String, InstanceMetrics> entry : instanceData.entrySet()) {
+      InstanceMetrics instanceMetrics = entry.getValue().createNewInstanceMetrics(metricName);
+      if (!instanceMetrics.getMetrics().isEmpty()) {
+        componentMetric.addInstanceMetric(instanceMetrics);
+      }
+    }
+    return componentMetric;
+  }
+
+  public InstanceMetrics getInstanceData(String instanceName) {
+    return instanceData.get(instanceName);
   }
 
   /**
@@ -61,7 +72,7 @@ public class ComponentMetrics {
    * @return all known metric values for the requested instance
    */
   public Map<Instant, Double> getMetricValues(String instance, String metric) {
-    InstanceMetrics instanceMetrics = getMetrics(instance);
+    InstanceMetrics instanceMetrics = getInstanceData(instance);
     if (instanceMetrics == null) {
       return null;
     }
@@ -75,7 +86,7 @@ public class ComponentMetrics {
    * @return sum of all the values of the requested metric for the instance.
    */
   public Double getMetricValueSum(String instance, String metric) {
-    InstanceMetrics instanceMetrics = getMetrics(instance);
+    InstanceMetrics instanceMetrics = getInstanceData(instance);
     if (instanceMetrics == null) {
       return null;
     }
@@ -83,10 +94,12 @@ public class ComponentMetrics {
     return instanceMetrics.getMetricValueSum(metric);
   }
 
-  public MetricsStats computeMinMaxStats(String metric) {
+  public MetricsStats computeStats(String metric) {
     double metricMax = 0;
     double metricMin = Double.MAX_VALUE;
-    for (InstanceMetrics instance : this.getMetrics().values()) {
+    double sum = 0;
+    double metricAvg = 0;
+    for (InstanceMetrics instance : this.getInstanceData().values()) {
 
       Double metricValue = instance.getMetricValueSum(metric);
       if (metricValue == null) {
@@ -94,17 +107,19 @@ public class ComponentMetrics {
       }
       metricMax = metricMax < metricValue ? metricValue : metricMax;
       metricMin = metricMin > metricValue ? metricValue : metricMin;
+      sum += metricValue;
     }
-    return new MetricsStats(metricMin, metricMax);
+    metricAvg = sum / this.getInstanceData().size();
+    return new MetricsStats(metric, metricMin, metricMax, metricAvg);
   }
 
 
-  public String getName() {
-    return name;
+  public String getComponentName() {
+    return componentName;
   }
 
   public boolean anyInstanceAboveLimit(String metricName, double limit) {
-    return metrics.values().stream().anyMatch(x -> x.hasMetricAboveLimit(metricName, limit));
+    return instanceData.values().stream().anyMatch(x -> x.hasMetricAboveLimit(metricName, limit));
   }
 
   /**
@@ -115,9 +130,9 @@ public class ComponentMetrics {
    * @return A new {@link ComponentMetrics} instance
    */
   public static ComponentMetrics merge(ComponentMetrics data1, ComponentMetrics data2) {
-    ComponentMetrics mergedData = new ComponentMetrics(data1.getName());
-    for (InstanceMetrics instance1 : data1.getMetrics().values()) {
-      InstanceMetrics instance2 = data2.getMetrics(instance1.getName());
+    ComponentMetrics mergedData = new ComponentMetrics(data1.getComponentName());
+    for (InstanceMetrics instance1 : data1.getInstanceData().values()) {
+      InstanceMetrics instance2 = data2.getInstanceData(instance1.getName());
       if (instance2 != null) {
         instance1 = InstanceMetrics.merge(instance1, instance2);
       }
@@ -130,8 +145,8 @@ public class ComponentMetrics {
   @Override
   public String toString() {
     return "ComponentMetrics{" +
-        "name='" + name + '\'' +
-        ", metrics=" + metrics +
+        "name='" + componentName + '\'' +
+        ", metrics=" + instanceData +
         '}';
   }
 }

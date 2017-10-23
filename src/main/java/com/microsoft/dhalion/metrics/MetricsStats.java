@@ -16,14 +16,20 @@
 package com.microsoft.dhalion.metrics;
 
 public class MetricsStats {
-
+  private String metricName;
   private double metricMax = 0;
   private double metricMin = Double.MAX_VALUE;
+  private double metricAvg = 0;
 
-
-  public MetricsStats(double metricMin, double metricMax) {
+  public MetricsStats(String metricName, double metricMin, double metricMax, double metricSum) {
+    this.metricName = metricName;
     this.metricMax = metricMax;
     this.metricMin = metricMin;
+    this.metricAvg = metricSum;
+  }
+
+  public double getMetricAvg() {
+    return metricAvg;
   }
 
   public double getMetricMax() {
@@ -32,5 +38,21 @@ public class MetricsStats {
 
   public double getMetricMin() {
     return metricMin;
+  }
+
+  public void setMetricAvg(double metricSum) {
+    this.metricAvg = metricSum;
+  }
+
+  public void setMetricMax(double metricMax) {
+    this.metricMax = metricMax;
+  }
+
+  public void setMetricMin(double metricMin) {
+    this.metricMin = metricMin;
+  }
+
+  public String getMetricName() {
+    return metricName;
   }
 }
