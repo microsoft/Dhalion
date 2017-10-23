@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.resolver.Action;
-import com.microsoft.dhalion.state.State;
+import com.microsoft.dhalion.state.MetricsState;
 
 /**
  * A {@link IHealthPolicy} strives to keep a distributed application healthy. It uses one or more of
@@ -31,7 +31,7 @@ public interface IHealthPolicy {
   /**
    * Invoked periodically, this method executes one or more {@link ISensor}s.
    */
-  void executeSensors(State stateSnapshot);
+  void executeSensors(MetricsState metricsState);
 
   /**
    * Typically invoked after {@link ISensor}s this method executes one or more {@link IDetector}s.

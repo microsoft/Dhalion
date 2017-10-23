@@ -11,7 +11,7 @@ import java.util.Optional;
 public abstract class SensorImpl implements ISensor {
   private final String metricName;
   protected Map<String, ComponentMetrics> metrics = new HashMap<>();
-  private Map<String, MetricsStats> stats = new HashMap<>();
+  protected Map<String, MetricsStats> stats = new HashMap<>();
 
   public SensorImpl(String metricName) {
     this.metricName = metricName;
