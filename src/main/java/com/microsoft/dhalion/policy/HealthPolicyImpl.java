@@ -103,9 +103,9 @@ public class HealthPolicyImpl implements IHealthPolicy {
     if (sensors == null) {
       return;
     }
-    sensors.stream().forEach(sensor -> sensor.initialize(stateSnapshot));
+
     sensors.stream().forEach(sensor -> stateSnapshot.addToState(sensor.fetchMetrics(),
-        sensor.fetchStats(), sensor.getMetricName()));
+        sensor.getStats(), sensor.getMetricName()));
   }
 
   @Override
