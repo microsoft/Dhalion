@@ -51,11 +51,11 @@ public class ComponentMetrics {
     return instanceData;
   }
 
-  public ComponentMetrics getComponentMetric(String metricName){
+  public ComponentMetrics getComponentMetric(String metricName) {
     ComponentMetrics componentMetric = new ComponentMetrics(this.getComponentName());
-    for(Map.Entry<String, InstanceMetrics> entry : instanceData.entrySet()){
+    for (Map.Entry<String, InstanceMetrics> entry : instanceData.entrySet()) {
       InstanceMetrics instanceMetrics = entry.getValue().createNewInstanceMetrics(metricName);
-      if(!instanceMetrics.getMetrics().isEmpty()){
+      if (!instanceMetrics.getMetrics().isEmpty()) {
         componentMetric.addInstanceMetric(instanceMetrics);
       }
     }
@@ -110,7 +110,7 @@ public class ComponentMetrics {
       sum += metricValue;
     }
     metricAvg = sum / this.getInstanceData().size();
-    return new MetricsStats(metricMin, metricMax, metricAvg);
+    return new MetricsStats(metric, metricMin, metricMax, metricAvg);
   }
 
 

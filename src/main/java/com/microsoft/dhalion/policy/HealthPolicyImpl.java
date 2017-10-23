@@ -7,12 +7,6 @@
 
 package com.microsoft.dhalion.policy;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.microsoft.dhalion.api.IDetector;
 import com.microsoft.dhalion.api.IDiagnoser;
@@ -22,7 +16,13 @@ import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.resolver.Action;
-import com.microsoft.dhalion.state.State;
+import com.microsoft.dhalion.state.MetricsState;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class HealthPolicyImpl implements IHealthPolicy {
   protected List<ISensor> sensors = new ArrayList<>();
@@ -99,13 +99,12 @@ public class HealthPolicyImpl implements IHealthPolicy {
   }
 
   @Override
-  public void executeSensors(State stateSnapshot) {
+  public void executeSensors(MetricsState metricsState) {
     if (sensors == null) {
       return;
     }
 
-    sensors.stream().forEach(sensor -> stateSnapshot.addToState(sensor.fetchMetrics(),
-        sensor.getStats(), sensor.getMetricName()));
+    sensors.stream().forEach(sensor -> metricsState.addMetricsAndStats(sensor.fetchMetrics(), sensor.getStats()));
   }
 
   @Override

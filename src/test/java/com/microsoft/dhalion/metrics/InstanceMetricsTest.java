@@ -7,6 +7,7 @@
 
 package com.microsoft.dhalion.metrics;
 
+import com.microsoft.dhalion.common.DuplicateMetricException;
 import org.junit.Test;
 
 import java.time.Instant;
@@ -83,7 +84,7 @@ public class InstanceMetricsTest {
     assertEquals(432, instance2.getMetrics().get("m2").get(Instant.ofEpochSecond(432)).intValue());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = DuplicateMetricException.class)
   public void failsOnDuplicateMetricMerge() {
     InstanceMetrics instanceMetrics1 = new InstanceMetrics("i1");
     instanceMetrics1.addMetric("m1", new HashMap<>());

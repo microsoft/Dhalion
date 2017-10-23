@@ -15,8 +15,8 @@ import com.microsoft.dhalion.api.IDiagnoser;
 import com.microsoft.dhalion.api.IResolver;
 import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.policy.HealthPolicyImpl.ClockTimeProvider;
-import com.microsoft.dhalion.state.State;
 
+import com.microsoft.dhalion.state.MetricsState;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -68,9 +68,8 @@ public class HealthPolicyImplTest {
     HealthPolicyImpl policy = new HealthPolicyImpl();
     policy.initialize(sensors, detectors, diagnosers, resolvers);
 
-    State stateSnapshot = new State();
-    stateSnapshot.initialize();
-    policy.executeSensors(stateSnapshot);
+    MetricsState metricsState = new MetricsState();
+    policy.executeSensors(metricsState);
     policy.executeDetectors();
     policy.executeDiagnosers(new ArrayList<>());
     policy.executeResolver(resolver, new ArrayList<>());

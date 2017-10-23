@@ -6,10 +6,11 @@
  */
 package com.microsoft.dhalion.metrics;
 
+import com.microsoft.dhalion.common.DuplicateMetricException;
+
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import sun.security.jca.GetInstance;
 
 /**
  * An {@link InstanceMetrics} holds metrics information for a specific instance.
@@ -34,17 +35,17 @@ public class InstanceMetrics {
 
   public void addMetric(String name, Map<Instant, Double> values) {
     if (metrics.containsKey(name)) {
-      throw new IllegalArgumentException("Metric exists: " + name);
+      throw new DuplicateMetricException("Metric exists: " + name);
     }
     Map<Instant, Double> metricValues = new HashMap<>();
     metricValues.putAll(values);
     metrics.put(name, metricValues);
   }
 
-  public InstanceMetrics createNewInstanceMetrics(String metricName){
+  public InstanceMetrics createNewInstanceMetrics(String metricName) {
     InstanceMetrics instance = new InstanceMetrics(this.getName());
-    for(Map.Entry<String, Map<Instant,Double>> entry : metrics.entrySet()){
-      if(entry.getKey().equals(metricName)){
+    for (Map.Entry<String, Map<Instant, Double>> entry : metrics.entrySet()) {
+      if (entry.getKey().equals(metricName)) {
         instance.addMetric(metricName, entry.getValue());
       }
     }

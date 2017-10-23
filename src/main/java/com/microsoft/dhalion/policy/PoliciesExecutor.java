@@ -19,21 +19,20 @@ import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.api.IResolver;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
-import com.microsoft.dhalion.state.State;
+import com.microsoft.dhalion.state.MetricsState;
 
 public class PoliciesExecutor {
   private static final Logger LOG = Logger.getLogger(PoliciesExecutor.class.getName());
   private final List<IHealthPolicy> policies;
   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-  private State stateSnapshot;
 
   public PoliciesExecutor(List<IHealthPolicy> policies) {
     this.policies = policies;
-    stateSnapshot = new State();
-    stateSnapshot.initialize();
   }
 
   public ScheduledFuture<?> start() {
+    MetricsState metricsState = new MetricsState();
+
     ScheduledFuture<?> future = executor.scheduleWithFixedDelay(() -> {
       // schedule the next execution cycle
       Long nextScheduleDelay = policies.stream()
@@ -53,14 +52,15 @@ public class PoliciesExecutor {
         }
 
         LOG.info("Executing Policy: " + policy.getClass().getSimpleName());
-        stateSnapshot.clearStateSnapshot();
-        policy.executeSensors(stateSnapshot);
+        policy.executeSensors(metricsState);
         List<Symptom> symptoms = policy.executeDetectors();
         List<Diagnosis> diagnosis = policy.executeDiagnosers(symptoms);
         IResolver resolver = policy.selectResolver(diagnosis);
         policy.executeResolver(resolver, diagnosis);
-      }
 
+        // The policy execution is complete. Retain the stats, flush the metrics
+        metricsState.clearMetrics();
+      }
     }, 1, 1, TimeUnit.MILLISECONDS);
 
     return future;
