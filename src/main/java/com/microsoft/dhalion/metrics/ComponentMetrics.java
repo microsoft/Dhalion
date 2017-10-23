@@ -53,7 +53,6 @@ public class ComponentMetrics {
 
   public ComponentMetrics getComponentMetric(String metricName){
     ComponentMetrics componentMetric = new ComponentMetrics(this.getComponentName());
-    HashMap<String, InstanceMetrics> result = new HashMap<>();
     for(Map.Entry<String, InstanceMetrics> entry : instanceData.entrySet()){
       InstanceMetrics instanceMetrics = entry.getValue().createNewInstanceMetrics(metricName);
       if(!instanceMetrics.getMetrics().isEmpty()){
