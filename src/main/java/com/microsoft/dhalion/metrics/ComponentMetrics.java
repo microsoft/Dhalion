@@ -6,147 +6,175 @@
  */
 package com.microsoft.dhalion.metrics;
 
-import java.time.Instant;
+import com.microsoft.dhalion.common.DuplicateMetricException;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * An {@link ComponentMetrics} holds metrics information for all instances of a component.
+ * {@link ComponentMetrics} is a collection of {@link InstanceMetric} objects organized in a 2D space. This class holds
+ * metric information for all instances of all components. The dimensions are metric name and component name. This
+ * class provides methods to filter {@link InstanceMetric} objects by along either of the two dimensions.
  */
 public class ComponentMetrics {
-  // id of the component
-  protected String componentName;
+  //Map for the component name dimension
+  private HashMap<String, Set<InstanceMetricWrapper>> componentDim = new HashMap<>();
 
-  // a map of instance name to its metric values
-  private HashMap<String, InstanceMetrics> instanceData = new HashMap<>();
+  //Map for the metric name dimension
+  private HashMap<String, Set<InstanceMetricWrapper>> metricsDim = new HashMap<>();
 
-  public ComponentMetrics(String compName) {
-    this(compName, null);
+  //Set of all metrics managed by this object
+  private Set<InstanceMetricWrapper> allMetric = new HashSet<>();
+
+  public synchronized void addAll(Collection<InstanceMetric> metrics) {
+    metrics.forEach(this::add);
   }
 
-  public ComponentMetrics(String compName, String instanceName, String metricName, double value) {
-    this(compName, null);
-    if (instanceName != null) {
-      InstanceMetrics instanceMetrics = new InstanceMetrics(instanceName, metricName, value);
-      addInstanceMetric(instanceMetrics);
+  public synchronized void add(InstanceMetric metric) {
+    if (allMetric.contains(metric)) {
+      throw new DuplicateMetricException(metric.getComponentName(), metric.getInstanceName(), metric.getMetricName());
     }
+
+    InstanceMetricWrapper wrappedMetric = new InstanceMetricWrapper(metric);
+    allMetric.add(wrappedMetric);
+    componentDim.computeIfAbsent(metric.getComponentName(), k -> new HashSet<>()).add(wrappedMetric);
+    metricsDim.computeIfAbsent(metric.getMetricName(), k -> new HashSet<>()).add(wrappedMetric);
   }
 
-  public ComponentMetrics(String compName, Map<String, InstanceMetrics> instanceMetricsData) {
-    this.componentName = compName;
-    if (instanceMetricsData != null) {
-      instanceMetricsData.values().stream().forEach(x -> addInstanceMetric(x));
-    }
-  }
-
-  public void addInstanceMetric(InstanceMetrics instanceMetrics) {
-    String instanceName = instanceMetrics.getName();
-    if (instanceData.containsKey(instanceName)) {
-      throw new IllegalArgumentException("Instance metrics exist: " + componentName);
-    }
-    instanceData.put(instanceName, instanceMetrics);
-  }
-
-  public HashMap<String, InstanceMetrics> getInstanceData() {
-    return instanceData;
-  }
-
-  public ComponentMetrics getComponentMetric(String metricName) {
-    ComponentMetrics componentMetric = new ComponentMetrics(this.getComponentName());
-    for (Map.Entry<String, InstanceMetrics> entry : instanceData.entrySet()) {
-      InstanceMetrics instanceMetrics = entry.getValue().createNewInstanceMetrics(metricName);
-      if (!instanceMetrics.getMetrics().isEmpty()) {
-        componentMetric.addInstanceMetric(instanceMetrics);
-      }
-    }
-    return componentMetric;
-  }
-
-  public InstanceMetrics getInstanceData(String instanceName) {
-    return instanceData.get(instanceName);
+  public void addMetric(String component, String instance, String metricName, double value) {
+    InstanceMetric metric = new InstanceMetric(component, instance, metricName);
+    metric.addValue(value);
+    add(metric);
   }
 
   /**
-   * @param instance name of the instance for which metrics are desired
-   * @param metric   metric name
-   * @return all known metric values for the requested instance
+   * @param componentName
+   * @return a new {@link ComponentMetrics} instance containing all {@link InstanceMetric}s belonging to {@code
+   * componentName} only.
    */
-  public Map<Instant, Double> getMetricValues(String instance, String metric) {
-    InstanceMetrics instanceMetrics = getInstanceData(instance);
-    if (instanceMetrics == null) {
-      return null;
+  public ComponentMetrics filterByComponent(String componentName) {
+    final ComponentMetrics result = new ComponentMetrics();
+    Set<InstanceMetricWrapper> metrics = componentDim.get(componentName);
+    if (metrics != null) {
+      metrics.forEach(wrapper -> result.add(wrapper.metric));
     }
 
-    return instanceMetrics.getMetrics().get(metric);
+    return result;
   }
 
   /**
-   * @param instance name of the instance for which metrics are desired
-   * @param metric   metric name
-   * @return sum of all the values of the requested metric for the instance.
+   * @param metricName
+   * @return a new {@link ComponentMetrics} instance containing all {@link InstanceMetric}s belonging to {@code
+   * metricName} only.
    */
-  public Double getMetricValueSum(String instance, String metric) {
-    InstanceMetrics instanceMetrics = getInstanceData(instance);
-    if (instanceMetrics == null) {
-      return null;
+  public ComponentMetrics filterByMetric(String metricName) {
+    final ComponentMetrics result = new ComponentMetrics();
+    Set<InstanceMetricWrapper> metrics = metricsDim.get(metricName);
+    if (metrics != null) {
+      metrics.forEach(wrapper -> result.add(wrapper.metric));
     }
 
-    return instanceMetrics.getMetricValueSum(metric);
-  }
-
-  public MetricsStats computeStats(String metric) {
-    double metricMax = 0;
-    double metricMin = Double.MAX_VALUE;
-    double sum = 0;
-    double metricAvg = 0;
-    for (InstanceMetrics instance : this.getInstanceData().values()) {
-
-      Double metricValue = instance.getMetricValueSum(metric);
-      if (metricValue == null) {
-        continue;
-      }
-      metricMax = metricMax < metricValue ? metricValue : metricMax;
-      metricMin = metricMin > metricValue ? metricValue : metricMin;
-      sum += metricValue;
-    }
-    metricAvg = sum / this.getInstanceData().size();
-    return new MetricsStats(metric, metricMin, metricMax, metricAvg);
-  }
-
-
-  public String getComponentName() {
-    return componentName;
-  }
-
-  public boolean anyInstanceAboveLimit(String metricName, double limit) {
-    return instanceData.values().stream().anyMatch(x -> x.hasMetricAboveLimit(metricName, limit));
+    return result;
   }
 
   /**
-   * Merges instance metrics in two different objects into one. Input objects are not modified. It
-   * is assumed that the two input data sets belong to the same component. Hence the data sets
-   * will contain the same instances.
+   * @param componentName
+   * @param instanceName
+   * @return a new {@link ComponentMetrics} instance containing all {@link InstanceMetric}s belonging to {@code
+   * componentName/instanceName} only.
+   */
+  public ComponentMetrics filterByInstance(String componentName, String instanceName) {
+    final ComponentMetrics result = new ComponentMetrics();
+    Collection<InstanceMetric> metrics = filterByComponent(componentName).getMetrics();
+    if (metrics != null) {
+      metrics.stream()
+          .filter(metric -> metric.getInstanceName().equals(instanceName))
+          .forEach(result::add);
+    }
+
+    return result;
+  }
+
+  /**
+   * @return all {@link InstanceMetric} managed by this {@link ComponentMetrics} object
+   */
+  public Collection<InstanceMetric> getMetrics() {
+    final Collection<InstanceMetric> result = new ArrayList<>();
+    allMetric.forEach(wrapper -> result.add(wrapper.metric));
+    return result;
+  }
+
+  /**
+   * @return unique names of all metrics present in this {@link ComponentMetrics}
+   */
+  public Collection<String> getMetricNames() {
+    final Collection<String> result = new ArrayList<>();
+    result.addAll(metricsDim.keySet());
+    return result;
+  }
+
+  /**
+   * @return unique names of all components present in this {@link ComponentMetrics}
+   */
+  public Collection<String> getComponentNames() {
+    final Collection<String> result = new ArrayList<>();
+    result.addAll(componentDim.keySet());
+    return result;
+  }
+
+  /**
+   * Merges {@link InstanceMetric}s in two different {@link ComponentMetrics}. Input objects are not modified. This
+   * is a utility method two merge two different metrics. The method will fail if both the input objects contain
+   * metrics for the same {@link InstanceMetric}.
    *
    * @return A new {@link ComponentMetrics} instance
    */
   public static ComponentMetrics merge(ComponentMetrics data1, ComponentMetrics data2) {
-    ComponentMetrics mergedData = new ComponentMetrics(data1.getComponentName());
-    for (InstanceMetrics instance1 : data1.getInstanceData().values()) {
-      InstanceMetrics instance2 = data2.getInstanceData(instance1.getName());
-      if (instance2 != null) {
-        instance1 = InstanceMetrics.merge(instance1, instance2);
-      }
-      mergedData.addInstanceMetric(instance1);
+    ComponentMetrics mergedData = new ComponentMetrics();
+    if (data1 != null) {
+      mergedData.addAll(data1.getMetrics());
+    }
+    if (data2 != null) {
+      mergedData.addAll(data2.getMetrics());
+    }
+    return mergedData;
+  }
+
+  private class InstanceMetricWrapper {
+    private final InstanceMetric metric;
+
+    public InstanceMetricWrapper(InstanceMetric metric) {
+      this.metric = metric;
     }
 
-    return mergedData;
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+
+      InstanceMetricWrapper that = (InstanceMetricWrapper) o;
+
+      return metric.getComponentName().equals(that.metric.getComponentName())
+          && metric.getInstanceName().equals(that.metric.getInstanceName())
+          && metric.getMetricName().equals(that.metric.getMetricName());
+    }
+
+    @Override
+    public int hashCode() {
+      int result = metric.getComponentName().hashCode();
+      result = 31 * result + metric.getInstanceName().hashCode();
+      result = 31 * result + metric.getMetricName().hashCode();
+      return result;
+    }
   }
 
   @Override
   public String toString() {
     return "ComponentMetrics{" +
-        "name='" + componentName + '\'' +
-        ", metrics=" + instanceData +
+        "allMetric=" + allMetric +
         '}';
   }
 }
