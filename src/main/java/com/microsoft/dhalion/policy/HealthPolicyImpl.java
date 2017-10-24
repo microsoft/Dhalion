@@ -161,6 +161,12 @@ public class HealthPolicyImpl implements IHealthPolicy {
   }
 
   @Override
+  public boolean evaluateActions(List<Action> actions, MetricsState initialState, MetricsState
+      newState){
+    return true;
+  }
+
+  @Override
   public long getDelay(TimeUnit unit) {
     long delay;
     if (lastExecutionTimeMills <= 0) {

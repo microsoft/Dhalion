@@ -7,6 +7,7 @@
 
 package com.microsoft.dhalion.policy;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -19,12 +20,15 @@ import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.api.IResolver;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.resolver.Action;
 import com.microsoft.dhalion.state.MetricsState;
 
 public class PoliciesExecutor {
   private static final Logger LOG = Logger.getLogger(PoliciesExecutor.class.getName());
   private final List<IHealthPolicy> policies;
   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+  private List<Action> actions = new ArrayList<>();
+  private MetricsState previousState = null;
 
   public PoliciesExecutor(List<IHealthPolicy> policies) {
     this.policies = policies;
@@ -53,10 +57,14 @@ public class PoliciesExecutor {
 
         LOG.info("Executing Policy: " + policy.getClass().getSimpleName());
         policy.executeSensors(metricsState);
+        if(this.actions.size() > 0) {
+          policy.evaluateActions(this.actions, previousState, metricsState);
+        }
+        previousState = metricsState;
         List<Symptom> symptoms = policy.executeDetectors();
         List<Diagnosis> diagnosis = policy.executeDiagnosers(symptoms);
         IResolver resolver = policy.selectResolver(diagnosis);
-        policy.executeResolver(resolver, diagnosis);
+        this.actions = policy.executeResolver(resolver, diagnosis);
 
         // The policy execution is complete. Retain the stats, flush the metrics
         metricsState.clearMetrics();

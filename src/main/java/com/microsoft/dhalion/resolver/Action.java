@@ -6,7 +6,11 @@
  */
 package com.microsoft.dhalion.resolver;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.microsoft.dhalion.api.IResolver;
+import com.microsoft.dhalion.common.InstanceInfo;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 
 /**
@@ -14,13 +18,40 @@ import com.microsoft.dhalion.diagnoser.Diagnosis;
  * {@link Diagnosis}
  */
 public class Action {
-  private String name;
+  private Set<InstanceInfo> affectedInstances;
 
-  public Action(String name) {
-    this.name = name;
+  private String type;
+
+  public Action(String type) {
+    this.type = type;
   }
 
-  public String getName() {
-    return name;
+  public Action(Set<InstanceInfo> affectedInstances, String type) {
+    this.affectedInstances = affectedInstances;
+    this.type = type;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public Set<InstanceInfo> getAffectedInstances() {
+    return affectedInstances;
+  }
+
+  public void setAffectedInstances(Set<InstanceInfo> affectedInstances) {
+    this.affectedInstances = affectedInstances;
+  }
+
+  public Set<String> getAffectedComponents() {
+    Set<String> affectedComponents = new HashSet<String>();
+    for (InstanceInfo instance : affectedInstances) {
+      String component = instance.getComponentName();
+      if (!affectedComponents.contains(component)) {
+        affectedComponents.add(component);
+      }
+    }
+    return affectedComponents;
   }
 }
+

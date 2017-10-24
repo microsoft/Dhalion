@@ -56,6 +56,12 @@ public interface IHealthPolicy {
   List<Action> executeResolver(IResolver resolver, List<Diagnosis> diagnosis);
 
   /**
+   * Evaluates a list of actions by comparing thesystem states before and after the actions .
+   * were executed. Returns true when the new system state is better than the initial state.
+   */
+  boolean evaluateActions(List<Action> actions, MetricsState initialState, MetricsState newState);
+
+  /**
    * @param unit the desired unit of time
    * @return Returns the remaining delay before re-execution of this policy, in the
    * given time unit.
