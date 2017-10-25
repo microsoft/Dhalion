@@ -7,141 +7,120 @@
 
 package com.microsoft.dhalion.metrics;
 
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.microsoft.dhalion.common.DuplicateMetricException;
 import org.junit.Test;
 
+import java.util.Collection;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class ComponentMetricsTest {
   @Test
-  public void testComponentMetricsConstruction() {
-    Map<String, InstanceMetrics> instanceMetricsMap = new HashMap<>();
+  public void testFilters() {
+    InstanceMetric c1i2m1 = new InstanceMetric("c1", "i2", "m1");
+    InstanceMetric c2i3m1 = new InstanceMetric("c2", "i3", "m1");
+    InstanceMetric c2i4m3 = new InstanceMetric("c2", "i4", "m3");
 
-    InstanceMetrics instanceMetrics = new InstanceMetrics("i1");
-    addTestMetrics(instanceMetrics, "m1", 123);
-    instanceMetricsMap.put("i1", instanceMetrics);
-    ComponentMetrics componentMetrics = new ComponentMetrics("c1", instanceMetricsMap);
+    ComponentMetrics metrics = new ComponentMetrics();
+    metrics.add(new InstanceMetric("c1", "i1", "m1"));
+    metrics.add(new InstanceMetric("c1", "i1", "m2"));
+    metrics.add(new InstanceMetric("c1", "i2", "m3"));
+    metrics.add(c1i2m1);
+    metrics.add(c2i3m1);
+    metrics.add(c2i4m3);
+    assertEquals(6, metrics.getMetrics().size());
 
-    assertEquals(1, componentMetrics.getInstanceData().size());
+    ComponentMetrics result = metrics.filterByComponent("c2");
+    assertEquals(2, result.getMetrics().size());
+    assertTrue(result.getMetrics().contains(c2i3m1));
+    assertTrue(result.getMetrics().contains(c2i4m3));
 
-    instanceMetrics = new InstanceMetrics("i2");
-    addTestMetrics(instanceMetrics, "m1", 321);
-    componentMetrics.addInstanceMetric(instanceMetrics);
-    assertEquals(2, componentMetrics.getInstanceData().size());
+    result = metrics.filterByComponent("c1");
+    assertEquals(4, result.getMetrics().size());
 
-    try {
-      componentMetrics.addInstanceMetric(instanceMetrics);
-      fail("Should not allow duplicate instance");
-    } catch (IllegalArgumentException e) {
-    }
+    result = metrics.filterByMetric("m1");
+    assertEquals(3, result.getMetrics().size());
+    assertTrue(result.getMetrics().contains(c1i2m1));
+    assertTrue(result.getMetrics().contains(c2i3m1));
 
-    assertEquals(2, componentMetrics.getInstanceData().size());
-    assertEquals(1, componentMetrics.getMetricValues("i1", "m1").size());
-    assertEquals(123, componentMetrics.getMetricValues("i1", "m1").get(Instant.ofEpochSecond(123)).intValue());
-    assertEquals(1, componentMetrics.getMetricValues("i2", "m1").size());
-    assertEquals(321, componentMetrics.getMetricValues("i2", "m1").get(Instant.ofEpochSecond(321)).intValue());
-
-    assertNull(componentMetrics.getInstanceData("does not exist"));
+    // test filter chaining
+    result = metrics.filterByComponent("c1");
+    assertEquals(4, result.getMetrics().size());
+    result = result.filterByMetric("m1");
+    assertEquals(2, result.getMetrics().size());
+    result = result.filterByInstance("c1", "i1");
+    assertEquals(1, result.getMetrics().size());
   }
 
   @Test
-  public void getSpecificMetrics() {
-    Map<String, InstanceMetrics> instanceMetricsMap = new HashMap<>();
+  public void testGetMetricNames() {
+    ComponentMetrics metrics = new ComponentMetrics();
+    metrics.add(new InstanceMetric("c1", "i1", "m1"));
+    metrics.add(new InstanceMetric("c1", "i2", "m2"));
+    metrics.add(new InstanceMetric("c2", "i3", "m1"));
+    metrics.add(new InstanceMetric("c2", "i4", "m3"));
+    assertEquals(4, metrics.getMetrics().size());
 
-    InstanceMetrics instanceMetrics = new InstanceMetrics("i1");
-    addTestMetrics(instanceMetrics, "m1", 123);
-    addTestMetrics(instanceMetrics, "m2", 12);
-    addTestMetrics(instanceMetrics, "m3", 1);
-
-    instanceMetricsMap.put("i1", instanceMetrics);
-    ComponentMetrics componentMetrics = new ComponentMetrics("c1", instanceMetricsMap);
-
-    assertEquals(1, componentMetrics.getInstanceData().size());
-    assertEquals(3, componentMetrics.getInstanceData().get("i1").getMetrics().size());
-
-    ComponentMetrics componentMetrics2 = componentMetrics.getComponentMetric("m2");
-    assertEquals(1, componentMetrics2.getInstanceData().size());
-    assertEquals(1, componentMetrics2.getInstanceData().get("i1").getMetrics().size());
-    assertEquals(12, componentMetrics2.getMetricValues("i1", "m2").get(Instant.ofEpochSecond(12)).
-        intValue());
-
-
-    instanceMetrics = new InstanceMetrics("i2");
-    addTestMetrics(instanceMetrics, "m2", 321);
-    componentMetrics.addInstanceMetric(instanceMetrics);
-    assertEquals(2, componentMetrics.getInstanceData().size());
-    assertEquals(1, componentMetrics.getInstanceData().get("i2").getMetrics().size());
-
-
-    ComponentMetrics componentMetrics3 = componentMetrics.getComponentMetric("m2");
-    assertEquals(2, componentMetrics3.getInstanceData().size());
-    assertEquals(1, componentMetrics3.getInstanceData().get("i1").getMetrics().size());
-    assertEquals(1, componentMetrics3.getInstanceData().get("i2").getMetrics().size());
-    assertEquals(12, componentMetrics3.getMetricValues("i1", "m2").get(Instant.ofEpochSecond(12))
-        .intValue());
-    assertEquals(321, componentMetrics3.getMetricValues("i2", "m2").get(Instant.ofEpochSecond(321))
-        .intValue());
+    Collection<String> names = metrics.getMetricNames();
+    assertEquals(3, names.size());
+    assertTrue(names.contains("m1"));
+    assertTrue(names.contains("m2"));
+    assertTrue(names.contains("m3"));
   }
 
   @Test
-  public void findsInstanceWithMetricAboveLimit() {
-    Map<String, InstanceMetrics> instanceMetricsMap = new HashMap<>();
+  public void testGetCompNames() {
+    ComponentMetrics metrics = new ComponentMetrics();
+    metrics.add(new InstanceMetric("c1", "i1", "m1"));
+    metrics.add(new InstanceMetric("c1", "i2", "m2"));
+    metrics.add(new InstanceMetric("c2", "i3", "m1"));
+    metrics.add(new InstanceMetric("c2", "i4", "m3"));
+    assertEquals(4, metrics.getMetrics().size());
 
-    InstanceMetrics instanceMetrics = new InstanceMetrics("i1");
-    addTestMetrics(instanceMetrics, "m1", 123, 345);
-    instanceMetricsMap.put("i1", instanceMetrics);
+    Collection<String> names = metrics.getComponentNames();
+    assertEquals(2, names.size());
+    assertTrue(names.contains("c1"));
+    assertTrue(names.contains("c2"));
+  }
 
-    instanceMetrics = new InstanceMetrics("i2");
-    addTestMetrics(instanceMetrics, "m1", 321, 765);
-    instanceMetricsMap.put("i2", instanceMetrics);
-
-    ComponentMetrics componentMetrics = new ComponentMetrics("c1", instanceMetricsMap);
-    assertTrue(componentMetrics.anyInstanceAboveLimit("m1", 700));
-    assertFalse(componentMetrics.anyInstanceAboveLimit("m1", 800));
+  @Test(expected = DuplicateMetricException.class)
+  public void testDuplicateErrors() {
+    ComponentMetrics metrics = new ComponentMetrics();
+    metrics.add(new InstanceMetric("c1", "i1", "m1"));
+    metrics.add(new InstanceMetric("c1", "i1", "m1"));
   }
 
   @Test
   public void testMerge() {
-    Map<String, InstanceMetrics> instanceMetricsMap = new HashMap<>();
+    ComponentMetrics componentMetrics1 = new ComponentMetrics();
+    componentMetrics1.add(new InstanceMetric("c1", "i1", "m1"));
+    componentMetrics1.add(new InstanceMetric("c1", "i1", "m2"));
+    componentMetrics1.add(new InstanceMetric("c1", "i2", "m2"));
+    assertEquals(1, componentMetrics1.getComponentNames().size());
+    assertEquals(2, componentMetrics1.getMetricNames().size());
+    assertEquals(3, componentMetrics1.filterByComponent("c1").getMetrics().size());
+    assertEquals(1, componentMetrics1.filterByMetric("m1").getMetrics().size());
 
-    InstanceMetrics instanceMetrics = new InstanceMetrics("i1");
-    addTestMetrics(instanceMetrics, "m1", 123, 234);
-    addTestMetrics(instanceMetrics, "m2", 1234, 2345);
-    instanceMetricsMap.put("i1", instanceMetrics);
-
-    instanceMetrics = new InstanceMetrics("i2");
-    addTestMetrics(instanceMetrics, "m1", 321, 432);
-    instanceMetricsMap.put("i2", instanceMetrics);
-
-    ComponentMetrics componentMetrics1 = new ComponentMetrics("c1", instanceMetricsMap);
-    assertEquals(1, componentMetrics1.getInstanceData("i2").getMetrics().size());
-
-    instanceMetricsMap.clear();
-    instanceMetrics = new InstanceMetrics("i2");
-    addTestMetrics(instanceMetrics, "m2", 321, 432);
-    instanceMetricsMap.put("i2", instanceMetrics);
-
-    ComponentMetrics componentMetrics2 = new ComponentMetrics("c2", instanceMetricsMap);
+    ComponentMetrics componentMetrics2 = new ComponentMetrics();
+    componentMetrics2.add(new InstanceMetric("c1", "i1", "m3"));
+    componentMetrics2.add(new InstanceMetric("c2", "i3", "m2"));
+    componentMetrics2.add(new InstanceMetric("c3", "i4", "m2"));
+    assertEquals(3, componentMetrics2.getComponentNames().size());
+    assertEquals(2, componentMetrics2.getMetricNames().size());
+    assertEquals(1, componentMetrics2.filterByComponent("c1").getMetrics().size());
+    assertEquals(1, componentMetrics2.filterByComponent("c2").getMetrics().size());
+    assertEquals(1, componentMetrics2.filterByComponent("c3").getMetrics().size());
+    assertEquals(1, componentMetrics2.filterByMetric("m3").getMetrics().size());
 
     ComponentMetrics result = ComponentMetrics.merge(componentMetrics1, componentMetrics2);
-    assertEquals(2, result.getInstanceData().size());
-    assertEquals(2, result.getInstanceData("i1").getMetrics().size());
-    assertEquals(2, result.getInstanceData("i1").getMetrics().size());
-  }
-
-  private void addTestMetrics(InstanceMetrics instance, String metricName, int... values) {
-    HashMap<Instant, Double> valueMap = new HashMap<>();
-    for (int value : values) {
-      valueMap.put(Instant.ofEpochSecond(value), (double) value);
-
-    }
-    instance.addMetric(metricName, valueMap);
+    assertEquals(3, result.getComponentNames().size());
+    assertEquals(3, result.getMetricNames().size());
+    assertEquals(4, result.filterByComponent("c1").getMetrics().size());
+    assertEquals(1, result.filterByComponent("c2").getMetrics().size());
+    assertEquals(1, result.filterByComponent("c3").getMetrics().size());
+    assertEquals(1, result.filterByMetric("m1").getMetrics().size());
+    assertEquals(4, result.filterByMetric("m2").getMetrics().size());
+    assertEquals(1, result.filterByMetric("m3").getMetrics().size());
   }
 }

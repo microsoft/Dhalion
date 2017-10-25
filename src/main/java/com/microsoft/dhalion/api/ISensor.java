@@ -28,22 +28,15 @@ public interface ISensor {
    * Pulls a given metric information for all component from an external source. The sensor instance then manages the
    * pulled information in local state. It also updates the {@link MetricsStats} associated with this sensor.
    */
-  default Map<String, ComponentMetrics> fetchMetrics() {
-    return null;
+  default ComponentMetrics fetchMetrics() {
+    throw new UnsupportedOperationException();
   }
 
   /**
-   * @return returns the most recently fetched metric value for all components as a map
+   * @return returns the most recently fetched metric value for all components
    */
-  default Map<String, ComponentMetrics> getMetrics() {
-    return new HashMap<>();
-  }
-
-  /**
-   * @return returns the most recently fetched metric value for a specific component
-   */
-  default Optional<ComponentMetrics> getMetrics(String component) {
-    return Optional.empty();
+  default ComponentMetrics getMetrics() {
+    return fetchMetrics();
   }
 
   /**

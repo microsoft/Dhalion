@@ -6,11 +6,11 @@
  */
 package com.microsoft.dhalion.detector;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.MetricsStats;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A {@link Symptom} identifies an anomaly or a potential health issue in a specific component of a
@@ -18,26 +18,26 @@ import com.microsoft.dhalion.metrics.MetricsStats;
  */
 public class Symptom {
   private String symptomName;
-  private Map<String, ComponentMetrics> metrics = new HashMap<>();
+  private ComponentMetrics metrics = new ComponentMetrics();
   private Map<String, MetricsStats> stats = new HashMap<>();
 
   public Symptom(String symptomName) {
-    this.symptomName = symptomName;
+    this(symptomName, null);
   }
 
   public Symptom(String symptomName, ComponentMetrics metrics) {
-    this.symptomName = symptomName;
-    addComponentMetrics(metrics);
+    this(symptomName, metrics, null);
   }
 
   public Symptom(String symptomName, ComponentMetrics metrics, MetricsStats stats) {
     this.symptomName = symptomName;
-    addComponentMetrics(metrics);
-    addStats(metrics.getComponentName(), stats);
+    this.metrics = metrics;
+    // TODO optimize stats structure like ComponentMetrics
+//    addStats(metrics.getComponentName(), stats);
   }
 
   public synchronized void addComponentMetrics(ComponentMetrics metrics) {
-    this.metrics.put(metrics.getComponentName(), metrics);
+    this.metrics = ComponentMetrics.merge(metrics, this.metrics);
   }
 
   public synchronized void addStats(String componentName, MetricsStats componentStats) {
@@ -48,7 +48,7 @@ public class Symptom {
     return symptomName;
   }
 
-  public Map<String, ComponentMetrics> getComponents() {
+  public ComponentMetrics getComponentMetrics() {
     return metrics;
   }
 
@@ -56,24 +56,12 @@ public class Symptom {
     return stats;
   }
 
-  /**
-   * @return the only component exhibiting this symptom
-   */
-  public synchronized ComponentMetrics getComponent() {
-    if (metrics.size() > 1) {
-      throw new IllegalStateException();
-    }
-
-    return metrics.values().iterator().next();
-  }
-
   @Override
   public String toString() {
     return "Symptom{" +
-        "name=" + symptomName +
+        "symptomName='" + symptomName + '\'' +
         ", metrics=" + metrics +
         ", stats=" + stats +
         '}';
   }
 }
-

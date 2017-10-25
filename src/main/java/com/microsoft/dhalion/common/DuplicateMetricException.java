@@ -7,8 +7,8 @@
 
 package com.microsoft.dhalion.common;
 
-public class DuplicateMetricException extends RuntimeException{
-  public DuplicateMetricException(String message) {
-    super(message);
+public class DuplicateMetricException extends RuntimeException {
+  public DuplicateMetricException(String component, String instance, String metric) {
+    super(String.format("Metric name %s already exists for %s/%s", metric, component, instance));
   }
 }

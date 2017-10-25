@@ -36,4 +36,21 @@ public class InstanceInfo {
         ", instanceName='" + instanceName + '\'' +
         '}';
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    InstanceInfo that = (InstanceInfo) o;
+
+    return componentName.equals(that.componentName) && instanceName.equals(that.instanceName);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = componentName.hashCode();
+    result = 31 * result + instanceName.hashCode();
+    return result;
+  }
 }
