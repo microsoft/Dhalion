@@ -34,11 +34,12 @@ public class ComponentMetrics {
   }
 
   public synchronized void add(InstanceMetric metric) {
-    if (allMetric.contains(metric)) {
+    InstanceMetricWrapper wrappedMetric = new InstanceMetricWrapper(metric);
+
+    if (allMetric.contains(wrappedMetric)) {
       throw new DuplicateMetricException(metric.getComponentName(), metric.getInstanceName(), metric.getMetricName());
     }
 
-    InstanceMetricWrapper wrappedMetric = new InstanceMetricWrapper(metric);
     allMetric.add(wrappedMetric);
     componentDim.computeIfAbsent(metric.getComponentName(), k -> new HashSet<>()).add(wrappedMetric);
     metricsDim.computeIfAbsent(metric.getMetricName(), k -> new HashSet<>()).add(wrappedMetric);
