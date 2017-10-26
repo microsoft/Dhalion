@@ -40,7 +40,7 @@ public interface MetricsProvider {
    * @param instance  id of the instance
    * @return InstanceMetric containing the value(s)
    */
-  default InstanceMetric getComponentMetrics(String metric, Duration duration, String component, String instance) {
+  default InstanceMetric getInstanceMetrics(String metric, Duration duration, String component, String instance) {
     return null;
   }
 
@@ -78,7 +78,7 @@ public interface MetricsProvider {
    * @param instance  id of the instance
    * @return component metrics
    */
-  default InstanceMetric getComponentMetrics(String metric,
+  default InstanceMetric getInstanceMetrics(String metric,
                                              Instant startTime,
                                              Duration duration,
                                              String component,
