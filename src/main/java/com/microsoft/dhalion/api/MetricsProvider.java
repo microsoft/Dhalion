@@ -7,7 +7,7 @@
 package com.microsoft.dhalion.api;
 
 import com.microsoft.dhalion.metrics.ComponentMetrics;
-import com.microsoft.dhalion.metrics.InstanceMetric;
+import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -38,9 +38,9 @@ public interface MetricsProvider {
    * @param duration  the duration for which the metric was aggregated
    * @param component id of the components for which the metric is needed
    * @param instance  id of the instance
-   * @return InstanceMetric containing the value(s)
+   * @return InstanceMetrics containing the value(s)
    */
-  default InstanceMetric getInstanceMetrics(String metric, Duration duration, String component, String instance) {
+  default InstanceMetrics getInstanceMetrics(String metric, Duration duration, String component, String instance) {
     return null;
   }
 
@@ -78,7 +78,7 @@ public interface MetricsProvider {
    * @param instance  id of the instance
    * @return component metrics
    */
-  default InstanceMetric getInstanceMetrics(String metric,
+  default InstanceMetrics getInstanceMetrics(String metric,
                                              Instant startTime,
                                              Duration duration,
                                              String component,

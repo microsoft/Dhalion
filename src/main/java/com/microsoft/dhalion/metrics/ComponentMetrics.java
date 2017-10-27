@@ -15,9 +15,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * {@link ComponentMetrics} is a collection of {@link InstanceMetric} objects organized in a 2D space. This class holds
+ * {@link ComponentMetrics} is a collection of {@link InstanceMetrics} objects organized in a 2D space. This class holds
  * metric information for all instances of all components. The dimensions are metric name and component name. This
- * class provides methods to filter {@link InstanceMetric} objects by along either of the two dimensions.
+ * class provides methods to filter {@link InstanceMetrics} objects by along either of the two dimensions.
  */
 public class ComponentMetrics {
   //Map for the component name dimension
@@ -29,11 +29,11 @@ public class ComponentMetrics {
   //Set of all metrics managed by this object
   private Set<InstanceMetricWrapper> allMetric = new HashSet<>();
 
-  public synchronized void addAll(Collection<InstanceMetric> metrics) {
+  public synchronized void addAll(Collection<InstanceMetrics> metrics) {
     metrics.forEach(this::add);
   }
 
-  public synchronized void add(InstanceMetric metric) {
+  public synchronized void add(InstanceMetrics metric) {
     InstanceMetricWrapper wrappedMetric = new InstanceMetricWrapper(metric);
 
     if (allMetric.contains(wrappedMetric)) {
@@ -46,14 +46,14 @@ public class ComponentMetrics {
   }
 
   public void addMetric(String component, String instance, String metricName, double value) {
-    InstanceMetric metric = new InstanceMetric(component, instance, metricName);
+    InstanceMetrics metric = new InstanceMetrics(component, instance, metricName);
     metric.addValue(value);
     add(metric);
   }
 
   /**
    * @param componentName
-   * @return a new {@link ComponentMetrics} instance containing all {@link InstanceMetric}s belonging to {@code
+   * @return a new {@link ComponentMetrics} instance containing all {@link InstanceMetrics}s belonging to {@code
    * componentName} only.
    */
   public ComponentMetrics filterByComponent(String componentName) {
@@ -68,7 +68,7 @@ public class ComponentMetrics {
 
   /**
    * @param metricName
-   * @return a new {@link ComponentMetrics} instance containing all {@link InstanceMetric}s belonging to {@code
+   * @return a new {@link ComponentMetrics} instance containing all {@link InstanceMetrics}s belonging to {@code
    * metricName} only.
    */
   public ComponentMetrics filterByMetric(String metricName) {
@@ -84,12 +84,12 @@ public class ComponentMetrics {
   /**
    * @param componentName
    * @param instanceName
-   * @return a new {@link ComponentMetrics} instance containing all {@link InstanceMetric}s belonging to {@code
+   * @return a new {@link ComponentMetrics} instance containing all {@link InstanceMetrics}s belonging to {@code
    * componentName/instanceName} only.
    */
   public ComponentMetrics filterByInstance(String componentName, String instanceName) {
     final ComponentMetrics result = new ComponentMetrics();
-    Collection<InstanceMetric> metrics = filterByComponent(componentName).getMetrics();
+    Collection<InstanceMetrics> metrics = filterByComponent(componentName).getMetrics();
     if (metrics != null) {
       metrics.stream()
           .filter(metric -> metric.getInstanceName().equals(instanceName))
@@ -100,10 +100,10 @@ public class ComponentMetrics {
   }
 
   /**
-   * @return all {@link InstanceMetric} managed by this {@link ComponentMetrics} object
+   * @return all {@link InstanceMetrics} managed by this {@link ComponentMetrics} object
    */
-  public Collection<InstanceMetric> getMetrics() {
-    final Collection<InstanceMetric> result = new ArrayList<>();
+  public Collection<InstanceMetrics> getMetrics() {
+    final Collection<InstanceMetrics> result = new ArrayList<>();
     allMetric.forEach(wrapper -> result.add(wrapper.metric));
     return result;
   }
@@ -127,9 +127,9 @@ public class ComponentMetrics {
   }
 
   /**
-   * Merges {@link InstanceMetric}s in two different {@link ComponentMetrics}. Input objects are not modified. This
+   * Merges {@link InstanceMetrics}s in two different {@link ComponentMetrics}. Input objects are not modified. This
    * is a utility method two merge two different metrics. The method will fail if both the input objects contain
-   * metrics for the same {@link InstanceMetric}.
+   * metrics for the same {@link InstanceMetrics}.
    *
    * @return A new {@link ComponentMetrics} instance
    */
@@ -145,9 +145,9 @@ public class ComponentMetrics {
   }
 
   private class InstanceMetricWrapper {
-    private final InstanceMetric metric;
+    private final InstanceMetrics metric;
 
-    public InstanceMetricWrapper(InstanceMetric metric) {
+    public InstanceMetricWrapper(InstanceMetrics metric) {
       this.metric = metric;
     }
 
