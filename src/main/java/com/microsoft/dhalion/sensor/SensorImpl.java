@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public abstract class SensorImpl implements ISensor {
   private final String metricName;
-  protected Map<String, ComponentMetrics> metrics = new HashMap<>();
+  protected ComponentMetrics metrics = new ComponentMetrics();
   protected Map<String, MetricsStats> stats = new HashMap<>();
 
   public SensorImpl(String metricName) {
@@ -18,20 +18,11 @@ public abstract class SensorImpl implements ISensor {
   }
 
   @Override
-  abstract public Map<String, ComponentMetrics> fetchMetrics();
+  abstract public ComponentMetrics fetchMetrics();
 
   @Override
-  public Map<String, ComponentMetrics> getMetrics() {
+  public ComponentMetrics getMetrics() {
     return metrics;
-  }
-
-  @Override
-  public Optional<ComponentMetrics> getMetrics(String component) {
-    if (metrics == null) {
-      return Optional.empty();
-    }
-
-    return Optional.ofNullable(metrics.get(component));
   }
 
   @Override

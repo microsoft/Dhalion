@@ -7,89 +7,58 @@
 
 package com.microsoft.dhalion.metrics;
 
-import com.microsoft.dhalion.common.DuplicateMetricException;
 import org.junit.Test;
 
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class InstanceMetricsTest {
   @Test
-  public void mergesDisjointInstances() {
-    Map<Instant, Double> m1Values = new HashMap<>();
-    m1Values.put(Instant.ofEpochSecond(123), 123.0);
-    m1Values.put(Instant.ofEpochSecond(234), 234.0);
-
-    InstanceMetrics instanceMetrics1 = new InstanceMetrics("i1");
-    instanceMetrics1.addMetric("m1", m1Values);
-
-    Map<Instant, Double> m2Values = new HashMap<>();
-    m2Values.put(Instant.ofEpochSecond(321), 321.0);
-    m2Values.put(Instant.ofEpochSecond(432), 432.0);
-
-    InstanceMetrics instanceMetrics2 = new InstanceMetrics("i1");
-    instanceMetrics2.addMetric("m2", m2Values);
-
-    InstanceMetrics mergedInstanceMetrics
-        = InstanceMetrics.merge(instanceMetrics1, instanceMetrics2);
-
-    assertEquals(2, mergedInstanceMetrics.getMetrics().size());
-    assertNotNull(mergedInstanceMetrics.getMetrics().get("m1"));
-    assertNotNull(mergedInstanceMetrics.getMetrics().get("m2"));
-    assertEquals(2, mergedInstanceMetrics.getMetrics().get("m1").size());
-    assertEquals(2, mergedInstanceMetrics.getMetrics().get("m2").size());
-    assertEquals(123, mergedInstanceMetrics.getMetrics().get("m1").get(Instant.ofEpochSecond(123)).intValue());
-    assertEquals(432, mergedInstanceMetrics.getMetrics().get("m2").get(Instant.ofEpochSecond(432)).intValue());
+  public void testConstruction() {
+    InstanceMetrics metric = new InstanceMetrics("comp", "inst", "met");
+    assertEquals("comp", metric.getComponentName());
+    assertEquals("inst", metric.getInstanceName());
+    assertEquals("met", metric.getMetricName());
   }
 
   @Test
-  public void getSpecificMetrics() {
-    Map<Instant, Double> m1Values = new HashMap<>();
-    m1Values.put(Instant.ofEpochSecond(123), 123.0);
-    m1Values.put(Instant.ofEpochSecond(234), 234.0);
+  public void testAddValue() {
+    InstanceMetrics metric = new InstanceMetrics("comp", "inst", "met");
+    assertEquals(0, metric.getValues().size());
+    Instant before = Instant.now();
+    metric.addValue(13.0);
+    Instant after = Instant.now();
 
-    InstanceMetrics instanceMetrics1 = new InstanceMetrics("i1");
-    instanceMetrics1.addMetric("m1", m1Values);
-
-    Map<Instant, Double> m2Values = new HashMap<>();
-    m2Values.put(Instant.ofEpochSecond(321), 321.0);
-    m2Values.put(Instant.ofEpochSecond(432), 432.0);
-    m2Values.put(Instant.ofEpochSecond(436), 436.0);
-
-    InstanceMetrics instanceMetrics2 = new InstanceMetrics("i1");
-    instanceMetrics2.addMetric("m2", m2Values);
-
-    InstanceMetrics mergedInstanceMetrics
-        = InstanceMetrics.merge(instanceMetrics1, instanceMetrics2);
-
-    InstanceMetrics instance1 = mergedInstanceMetrics.createNewInstanceMetrics("m1");
-    InstanceMetrics instance2 = mergedInstanceMetrics.createNewInstanceMetrics("m2");
-
-    assertEquals(1, instance1.getMetrics().size());
-    assertEquals(1, instance2.getMetrics().size());
-
-    assertNull(instance1.getMetrics().get("m2"));
-    assertNull(instance2.getMetrics().get("m1"));
-
-    assertNotNull(instance1.getMetrics().get("m1"));
-    assertNotNull(instance2.getMetrics().get("m2"));
-    assertEquals(2, instance1.getMetrics().get("m1").size());
-    assertEquals(3, instance2.getMetrics().get("m2").size());
-    assertEquals(123, instance1.getMetrics().get("m1").get(Instant.ofEpochSecond(123)).intValue());
-    assertEquals(432, instance2.getMetrics().get("m2").get(Instant.ofEpochSecond(432)).intValue());
+    assertEquals(1, metric.getValues().size());
+    assertEquals(13.0, metric.getValues().values().iterator().next(), 0.0);
+    Instant instant = metric.getValues().keySet().iterator().next();
+    assertTrue(instant.toEpochMilli() >= before.toEpochMilli());
+    assertTrue(instant.toEpochMilli() <= after.toEpochMilli());
   }
 
-  @Test(expected = DuplicateMetricException.class)
-  public void failsOnDuplicateMetricMerge() {
-    InstanceMetrics instanceMetrics1 = new InstanceMetrics("i1");
-    instanceMetrics1.addMetric("m1", new HashMap<>());
-    InstanceMetrics instanceMetrics2 = new InstanceMetrics("i1");
-    instanceMetrics2.addMetric("m1", new HashMap<>());
-    InstanceMetrics.merge(instanceMetrics1, instanceMetrics2);
+  @Test
+  public void testAddValues() {
+    HashMap<Instant, Double> values = new HashMap<>();
+
+    InstanceMetrics metric = new InstanceMetrics("comp", "inst", "met");
+    assertEquals(0, metric.getValues().size());
+
+    metric.addValues(values);
+    assertEquals(0, metric.getValues().size());
+
+    values.put(Instant.now(), 10.0);
+    values.put(Instant.now().plusSeconds(10), 20.0);
+    values.put(Instant.now().plusSeconds(20), 30.0);
+
+    metric.addValues(values);
+    assertEquals(3, metric.getValues().size());
+    assertEquals(60, metric.getValueSum(), 0.0);
+
+    assertTrue(metric.hasValueAboveLimit(20));
+    assertFalse(metric.hasValueAboveLimit(40));
   }
 }
