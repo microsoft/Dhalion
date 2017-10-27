@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -52,7 +53,7 @@ public class ComponentMetrics {
   }
 
   /**
-   * @param componentName
+   * @param componentName component name to be used for filtering metrics
    * @return a new {@link ComponentMetrics} instance containing all {@link InstanceMetrics}s belonging to {@code
    * componentName} only.
    */
@@ -67,7 +68,7 @@ public class ComponentMetrics {
   }
 
   /**
-   * @param metricName
+   * @param metricName metric name to be used for filtering metrics
    * @return a new {@link ComponentMetrics} instance containing all {@link InstanceMetrics}s belonging to {@code
    * metricName} only.
    */
@@ -82,21 +83,39 @@ public class ComponentMetrics {
   }
 
   /**
-   * @param componentName
-   * @param instanceName
+   * @param componentName component name to be used for filtering metrics
+   * @param instanceName  instance name to be used for filtering metrics
    * @return a new {@link ComponentMetrics} instance containing all {@link InstanceMetrics}s belonging to {@code
    * componentName/instanceName} only.
    */
   public ComponentMetrics filterByInstance(String componentName, String instanceName) {
     final ComponentMetrics result = new ComponentMetrics();
     Collection<InstanceMetrics> metrics = filterByComponent(componentName).getMetrics();
-    if (metrics != null) {
-      metrics.stream()
-          .filter(metric -> metric.getInstanceName().equals(instanceName))
-          .forEach(result::add);
-    }
+    metrics.stream()
+        .filter(metric -> metric.getInstanceName().equals(instanceName))
+        .forEach(result::add);
 
     return result;
+  }
+
+  /**
+   * @param componentName name of the component
+   * @param instanceName  name of the instance
+   * @param metricName    name of the metric
+   * @return a unique {@link InstanceMetrics} if exists
+   */
+  public Optional<InstanceMetrics> getMetrics(String componentName, String instanceName, String metricName) {
+    Collection<InstanceMetrics> metrics =
+        filterByInstance(componentName, instanceName).filterByMetric(metricName).getMetrics();
+    if (metrics.size() > 1) {
+      throw new DuplicateMetricException(componentName, instanceName, metricName);
+    }
+
+    if (metrics.isEmpty()) {
+      return Optional.empty();
+    }
+
+    return Optional.of(metrics.iterator().next());
   }
 
   /**
@@ -106,6 +125,21 @@ public class ComponentMetrics {
     final Collection<InstanceMetrics> result = new ArrayList<>();
     allMetric.forEach(wrapper -> result.add(wrapper.metric));
     return result;
+  }
+
+  /**
+   * @return returns the only {@link InstanceMetrics} managed by this {@link ComponentMetrics}
+   */
+  public Optional<InstanceMetrics> getLoneInstanceMetrics() {
+    if (allMetric.size() > 1) {
+      throw new IllegalArgumentException("More than 1 metrics available, count = " + allMetric.size());
+    }
+
+    if (allMetric.isEmpty()) {
+      return Optional.empty();
+    }
+
+    return Optional.of(allMetric.iterator().next().metric);
   }
 
   /**
@@ -147,7 +181,7 @@ public class ComponentMetrics {
   private class InstanceMetricWrapper {
     private final InstanceMetrics metric;
 
-    public InstanceMetricWrapper(InstanceMetrics metric) {
+    InstanceMetricWrapper(InstanceMetrics metric) {
       this.metric = metric;
     }
 
