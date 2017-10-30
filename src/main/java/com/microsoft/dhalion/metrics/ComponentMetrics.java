@@ -160,6 +160,25 @@ public class ComponentMetrics {
     return result;
   }
 
+  public MetricsStats computeStats(String metric) {
+    double metricMax = 0;
+    double metricMin = Double.MAX_VALUE;
+    double sum = 0;
+    double metricAvg = 0;
+    Collection<InstanceMetrics> metrics = filterByMetric(metric).getMetrics();
+    for (InstanceMetrics instance : metrics) {
+      Double metricValue = instance.getValueSum();
+      if (metricValue == null) {
+        continue;
+      }
+      metricMax = metricMax < metricValue ? metricValue : metricMax;
+      metricMin = metricMin > metricValue ? metricValue : metricMin;
+      sum += metricValue;
+    }
+    metricAvg = sum / metrics.size();
+    return new MetricsStats(metric, metricMin, metricMax, metricAvg);
+  }
+
   /**
    * Merges {@link InstanceMetrics}s in two different {@link ComponentMetrics}. Input objects are not modified. This
    * is a utility method two merge two different metrics. The method will fail if both the input objects contain
