@@ -13,16 +13,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * An {@link InstanceMetric} holds metric information of a specific metric for instance of a component.
+ * An {@link InstanceMetrics} holds metric information of a specific metric for instance of a component.
  */
-public class InstanceMetric extends InstanceInfo {
+public class InstanceMetrics extends InstanceInfo {
   // id of the component
   private final String metricName;
 
   //metric values at different times
   private Map<Instant, Double> metrics = new HashMap<>();
 
-  public InstanceMetric(String componentName, String instanceName, String metricName) {
+  public InstanceMetrics(String componentName, String instanceName, String metricName) {
     super(componentName, instanceName);
     this.metricName = metricName;
   }
@@ -33,7 +33,7 @@ public class InstanceMetric extends InstanceInfo {
 
   /**
    * Adds a metric and its value for the instance. This is a shorthand method for
-   * {@link InstanceMetric#addValues} method. The assumption is that the metric will have only one
+   * {@link InstanceMetrics#addValues} method. The assumption is that the metric will have only one
    * value.
    *
    * @param value metric value
@@ -60,7 +60,7 @@ public class InstanceMetric extends InstanceInfo {
 
   @Override
   public String toString() {
-    return "InstanceMetric{" +
+    return "InstanceMetrics{" +
         "metricName='" + metricName + '\'' +
         ", metrics=" + metrics +
         ", componentName='" + componentName + '\'' +

@@ -18,14 +18,14 @@ import static org.junit.Assert.assertTrue;
 public class ComponentMetricsTest {
   @Test
   public void testFilters() {
-    InstanceMetric c1i2m1 = new InstanceMetric("c1", "i2", "m1");
-    InstanceMetric c2i3m1 = new InstanceMetric("c2", "i3", "m1");
-    InstanceMetric c2i4m3 = new InstanceMetric("c2", "i4", "m3");
+    InstanceMetrics c1i2m1 = new InstanceMetrics("c1", "i2", "m1");
+    InstanceMetrics c2i3m1 = new InstanceMetrics("c2", "i3", "m1");
+    InstanceMetrics c2i4m3 = new InstanceMetrics("c2", "i4", "m3");
 
     ComponentMetrics metrics = new ComponentMetrics();
-    metrics.add(new InstanceMetric("c1", "i1", "m1"));
-    metrics.add(new InstanceMetric("c1", "i1", "m2"));
-    metrics.add(new InstanceMetric("c1", "i2", "m3"));
+    metrics.add(new InstanceMetrics("c1", "i1", "m1"));
+    metrics.add(new InstanceMetrics("c1", "i1", "m2"));
+    metrics.add(new InstanceMetrics("c1", "i2", "m3"));
     metrics.add(c1i2m1);
     metrics.add(c2i3m1);
     metrics.add(c2i4m3);
@@ -56,10 +56,10 @@ public class ComponentMetricsTest {
   @Test
   public void testGetMetricNames() {
     ComponentMetrics metrics = new ComponentMetrics();
-    metrics.add(new InstanceMetric("c1", "i1", "m1"));
-    metrics.add(new InstanceMetric("c1", "i2", "m2"));
-    metrics.add(new InstanceMetric("c2", "i3", "m1"));
-    metrics.add(new InstanceMetric("c2", "i4", "m3"));
+    metrics.add(new InstanceMetrics("c1", "i1", "m1"));
+    metrics.add(new InstanceMetrics("c1", "i2", "m2"));
+    metrics.add(new InstanceMetrics("c2", "i3", "m1"));
+    metrics.add(new InstanceMetrics("c2", "i4", "m3"));
     assertEquals(4, metrics.getMetrics().size());
 
     Collection<String> names = metrics.getMetricNames();
@@ -72,10 +72,10 @@ public class ComponentMetricsTest {
   @Test
   public void testGetCompNames() {
     ComponentMetrics metrics = new ComponentMetrics();
-    metrics.add(new InstanceMetric("c1", "i1", "m1"));
-    metrics.add(new InstanceMetric("c1", "i2", "m2"));
-    metrics.add(new InstanceMetric("c2", "i3", "m1"));
-    metrics.add(new InstanceMetric("c2", "i4", "m3"));
+    metrics.add(new InstanceMetrics("c1", "i1", "m1"));
+    metrics.add(new InstanceMetrics("c1", "i2", "m2"));
+    metrics.add(new InstanceMetrics("c2", "i3", "m1"));
+    metrics.add(new InstanceMetrics("c2", "i4", "m3"));
     assertEquals(4, metrics.getMetrics().size());
 
     Collection<String> names = metrics.getComponentNames();
@@ -87,25 +87,25 @@ public class ComponentMetricsTest {
   @Test(expected = DuplicateMetricException.class)
   public void testDuplicateErrors() {
     ComponentMetrics metrics = new ComponentMetrics();
-    metrics.add(new InstanceMetric("c1", "i1", "m1"));
-    metrics.add(new InstanceMetric("c1", "i1", "m1"));
+    metrics.add(new InstanceMetrics("c1", "i1", "m1"));
+    metrics.add(new InstanceMetrics("c1", "i1", "m1"));
   }
 
   @Test
   public void testMerge() {
     ComponentMetrics componentMetrics1 = new ComponentMetrics();
-    componentMetrics1.add(new InstanceMetric("c1", "i1", "m1"));
-    componentMetrics1.add(new InstanceMetric("c1", "i1", "m2"));
-    componentMetrics1.add(new InstanceMetric("c1", "i2", "m2"));
+    componentMetrics1.add(new InstanceMetrics("c1", "i1", "m1"));
+    componentMetrics1.add(new InstanceMetrics("c1", "i1", "m2"));
+    componentMetrics1.add(new InstanceMetrics("c1", "i2", "m2"));
     assertEquals(1, componentMetrics1.getComponentNames().size());
     assertEquals(2, componentMetrics1.getMetricNames().size());
     assertEquals(3, componentMetrics1.filterByComponent("c1").getMetrics().size());
     assertEquals(1, componentMetrics1.filterByMetric("m1").getMetrics().size());
 
     ComponentMetrics componentMetrics2 = new ComponentMetrics();
-    componentMetrics2.add(new InstanceMetric("c1", "i1", "m3"));
-    componentMetrics2.add(new InstanceMetric("c2", "i3", "m2"));
-    componentMetrics2.add(new InstanceMetric("c3", "i4", "m2"));
+    componentMetrics2.add(new InstanceMetrics("c1", "i1", "m3"));
+    componentMetrics2.add(new InstanceMetrics("c2", "i3", "m2"));
+    componentMetrics2.add(new InstanceMetrics("c3", "i4", "m2"));
     assertEquals(3, componentMetrics2.getComponentNames().size());
     assertEquals(2, componentMetrics2.getMetricNames().size());
     assertEquals(1, componentMetrics2.filterByComponent("c1").getMetrics().size());

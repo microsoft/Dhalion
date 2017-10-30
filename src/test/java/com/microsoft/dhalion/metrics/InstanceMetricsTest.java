@@ -16,10 +16,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class InstanceMetricTest {
+public class InstanceMetricsTest {
   @Test
   public void testConstruction() {
-    InstanceMetric metric = new InstanceMetric("comp", "inst", "met");
+    InstanceMetrics metric = new InstanceMetrics("comp", "inst", "met");
     assertEquals("comp", metric.getComponentName());
     assertEquals("inst", metric.getInstanceName());
     assertEquals("met", metric.getMetricName());
@@ -27,7 +27,7 @@ public class InstanceMetricTest {
 
   @Test
   public void testAddValue() {
-    InstanceMetric metric = new InstanceMetric("comp", "inst", "met");
+    InstanceMetrics metric = new InstanceMetrics("comp", "inst", "met");
     assertEquals(0, metric.getValues().size());
     Instant before = Instant.now();
     metric.addValue(13.0);
@@ -44,7 +44,7 @@ public class InstanceMetricTest {
   public void testAddValues() {
     HashMap<Instant, Double> values = new HashMap<>();
 
-    InstanceMetric metric = new InstanceMetric("comp", "inst", "met");
+    InstanceMetrics metric = new InstanceMetrics("comp", "inst", "met");
     assertEquals(0, metric.getValues().size());
 
     metric.addValues(values);
