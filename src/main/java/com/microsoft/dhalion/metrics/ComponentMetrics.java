@@ -106,6 +106,21 @@ public class ComponentMetrics {
   }
 
   /**
+   * @param instanceName instance name to be used for filtering metrics
+   * @return a new {@link ComponentMetrics} instance containing all {@link InstanceMetrics}s belonging to {@code
+   * componentName/instanceName} only.
+   */
+  public ComponentMetrics filterByInstance(String instanceName) {
+    final ComponentMetrics result = new ComponentMetrics();
+    allMetric.stream()
+        .map(wrapper -> wrapper.metric)
+        .filter(metric -> metric.getInstanceName().equals(instanceName))
+        .forEach(result::add);
+
+    return result;
+  }
+
+  /**
    * @param componentName name of the component
    * @param instanceName  name of the instance
    * @param metricName    name of the metric
@@ -132,6 +147,20 @@ public class ComponentMetrics {
     final Collection<InstanceMetrics> result = new ArrayList<>();
     allMetric.forEach(wrapper -> result.add(wrapper.metric));
     return result;
+  }
+
+  /**
+   * @return count of metrics
+   */
+  public int size() {
+    return allMetric.size();
+  }
+
+  /**
+   * @return true if no {@link InstanceMetrics} are present
+   */
+  public boolean isEmpty() {
+    return size() == 0;
   }
 
   /**
@@ -165,6 +194,32 @@ public class ComponentMetrics {
     final Collection<String> result = new ArrayList<>();
     result.addAll(componentDim.keySet());
     return result;
+  }
+
+  /**
+   * @return count of components
+   */
+  public int getComponentCount() {
+    return componentDim.size();
+  }
+
+  public MetricsStats computeStats(String metric) {
+    double metricMax = 0;
+    double metricMin = Double.MAX_VALUE;
+    double sum = 0;
+    double metricAvg = 0;
+    Collection<InstanceMetrics> metrics = filterByMetric(metric).getMetrics();
+    for (InstanceMetrics instance : metrics) {
+      Double metricValue = instance.getValueSum();
+      if (metricValue == null) {
+        continue;
+      }
+      metricMax = metricMax < metricValue ? metricValue : metricMax;
+      metricMin = metricMin > metricValue ? metricValue : metricMin;
+      sum += metricValue;
+    }
+    metricAvg = sum / metrics.size();
+    return new MetricsStats(metric, metricMin, metricMax, metricAvg);
   }
 
   /**
