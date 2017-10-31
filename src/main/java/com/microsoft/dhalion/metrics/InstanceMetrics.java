@@ -42,6 +42,10 @@ public class InstanceMetrics extends InstanceInfo {
     metrics.put(Instant.now(), value);
   }
 
+  public void addValue(Instant time, double value) {
+    metrics.put(time, value);
+  }
+
   public Map<Instant, Double> getValues() {
     return metrics;
   }

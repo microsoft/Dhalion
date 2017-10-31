@@ -8,6 +8,7 @@ package com.microsoft.dhalion.metrics;
 
 import com.microsoft.dhalion.common.DuplicateMetricException;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -49,6 +50,12 @@ public class ComponentMetrics {
   public void addMetric(String component, String instance, String metricName, double value) {
     InstanceMetrics metric = new InstanceMetrics(component, instance, metricName);
     metric.addValue(value);
+    add(metric);
+  }
+
+  public void addMetric(String component, String instance, String metricName, Instant time, double value) {
+    InstanceMetrics metric = new InstanceMetrics(component, instance, metricName);
+    metric.addValue(time, value);
     add(metric);
   }
 
