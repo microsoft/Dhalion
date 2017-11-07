@@ -6,6 +6,7 @@
  */
 package com.microsoft.dhalion.metrics;
 
+import com.microsoft.dhalion.common.DuplicateMetricException;
 import com.microsoft.dhalion.common.InstanceInfo;
 
 import java.time.Instant;
@@ -22,12 +23,27 @@ public class InstanceMetrics extends InstanceInfo {
   //metric values at different times
   private Map<Instant, Double> metrics = new HashMap<>();
 
+  /**
+   * @param componentName name/id of a component, not null
+   * @param instanceName  name/id of a instance, not null
+   * @param metricName    name/id of a metric, not null
+   */
   public InstanceMetrics(String componentName, String instanceName, String metricName) {
     super(componentName, instanceName);
     this.metricName = metricName;
   }
 
+  /**
+   * Adds multiple instant-value pairs. The operation fails if a instant to be added already exists.
+   *
+   * @param values values to be added, not null
+   */
   public void addValues(Map<Instant, Double> values) {
+    values.entrySet().stream()
+        .filter(entry -> metrics.containsKey(entry.getKey())).findAny()
+        .ifPresent(x -> {
+          throw new DuplicateMetricException(componentName, instanceName, metricName);
+        });
     metrics.putAll(values);
   }
 
@@ -42,8 +58,44 @@ public class InstanceMetrics extends InstanceInfo {
     metrics.put(Instant.now(), value);
   }
 
+  /**
+   * Adds a instant-value pair. The operation fails if a instant to be added already exists.
+   *
+   * @param time  instant at which metric was recorded
+   * @param value value of the metric
+   */
   public void addValue(Instant time, double value) {
+    if (metrics.containsKey(time)) {
+      throw new DuplicateMetricException(componentName, instanceName, metricName);
+    }
     metrics.put(time, value);
+  }
+
+  /**
+   * Reads metric values from the other instance and adds it to this instance. The operation will fail if the instances
+   * have different metricn, component or instance name. It will also fail if both instances have a value for the
+   * same instant value.
+   *
+   * @param o other instance of {@link InstanceMetrics}, not null
+   */
+  public void merge(InstanceMetrics o) {
+    if (!metricName.equals(o.metricName)) {
+      throw new IllegalArgumentException(String.format("Metric name mismatch: %s vs %s", metricName, o.metricName));
+    }
+    if (!componentName.equals(o.componentName)) {
+      throw new IllegalArgumentException(String.format("Component name mismatch: %s vs %s", metricName, o.metricName));
+    }
+    if (!instanceName.equals(o.instanceName)) {
+      throw new IllegalArgumentException(String.format("Instance name mismatch: %s vs %s", metricName, o.metricName));
+    }
+
+    o.getValues().entrySet().stream()
+        .filter(entry -> metrics.containsKey(entry.getKey())).findAny()
+        .ifPresent(x -> {
+          throw new DuplicateMetricException(componentName, instanceName, metricName);
+        });
+
+    metrics.putAll(o.metrics);
   }
 
   public Map<Instant, Double> getValues() {

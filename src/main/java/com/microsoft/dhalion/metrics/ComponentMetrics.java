@@ -141,6 +141,15 @@ public class ComponentMetrics {
   }
 
   /**
+   * Searches for a {@link InstanceMetrics} with the same name-metric-component as the provided instance.
+   *
+   * @return a unique {@link InstanceMetrics} if exists
+   */
+  public Optional<InstanceMetrics> getMetrics(InstanceMetrics instance) {
+    return getMetrics(instance.getComponentName(), instance.getInstanceName(), instance.getMetricName());
+  }
+
+  /**
    * @return all {@link InstanceMetrics} managed by this {@link ComponentMetrics} object
    */
   public Collection<InstanceMetrics> getMetrics() {
