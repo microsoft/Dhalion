@@ -10,8 +10,8 @@ import com.microsoft.dhalion.common.DuplicateMetricException;
 import com.microsoft.dhalion.common.InstanceInfo;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * An {@link InstanceMetrics} holds metric information of a specific metric for instance of a component.
@@ -21,7 +21,7 @@ public class InstanceMetrics extends InstanceInfo {
   private final String metricName;
 
   //metric values at different times
-  private Map<Instant, Double> metrics = new HashMap<>();
+  private Map<Instant, Double> metrics = new TreeMap<>();
 
   /**
    * @param componentName name/id of a component, not null
