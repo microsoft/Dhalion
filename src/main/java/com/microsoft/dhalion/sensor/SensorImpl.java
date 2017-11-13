@@ -21,17 +21,17 @@ public abstract class SensorImpl implements ISensor {
   abstract public ComponentMetrics fetchMetrics();
 
   @Override
-  public ComponentMetrics getMetrics() {
+  public ComponentMetrics readMetrics() {
     return metrics;
   }
 
   @Override
-  public Map<String, MetricsStats> getStats() {
+  public Map<String, MetricsStats> readStats() {
     return stats;
   }
 
   @Override
-  public Optional<MetricsStats> getStats(String component) {
+  public Optional<MetricsStats> readStats(String component) {
     if (stats == null) {
       return Optional.empty();
     }

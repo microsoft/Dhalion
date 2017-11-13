@@ -104,7 +104,7 @@ public class HealthPolicyImpl implements IHealthPolicy {
       return;
     }
 
-    sensors.stream().forEach(sensor -> metricsState.addMetricsAndStats(sensor.fetchMetrics(), sensor.getStats()));
+    sensors.stream().forEach(sensor -> metricsState.addMetricsAndStats(sensor.fetchMetrics(), sensor.readStats()));
   }
 
   @Override
@@ -129,7 +129,7 @@ public class HealthPolicyImpl implements IHealthPolicy {
     }
 
     diagnosis = diagnosers.stream().map(diagnoser -> diagnoser.diagnose(symptoms))
-        .filter(diagnoses -> diagnoses != null)
+        .filter(diagnoses -> diagnoses != null).flatMap(x -> x.stream())
         .collect(Collectors.toList());
 
     return diagnosis;

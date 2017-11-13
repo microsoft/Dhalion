@@ -23,7 +23,7 @@ public class SensorImplTest {
 
     assertEquals("m", sensor.getMetricName());
     sensor.fetchMetrics();
-    ComponentMetrics componentData = sensor.getMetrics();
+    ComponentMetrics componentData = sensor.readMetrics();
 
     assertEquals(2, componentData.getComponentNames().size());
     assertEquals(2, componentData.filterByComponent("c1").getMetrics().size());

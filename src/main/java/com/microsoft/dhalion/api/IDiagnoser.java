@@ -28,7 +28,7 @@ public interface IDiagnoser {
    *
    * @return a {@link Diagnosis} instance representing a problem
    */
-  default Diagnosis diagnose(List<Symptom> symptoms) {
+  default List<Diagnosis> diagnose(List<Symptom> symptoms) {
     return null;
   }
 

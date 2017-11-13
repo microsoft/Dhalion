@@ -35,21 +35,21 @@ public interface ISensor {
   /**
    * @return returns the most recently fetched metric value for all components
    */
-  default ComponentMetrics getMetrics() {
+  default ComponentMetrics readMetrics() {
     return fetchMetrics();
   }
 
   /**
    * @return returns latest metric stats for all components as a map
    */
-  default Map<String, MetricsStats> getStats() {
+  default Map<String, MetricsStats> readStats() {
     return new HashMap<>();
   }
 
   /**
    * @return returns latest metric stats for a specific component
    */
-  default Optional<MetricsStats> getStats(String component) {
+  default Optional<MetricsStats> readStats(String component) {
     return Optional.empty();
   }
 
