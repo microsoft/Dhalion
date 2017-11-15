@@ -55,14 +55,14 @@ public class ComponentMetricsTest {
 
   @Test
   public void testGetMetricNames() {
-    ComponentMetrics metrics = new ComponentMetrics();
-    metrics.add(new InstanceMetrics("c1", "i1", "m1"));
-    metrics.add(new InstanceMetrics("c1", "i2", "m2"));
-    metrics.add(new InstanceMetrics("c2", "i3", "m1"));
-    metrics.add(new InstanceMetrics("c2", "i4", "m3"));
-    assertEquals(4, metrics.getMetrics().size());
+    ComponentMetrics componentMetrics = new ComponentMetrics();
+    componentMetrics.add(new InstanceMetrics("c1", "i1", "m1"));
+    componentMetrics.add(new InstanceMetrics("c1", "i2", "m2"));
+    componentMetrics.add(new InstanceMetrics("c2", "i3", "m1"));
+    componentMetrics.add(new InstanceMetrics("c2", "i4", "m3"));
+    assertEquals(4, componentMetrics.getMetrics().size());
 
-    Collection<String> names = metrics.getMetricNames();
+    Collection<String> names = componentMetrics.getMetricNames();
     assertEquals(3, names.size());
     assertTrue(names.contains("m1"));
     assertTrue(names.contains("m2"));
@@ -71,14 +71,14 @@ public class ComponentMetricsTest {
 
   @Test
   public void testGetCompNames() {
-    ComponentMetrics metrics = new ComponentMetrics();
-    metrics.add(new InstanceMetrics("c1", "i1", "m1"));
-    metrics.add(new InstanceMetrics("c1", "i2", "m2"));
-    metrics.add(new InstanceMetrics("c2", "i3", "m1"));
-    metrics.add(new InstanceMetrics("c2", "i4", "m3"));
-    assertEquals(4, metrics.getMetrics().size());
+    ComponentMetrics componentMetrics = new ComponentMetrics();
+    componentMetrics.add(new InstanceMetrics("c1", "i1", "m1"));
+    componentMetrics.add(new InstanceMetrics("c1", "i2", "m2"));
+    componentMetrics.add(new InstanceMetrics("c2", "i3", "m1"));
+    componentMetrics.add(new InstanceMetrics("c2", "i4", "m3"));
+    assertEquals(4, componentMetrics.getMetrics().size());
 
-    Collection<String> names = metrics.getComponentNames();
+    Collection<String> names = componentMetrics.getComponentNames();
     assertEquals(2, names.size());
     assertTrue(names.contains("c1"));
     assertTrue(names.contains("c2"));
@@ -86,9 +86,9 @@ public class ComponentMetricsTest {
 
   @Test(expected = DuplicateMetricException.class)
   public void testDuplicateErrors() {
-    ComponentMetrics metrics = new ComponentMetrics();
-    metrics.add(new InstanceMetrics("c1", "i1", "m1"));
-    metrics.add(new InstanceMetrics("c1", "i1", "m1"));
+    ComponentMetrics componentMetrics = new ComponentMetrics();
+    componentMetrics.add(new InstanceMetrics("c1", "i1", "m1"));
+    componentMetrics.add(new InstanceMetrics("c1", "i1", "m1"));
   }
 
   @Test

@@ -12,6 +12,9 @@ import com.microsoft.dhalion.common.InstanceInfo;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * An {@link InstanceMetrics} holds metric information of a specific metric for instance of a component.
@@ -98,6 +101,15 @@ public class InstanceMetrics extends InstanceInfo {
     metrics.putAll(o.metrics);
   }
 
+  public Map<Instant, Double> getMostRecentValues(int noRecentValues) {
+    Map<Instant, Double> recentValues;
+    TreeSet<Instant> sortedInstants = new TreeSet<>();
+    sortedInstants.addAll(metrics.keySet());
+    recentValues = sortedInstants.descendingSet().stream().limit(noRecentValues)
+        .collect(Collectors.toMap(Function.identity(), instant -> metrics.get(instant)));
+    return recentValues;
+  }
+
   public Map<Instant, Double> getValues() {
     return metrics;
   }
@@ -108,6 +120,10 @@ public class InstanceMetrics extends InstanceInfo {
 
   public Double getValueSum() {
     return metrics.values().stream().mapToDouble(x -> x.doubleValue()).sum();
+  }
+
+  public Double getValueSum(int noRecentValues) {
+    return getMostRecentValues(noRecentValues).values().stream().mapToDouble(x -> x.doubleValue()).sum();
   }
 
   public boolean hasValueAboveLimit(double limit) {
