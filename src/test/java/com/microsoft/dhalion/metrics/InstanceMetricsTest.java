@@ -12,6 +12,7 @@ import org.junit.Test;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -98,5 +99,39 @@ public class InstanceMetricsTest {
     Map<Instant, Double> recentValues3 = instanceMetric.getMostRecentValues(3);
     assertEquals(3, recentValues3.size());
     assertEquals(instanceMetric.getValues(), recentValues3);
+  }
+
+  @Test
+  public void testGetRecentTimestamps() {
+    HashMap<Instant, Double> values = new HashMap<>();
+
+    InstanceMetrics instanceMetric = new InstanceMetrics("comp", "inst", "met");
+    assertEquals(0, instanceMetric.getValues().size());
+
+    instanceMetric.addValues(values);
+    assertEquals(0, instanceMetric.getValues().size());
+
+    Instant t = Instant.now();
+    values.put(t, 10.0);
+    values.put(t.plusSeconds(10), 20.0);
+    values.put(t.plusSeconds(20), 30.0);
+
+    instanceMetric.addValues(values);
+    assertEquals(3, instanceMetric.getValues().size());
+    assertEquals(60, instanceMetric.getValueSum(), 0.0);
+
+
+    Set<Instant> recentTimestamps1 = instanceMetric.getMostRecentTimestamps(1);
+    assertEquals(1, recentTimestamps1.size());
+    assertTrue(recentTimestamps1.contains(t.plusSeconds(20)));
+
+    Set<Instant> recentTimestamps2 = instanceMetric.getMostRecentTimestamps(2);
+    assertEquals(2, recentTimestamps2.size());
+    assertTrue(recentTimestamps2.contains(t.plusSeconds(20)));
+    assertTrue(recentTimestamps2.contains(t.plusSeconds(10)));
+
+
+    Set<Instant>  recentTimestamps3 = instanceMetric.getMostRecentTimestamps(3);
+    assertEquals(3, recentTimestamps3.size());
   }
 }

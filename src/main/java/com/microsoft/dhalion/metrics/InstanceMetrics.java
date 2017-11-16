@@ -10,8 +10,10 @@ import com.microsoft.dhalion.common.DuplicateMetricException;
 import com.microsoft.dhalion.common.InstanceInfo;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -105,6 +107,13 @@ public class InstanceMetrics extends InstanceInfo {
     recentValues = (Map<Instant, Double>) ((TreeMap) metrics).descendingMap().keySet().stream().limit(noRecentValues)
         .collect(Collectors.toMap(Function.identity(), instant -> metrics.get(instant)));
     return recentValues;
+  }
+
+  public TreeSet<Instant> getMostRecentTimestamps(int noRecentValues) {
+    TreeSet<Instant> recentTimestamps;
+    recentTimestamps = new TreeSet((Collection) ((TreeMap) metrics).descendingMap().keySet().stream()
+                                                                   .limit(noRecentValues).collect(Collectors.toSet()));
+    return recentTimestamps;
   }
 
   public Map<Instant, Double> getValues() {
