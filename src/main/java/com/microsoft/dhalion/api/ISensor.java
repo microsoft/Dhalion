@@ -40,20 +40,6 @@ public interface ISensor {
   }
 
   /**
-   * @return returns latest metric stats for all components as a map
-   */
-  default Map<String, MetricsStats> readStats() {
-    return new HashMap<>();
-  }
-
-  /**
-   * @return returns latest metric stats for a specific component
-   */
-  default Optional<MetricsStats> readStats(String component) {
-    return Optional.empty();
-  }
-
-  /**
    * Releases all acquired resources and prepare for termination of this instance
    */
   default void close() {

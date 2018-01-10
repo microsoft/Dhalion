@@ -8,6 +8,8 @@
 package com.microsoft.dhalion.policy;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import com.microsoft.dhalion.api.IDetector;
@@ -16,11 +18,13 @@ import com.microsoft.dhalion.api.IResolver;
 import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.policy.HealthPolicyImpl.ClockTimeProvider;
 
-import com.microsoft.dhalion.state.MetricsState;
+import com.microsoft.dhalion.state.MetricsSnapshot;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anySet;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,47 +41,46 @@ public class HealthPolicyImplTest {
     policy.registerDiagnosers(diagnoser);
     policy.registerResolvers(resolver);
 
-    policy.executeDetectors();
-    policy.executeDiagnosers(new ArrayList<>());
-    policy.executeResolver(resolver, new ArrayList<>());
+    policy.executeDetectors(null);
+    policy.executeDiagnosers(null, new HashSet<>());
+    policy.executeResolver(resolver, null, new HashSet<>(), new HashSet<>());
 
-    verify(detector, times(1)).detect();
-    verify(diagnoser, times(1)).diagnose(anyList());
-    verify(resolver, times(1)).resolve(anyList());
+    verify(detector, times(1)).detect(any());
+    verify(diagnoser, times(1)).diagnose(any(), anySet());
+    verify(resolver, times(1)).resolve(any(), anySet(), anySet());
   }
 
   @Test
   public void testInitialize() {
 
-    ArrayList<ISensor> sensors = new ArrayList<>();
+    Set<ISensor> sensors = new HashSet<>();
     ISensor sensor = mock(ISensor.class);
     sensors.add(sensor);
 
-    ArrayList<IDetector> detectors = new ArrayList<>();
+    Set<IDetector> detectors = new HashSet<>();
     IDetector detector = mock(IDetector.class);
     detectors.add(detector);
 
-    ArrayList<IDiagnoser> diagnosers = new ArrayList<>();
+    Set<IDiagnoser> diagnosers = new HashSet<>();
     IDiagnoser diagnoser = mock(IDiagnoser.class);
     diagnosers.add(diagnoser);
 
-    ArrayList<IResolver> resolvers = new ArrayList<>();
+    Set<IResolver> resolvers = new HashSet<>();
     IResolver resolver = mock(IResolver.class);
     resolvers.add(resolver);
 
     HealthPolicyImpl policy = new HealthPolicyImpl();
     policy.initialize(sensors, detectors, diagnosers, resolvers);
 
-    MetricsState metricsState = new MetricsState();
-    policy.executeSensors(metricsState);
-    policy.executeDetectors();
-    policy.executeDiagnosers(new ArrayList<>());
-    policy.executeResolver(resolver, new ArrayList<>());
+    MetricsSnapshot metrics = policy.executeSensors();
+    policy.executeDetectors(metrics);
+    policy.executeDiagnosers(metrics, new HashSet<>());
+    policy.executeResolver(resolver, metrics, new HashSet<>(), new HashSet<>());
 
     verify(sensor, times(1)).fetchMetrics();
-    verify(detector, times(1)).detect();
-    verify(diagnoser, times(1)).diagnose(anyList());
-    verify(resolver, times(1)).resolve(anyList());
+    verify(detector, times(1)).detect(any());
+    verify(diagnoser, times(1)).diagnose(any(), anySet());
+    verify(resolver, times(1)).resolve(any(), anySet(), anySet());
   }
 
   @Test
@@ -93,7 +96,7 @@ public class HealthPolicyImplTest {
     long delay = policy.getDelay(TimeUnit.MILLISECONDS);
     Assert.assertEquals(0, delay);
 
-    policy.executeResolver(null, null);
+    policy.executeResolver(null, null, null, null);
     delay = policy.getDelay(TimeUnit.MILLISECONDS);
     Assert.assertEquals(100, delay);
     delay = policy.getDelay(TimeUnit.MILLISECONDS);
@@ -107,7 +110,7 @@ public class HealthPolicyImplTest {
 
     testClock.timestamp += 10;
     // new cycle should  reset one time delay
-    policy.executeResolver(null, null);
+    policy.executeResolver(null, null, null, null);
     delay = policy.getDelay(TimeUnit.MILLISECONDS);
     Assert.assertEquals(100, delay);
   }

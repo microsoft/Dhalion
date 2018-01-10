@@ -7,19 +7,20 @@
 
 package com.microsoft.dhalion.policy;
 
+import com.microsoft.dhalion.api.IHealthPolicy;
+import com.microsoft.dhalion.api.IResolver;
+import com.microsoft.dhalion.detector.Symptom;
+import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.state.MetricsSnapshot;
+
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-
-import com.microsoft.dhalion.api.IHealthPolicy;
-import com.microsoft.dhalion.api.IResolver;
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.diagnoser.Diagnosis;
-import com.microsoft.dhalion.state.MetricsState;
 
 public class PoliciesExecutor {
   private static final Logger LOG = Logger.getLogger(PoliciesExecutor.class.getName());
@@ -31,7 +32,6 @@ public class PoliciesExecutor {
   }
 
   public ScheduledFuture<?> start() {
-    MetricsState metricsState = new MetricsState();
 
     ScheduledFuture<?> future = executor.scheduleWithFixedDelay(() -> {
       // schedule the next execution cycle
@@ -52,14 +52,14 @@ public class PoliciesExecutor {
         }
 
         LOG.info("Executing Policy: " + policy.getClass().getSimpleName());
-        policy.executeSensors(metricsState);
-        List<Symptom> symptoms = policy.executeDetectors();
-        List<Diagnosis> diagnosis = policy.executeDiagnosers(symptoms);
-        IResolver resolver = policy.selectResolver(diagnosis);
-        policy.executeResolver(resolver, diagnosis);
+        MetricsSnapshot metrics = policy.executeSensors();
+        Set<Symptom> symptoms = policy.executeDetectors(metrics);
+        Set<Diagnosis> diagnoses = policy.executeDiagnosers(metrics, symptoms);
+        IResolver resolver = policy.selectResolver(metrics, symptoms, diagnoses);
+        policy.executeResolver(resolver, metrics, symptoms, diagnoses);
 
         // The policy execution is complete. Retain the stats, flush the metrics
-        metricsState.clearMetrics();
+        metrics.clearMetrics();
       }
     }, 1, 1, TimeUnit.MILLISECONDS);
 

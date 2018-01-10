@@ -7,9 +7,12 @@
 package com.microsoft.dhalion.api;
 
 import java.util.List;
+import java.util.Set;
 
+import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.resolver.Action;
+import com.microsoft.dhalion.state.MetricsSnapshot;
 
 /**
  * A {@link IResolver}'s major goal is to resolve the anomaly identified by a {@link Diagnosis}.
@@ -30,7 +33,7 @@ public interface IResolver {
    * @param diagnosis a list of anomalies detected by a {@link IDiagnoser}s
    * @return all the actions executed by this resolver to mitigate the problems
    */
-  default List<Action> resolve(List<Diagnosis> diagnosis){
+  default List<Action> resolve(MetricsSnapshot metrics, Set<Symptom> symptoms, Set<Diagnosis> diagnosis){
     return null;
   }
 

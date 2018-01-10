@@ -6,47 +6,52 @@
  */
 package com.microsoft.dhalion.diagnoser;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 
+import com.microsoft.dhalion.common.InstanceInfo;
 import com.microsoft.dhalion.detector.Symptom;
 
 /**
  * A {@link Diagnosis} instance is a representation of a possible causes of one or more
- * {@link Symptom}s. A {@link Symptom} could result in creation of one or more {@link Diagnosis}.
- * Similarly, correlated {@link Symptom}s can result in generation of a {@link Diagnosis} instance.
+ * {@link Symptom}s.
  */
 public class Diagnosis {
-  private String name;
-  private Map<String, Symptom> symptoms;
+  private String diagnosisType;
+  private String diagnosisName;
+  private Set<String> symptomNames;
+  private Set<InstanceInfo> addresses;
 
-  public Diagnosis(String diagnosisName) {
-    this(diagnosisName, new HashMap<>());
+  public Diagnosis(String diagnosisType, String diagnosisName, Set<String> symptomNames,
+                   Set<InstanceInfo> addresses) {
+    this.diagnosisType = diagnosisType;
+    this.diagnosisName = diagnosisName;
+    this.symptomNames = symptomNames;
+    this.addresses = addresses;
   }
 
-  public Diagnosis(String diagnosisName, Symptom symptom) {
-    this(diagnosisName, new HashMap<>());
-    symptoms.put(symptom.getSymptomName(), symptom);
+  public String getDiagnosisType() {
+    return diagnosisType;
   }
 
-  public Diagnosis(String diagnosisName, Map<String, Symptom> correlatedSymptoms) {
-    this.name = diagnosisName;
-    this.symptoms = correlatedSymptoms;
+  public String getDiagnosisName() {
+    return diagnosisName;
   }
 
-  public String getName() {
-    return name;
+  public Set<String> getSymptomNames() {
+    return symptomNames;
   }
 
-  public Map<String, Symptom> getSymptoms() {
-    return symptoms;
+  public Set<InstanceInfo> getAddresses() {
+    return addresses;
   }
 
   @Override
   public String toString() {
     return "Diagnosis{" +
-        "name='" + name + '\'' +
-        ", symptoms=" + symptoms +
+        "diagnosisType='" + diagnosisType + '\'' +
+        ", diagnosisName='" + diagnosisName + '\'' +
+        ", symptomNames=" + symptomNames +
+        ", addresses=" + addresses +
         '}';
   }
 }

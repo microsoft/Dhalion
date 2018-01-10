@@ -7,8 +7,10 @@
 package com.microsoft.dhalion.api;
 
 import java.util.List;
+import java.util.Set;
 
 import com.microsoft.dhalion.detector.Symptom;
+import com.microsoft.dhalion.state.MetricsSnapshot;
 
 public interface IDetector {
   /**
@@ -22,7 +24,7 @@ public interface IDetector {
    *
    * @return a list of issues detected by the symptom detectors
    */
-  default List<Symptom> detect() {
+  default Set<Symptom> detect(MetricsSnapshot snapshot) {
     return null;
   }
 

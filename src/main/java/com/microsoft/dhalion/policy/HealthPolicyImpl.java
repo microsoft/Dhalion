@@ -16,19 +16,21 @@ import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.resolver.Action;
-import com.microsoft.dhalion.state.MetricsState;
+import com.microsoft.dhalion.state.MetricsSnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class HealthPolicyImpl implements IHealthPolicy {
-  protected List<ISensor> sensors = new ArrayList<>();
-  protected List<IDetector> detectors = new ArrayList<>();
-  protected List<IDiagnoser> diagnosers = new ArrayList<>();
-  protected List<IResolver> resolvers = new ArrayList<>();
+  protected Set<ISensor> sensors = new HashSet<>();
+  protected Set<IDetector> detectors = new HashSet<>();
+  protected Set<IDiagnoser> diagnosers = new HashSet<>();
+  protected Set<IResolver> resolvers = new HashSet<>();
 
   protected long intervalMillis = TimeUnit.MINUTES.toMillis(1);
   @VisibleForTesting
@@ -37,8 +39,8 @@ public class HealthPolicyImpl implements IHealthPolicy {
   private long oneTimeDelayTimestamp = 0;
 
   @Override
-  public void initialize(List<ISensor> sensors, List<IDetector> detectors, List<IDiagnoser>
-      diagnosers, List<IResolver> resolvers) {
+  public void initialize(Set<ISensor> sensors, Set<IDetector> detectors, Set<IDiagnoser> diagnosers,
+                         Set<IResolver> resolvers) {
     this.sensors = sensors;
     this.detectors = detectors;
     this.diagnosers = diagnosers;
@@ -99,44 +101,45 @@ public class HealthPolicyImpl implements IHealthPolicy {
   }
 
   @Override
-  public void executeSensors(MetricsState metricsState) {
+  public MetricsSnapshot executeSensors() {
+    MetricsSnapshot metrics = new MetricsSnapshot();
     if (sensors == null) {
-      return;
+      return null;
     }
-
-    sensors.stream().forEach(sensor -> metricsState.addMetricsAndStats(sensor.fetchMetrics(), sensor.readStats()));
+    sensors.stream().forEach(sensor -> metrics.addMetrics(sensor.fetchMetrics()));
+    return metrics;
   }
 
   @Override
-  public List<Symptom> executeDetectors() {
-    List<Symptom> symptoms = new ArrayList<>();
+  public Set<Symptom> executeDetectors(MetricsSnapshot metrics) {
+    Set<Symptom> symptoms = new HashSet<>();
     if (detectors == null) {
       return symptoms;
     }
 
-    symptoms = detectors.stream().map(detector -> detector.detect())
+    symptoms = detectors.stream().map(detector -> detector.detect(metrics))
         .filter(detectedSymptoms -> detectedSymptoms != null)
-        .flatMap(List::stream).collect(Collectors.toList());
+        .flatMap(Set::stream).collect(Collectors.toSet());
 
     return symptoms;
   }
 
   @Override
-  public List<Diagnosis> executeDiagnosers(List<Symptom> symptoms) {
-    List<Diagnosis> diagnosis = new ArrayList<>();
+  public Set<Diagnosis> executeDiagnosers(MetricsSnapshot metrics, Set<Symptom> symptoms) {
+    Set<Diagnosis> diagnosis = new HashSet<>();
     if (diagnosers == null) {
       return diagnosis;
     }
 
-    diagnosis = diagnosers.stream().map(diagnoser -> diagnoser.diagnose(symptoms))
+    diagnosis = diagnosers.stream().map(diagnoser -> diagnoser.diagnose(metrics, symptoms))
         .filter(diagnoses -> diagnoses != null).flatMap(x -> x.stream())
-        .collect(Collectors.toList());
+        .collect(Collectors.toSet());
 
     return diagnosis;
   }
 
   @Override
-  public IResolver selectResolver(List<Diagnosis> diagnosis) {
+  public IResolver selectResolver(MetricsSnapshot metrics, Set<Symptom> symptoms, Set<Diagnosis> diagnosis) {
     if (resolvers == null) {
       return null;
     }
@@ -145,7 +148,8 @@ public class HealthPolicyImpl implements IHealthPolicy {
   }
 
   @Override
-  public List<Action> executeResolver(IResolver resolver, List<Diagnosis> diagnosis) {
+  public List<Action> executeResolver(IResolver resolver, MetricsSnapshot metrics, Set<Symptom> symptoms,
+                                      Set<Diagnosis> diagnosis) {
     if (oneTimeDelayTimestamp > 0 && oneTimeDelayTimestamp <= clock.currentTimeMillis()) {
       // reset one time delay timestamp
       oneTimeDelayTimestamp = 0;
@@ -153,7 +157,7 @@ public class HealthPolicyImpl implements IHealthPolicy {
 
     List<Action> actions = new ArrayList<>();
     if (resolver != null) {
-      actions = resolver.resolve(diagnosis);
+      actions = resolver.resolve(metrics, symptoms, diagnosis);
     }
 
     lastExecutionTimeMills = clock.currentTimeMillis();
@@ -193,17 +197,17 @@ public class HealthPolicyImpl implements IHealthPolicy {
   }
 
   @Override
-  public List<IDetector> getDetectors() {
+  public Set<IDetector> getDetectors() {
     return this.detectors;
   }
 
   @Override
-  public List<IDiagnoser> getDiagnosers() {
+  public Set<IDiagnoser> getDiagnosers() {
     return this.diagnosers;
   }
 
   @Override
-  public List<IResolver> getResolvers() {
+  public Set<IResolver> getResolvers() {
     return this.resolvers;
   }
 

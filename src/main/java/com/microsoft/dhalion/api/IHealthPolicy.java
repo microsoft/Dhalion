@@ -7,13 +7,14 @@
 
 package com.microsoft.dhalion.api;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.resolver.Action;
-import com.microsoft.dhalion.state.MetricsState;
+import com.microsoft.dhalion.state.MetricsSnapshot;
+
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A {@link IHealthPolicy} strives to keep a distributed application healthy. It uses one or more of
@@ -24,36 +25,37 @@ public interface IHealthPolicy {
   /**
    * Initializes this instance and should be invoked once by the system before its use.
    */
-  void initialize(List<ISensor> sensors, List<IDetector> detectors, List<IDiagnoser> diagnosers,
-                  List<IResolver> resolvers);
+  void initialize(Set<ISensor> sensors, Set<IDetector> detectors, Set<IDiagnoser> diagnosers,
+                  Set<IResolver> resolvers);
 
 
   /**
    * Invoked periodically, this method executes one or more {@link ISensor}s.
    */
-  void executeSensors(MetricsState metricsState);
+  MetricsSnapshot executeSensors();
 
   /**
    * Typically invoked after {@link ISensor}s this method executes one or more {@link IDetector}s.
    */
-  List<Symptom> executeDetectors();
+  Set<Symptom> executeDetectors(MetricsSnapshot metrics);
 
   /**
    * Typically invoked after {@link IDetector}s, this method executes one or more
    * {@link IDiagnoser}s.
    */
-  List<Diagnosis> executeDiagnosers(List<Symptom> symptoms);
+  Set<Diagnosis> executeDiagnosers(MetricsSnapshot metrics, Set<Symptom> symptoms);
 
   /**
    * Selects the most suitable {@link IResolver} based on the set of {@link Diagnosis} objects.
    */
-  IResolver selectResolver(List<Diagnosis> diagnosis);
+  IResolver selectResolver(MetricsSnapshot metrics, Set<Symptom> symptoms, Set<Diagnosis> diagnosis);
 
   /**
    * Typically invoked after {@link IDiagnoser}s, this method executes one or more {@link IResolver}
    * to fix any identified issues.
    */
-  List<Action> executeResolver(IResolver resolver, List<Diagnosis> diagnosis);
+  List<Action> executeResolver(IResolver resolver, MetricsSnapshot metrics, Set<Symptom> symptoms,
+                               Set<Diagnosis> diagnosis);
 
   /**
    * @param unit the desired unit of time
@@ -68,9 +70,9 @@ public interface IHealthPolicy {
   default void close() {
   }
 
-  List<IDetector> getDetectors();
+  Set<IDetector> getDetectors();
 
-  List<IDiagnoser> getDiagnosers();
+  Set<IDiagnoser> getDiagnosers();
 
-  List<IResolver> getResolvers();
+  Set<IResolver> getResolvers();
 }

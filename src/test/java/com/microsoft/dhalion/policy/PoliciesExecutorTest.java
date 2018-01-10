@@ -14,7 +14,9 @@ import org.mockito.InOrder;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Matchers.any;
@@ -34,35 +36,35 @@ public class PoliciesExecutorTest {
     PoliciesExecutor executor = new PoliciesExecutor(policies);
     executor.start();
 
-    verify(policy1, timeout(1000l).atLeast(5)).executeResolver(any(), anyList());
-    verify(policy2, timeout(1000l).atLeast(2)).executeResolver(any(), anyList());
+    verify(policy1, timeout(1000l).atLeast(5)).executeResolver(any(), any(), anySet(), anySet());
+    verify(policy2, timeout(1000l).atLeast(2)).executeResolver(any(), any(), anySet(), anySet());
     executor.destroy();
   }
 
   @Test
   public void verifyPolicyExecutionOrder() throws Exception {
-    List symptoms = new ArrayList<>();
-    List diagnosis = new ArrayList<>();
+    Set symptoms = new HashSet<>();
+    Set diagnosis = new HashSet<>();
     IResolver resolver = mock(IResolver.class);
     List actions = new ArrayList<>();
 
     IHealthPolicy mockPolicy = mock(IHealthPolicy.class);
-    when(mockPolicy.executeDetectors()).thenReturn(symptoms);
-    when(mockPolicy.executeDiagnosers(symptoms)).thenReturn(diagnosis);
-    when(mockPolicy.selectResolver(diagnosis)).thenReturn(resolver);
-    when(mockPolicy.executeResolver(resolver, diagnosis)).thenReturn(actions);
+    when(mockPolicy.executeDetectors(null)).thenReturn(symptoms);
+    when(mockPolicy.executeDiagnosers(null, symptoms)).thenReturn(diagnosis);
+    when(mockPolicy.selectResolver(null, symptoms,diagnosis)).thenReturn(resolver);
+    when(mockPolicy.executeResolver(resolver, null, symptoms, diagnosis)).thenReturn(actions);
 
     List<IHealthPolicy> policies = new ArrayList<>();
     policies.add(mockPolicy);
     PoliciesExecutor executor = new PoliciesExecutor(policies);
     executor.start();
 
-    verify(mockPolicy, timeout(50l).atLeastOnce()).executeResolver(resolver, diagnosis);
+    verify(mockPolicy, timeout(50l).atLeastOnce()).executeResolver(resolver, null , symptoms, diagnosis);
     InOrder order = Mockito.inOrder(mockPolicy);
-    order.verify(mockPolicy).executeDetectors();
-    order.verify(mockPolicy).executeDiagnosers(symptoms);
-    order.verify(mockPolicy).selectResolver(diagnosis);
-    order.verify(mockPolicy).executeResolver(resolver, diagnosis);
+    order.verify(mockPolicy).executeDetectors(null);
+    order.verify(mockPolicy).executeDiagnosers(null, symptoms);
+    order.verify(mockPolicy).selectResolver(null, symptoms, diagnosis);
+    order.verify(mockPolicy).executeResolver(resolver, null, symptoms, diagnosis);
 
     executor.destroy();
   }

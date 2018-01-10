@@ -8,9 +8,11 @@ package com.microsoft.dhalion.api;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.state.MetricsSnapshot;
 
 /**
  * A {@link IDiagnoser} evaluates one or more {@link Symptom}s and produces a {@link Diagnosis}, if
@@ -28,7 +30,7 @@ public interface IDiagnoser {
    *
    * @return a {@link Diagnosis} instance representing a problem
    */
-  default List<Diagnosis> diagnose(List<Symptom> symptoms) {
+  default Set<Diagnosis> diagnose(MetricsSnapshot snapshot, Set<Symptom> symptoms) {
     return null;
   }
 
