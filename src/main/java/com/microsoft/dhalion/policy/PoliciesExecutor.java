@@ -8,10 +8,13 @@
 package com.microsoft.dhalion.policy;
 
 import com.microsoft.dhalion.api.IHealthPolicy;
-import com.microsoft.dhalion.api.IResolver;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.metrics.Measurement;
+import com.microsoft.dhalion.resolver.Action;
 
+import java.time.Duration;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -32,27 +35,33 @@ public class PoliciesExecutor {
   public ScheduledFuture<?> start() {
     ScheduledFuture<?> future = executor.scheduleWithFixedDelay(() -> {
       // schedule the next execution cycle
-      Long nextScheduleDelay = policies.stream()
-          .map(x -> x.getDelay(TimeUnit.MILLISECONDS)).min(Comparator.naturalOrder()).orElse(10000l);
-      if (nextScheduleDelay > 0) {
+      Duration nextScheduleDelay = policies.stream()
+          .map(x -> x.getDelay())
+          .min(Comparator.naturalOrder())
+          .orElse(Duration.ofSeconds(10));
+
+      if (nextScheduleDelay.toMillis() > 0) {
         try {
           LOG.info("Sleep (millis) before next policy execution cycle: " + nextScheduleDelay);
-          TimeUnit.MILLISECONDS.sleep(nextScheduleDelay);
+          TimeUnit.MILLISECONDS.sleep(nextScheduleDelay.toMillis());
         } catch (InterruptedException e) {
           LOG.warning("Interrupted while waiting for next policy execution cycle");
         }
       }
 
       for (IHealthPolicy policy : policies) {
-        if (policy.getDelay(TimeUnit.MILLISECONDS) > 0) {
+        if (policy.getDelay().toMillis() > 0) {
           continue;
         }
 
         LOG.info("Executing Policy: " + policy.getClass().getSimpleName());
-        List<Symptom> symptoms = policy.executeDetectors();
-        List<Diagnosis> diagnosis = policy.executeDiagnosers(symptoms);
-        IResolver resolver = policy.selectResolver(diagnosis);
-        policy.executeResolver(resolver, diagnosis);
+        Collection<Measurement> metrics = policy.executeSensors();
+        // TODO update CacheState
+        Collection<Symptom> symptoms = policy.executeDetectors(metrics);
+        Collection<Diagnosis> diagnosis = policy.executeDiagnosers(symptoms);
+        Collection<Action> actions = policy.executeResolvers(diagnosis);
+        // TODO pretty print
+        LOG.info(actions.toString());
       }
 
     }, 1, 1, TimeUnit.MILLISECONDS);

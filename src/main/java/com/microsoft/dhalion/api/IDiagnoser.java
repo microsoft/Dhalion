@@ -6,30 +6,39 @@
  */
 package com.microsoft.dhalion.api;
 
-import java.util.List;
-import java.util.Map;
-
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 
+import java.util.Collection;
+
 /**
- * A {@link IDiagnoser} evaluates one or more {@link Symptom}s and produces a {@link Diagnosis}, if
- * any, representing a possible problem responsible for the observed {@link Symptom}s.
+ * A {@link IDiagnoser} examines and correlates one or more {@link Symptom}s and tries to identify a root cause. If
+ * a reason is found, {@link IDetector} produces a {@link Diagnosis} representing a possible problem responsible for
+ * the observed {@link Symptom}s.
  */
 public interface IDiagnoser {
   /**
-   * Initializes this instance and should be invoked once by the system before its use.
+   * @return returns names of {@link Diagnosis}s created by this {@link IDiagnoser}
+   */
+  default Collection<String> getDiagnosisNames() {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Initializes this instance and will be invoked once before this instance is used.
    */
   default void initialize() {
   }
 
   /**
-   * Evaluates available {@link Symptom}s and determines if a problem exists
+   * Triggers examination of available {@link Symptom}s and to identify a health issue responsible for the
+   * {@link Symptom}s.
    *
+   * @param symptoms recently identified {@link Symptom}s
    * @return a {@link Diagnosis} instance representing a problem
    */
-  default Diagnosis diagnose(List<Symptom> symptoms) {
-    return null;
+  default Collection<Diagnosis> diagnose(Collection<Symptom> symptoms) {
+    throw new UnsupportedOperationException();
   }
 
   /**

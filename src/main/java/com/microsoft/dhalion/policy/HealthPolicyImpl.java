@@ -12,111 +12,148 @@ import com.microsoft.dhalion.api.IDetector;
 import com.microsoft.dhalion.api.IDiagnoser;
 import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.api.IResolver;
+import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.metrics.Measurement;
 import com.microsoft.dhalion.resolver.Action;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 public class HealthPolicyImpl implements IHealthPolicy {
-  protected List<IDetector> detectors = new ArrayList<>();
-  protected List<IDiagnoser> diagnosers = new ArrayList<>();
-  protected List<IResolver> resolvers = new ArrayList<>();
+  protected Collection<ISensor> sensors = new ArrayList<>();
+  protected Collection<IDetector> detectors = new ArrayList<>();
+  protected Collection<IDiagnoser> diagnosers = new ArrayList<>();
+  protected Collection<IResolver> resolvers = new ArrayList<>();
 
-  protected long intervalMillis = TimeUnit.MINUTES.toMillis(1);
-  private long lastExecutionTimeMills = 0;
-  private long oneTimeDelayTimestamp = 0;
+  protected Duration interval = Duration.ofMinutes(1);
+  private Instant lastExecutionTimestamp;
+  private Instant oneTimeDelay = null;
 
   @VisibleForTesting
   ClockTimeProvider clock = new ClockTimeProvider();
 
   @Override
-  public void initialize(List<IDetector> detectors, List<IDiagnoser> diagnosers, List<IResolver> resolvers) {
-    this.detectors = detectors;
-    this.diagnosers = diagnosers;
-    this.resolvers = resolvers;
+  public void initialize(Collection<ISensor> sensors,
+                         Collection<IDetector> detectors,
+                         Collection<IDiagnoser> diagnosers,
+                         Collection<IResolver> resolvers) {
+    registerSensors(sensors.toArray(new ISensor[0]));
+    registerDetectors(detectors.toArray(new IDetector[0]));
+    registerDiagnosers(diagnosers.toArray(new IDiagnoser[0]));
+    registerResolvers(resolvers.toArray(new IResolver[0]));
+  }
+
+  public void registerSensors(ISensor... sensors) {
+    if (sensors == null) {
+      throw new IllegalArgumentException("Null instance cannot be added.");
+    }
+
+    Arrays.stream(sensors).forEach(sensor -> {
+      sensor.initialize();
+      this.sensors.add(sensor);
+    });
   }
 
   public void registerDetectors(IDetector... detectors) {
     if (detectors == null) {
       throw new IllegalArgumentException("Null instance cannot be added.");
     }
-    Arrays.stream(detectors).forEach(detector -> this.detectors.add(detector));
+
+    Arrays.stream(detectors).forEach(detector -> {
+      detector.initialize();
+      this.detectors.add(detector);
+    });
   }
 
   public void registerDiagnosers(IDiagnoser... diagnosers) {
     if (diagnosers == null) {
       throw new IllegalArgumentException("Null instance cannot be added.");
     }
-    Arrays.stream(diagnosers).forEach(diagnoser -> this.diagnosers.add(diagnoser));
+    Arrays.stream(diagnosers).forEach(diagnoser -> {
+      diagnoser.initialize();
+      this.diagnosers.add(diagnoser);
+    });
   }
 
   public void registerResolvers(IResolver... resolvers) {
     if (resolvers == null) {
       throw new IllegalArgumentException("Null instance cannot be added.");
     }
-    Arrays.stream(resolvers).forEach(resolver -> this.resolvers.add(resolver));
+    Arrays.stream(resolvers).forEach(resolver -> {
+      resolver.initialize();
+      this.resolvers.add(resolver);
+    });
   }
 
   /**
-   * @param unit  the delay unit
-   * @param value the delay after which this policy will be re-executed. For a one-time policy, the value will be 0 or
-   *              negative
+   * @param value the delay after which this policy will be re-executed. For a one-time policy
    */
-  public void setPolicyExecutionInterval(TimeUnit unit, long value) {
-    value = unit.toMillis(value);
-    if (value <= 0) {
-      value = Long.MAX_VALUE;
-    }
-    this.intervalMillis = unit.toMillis(value);
+  public void setPolicyExecutionInterval(Duration value) {
+    this.interval = value;
   }
 
   /**
-   * Sets the delay before next execution of this policy. This one time delay value overrides the original policy
-   * execution interval, set using {@link HealthPolicyImpl#setPolicyExecutionInterval}. All subsequent policy
-   * execution will take place using the original delay value.
+   * One-time delay defers policy execution. One-time delay is used when the system is expected to be unstable,
+   * typically after an {@link Action}. One-time delay value overrides the original policy execution interval. Policy
+   * execution will resume after the set delay has elapsed.
    *
-   * @param unit  the delay unit
    * @param value the delay value
+   * @see HealthPolicyImpl#setPolicyExecutionInterval
    */
-  public void setOneTimeDelay(TimeUnit unit, long value) {
-    oneTimeDelayTimestamp = clock.currentTimeMillis() + unit.toMillis(value);
+  public void setOneTimeDelay(Duration value) {
+    oneTimeDelay = clock.now().plus(value);
   }
 
   @Override
-  public List<Symptom> executeDetectors() {
+  public Collection<Measurement> executeSensors() {
+    Collection<Measurement> metrics = new ArrayList<>();
+    if (sensors == null) {
+      return metrics;
+    }
+
+    sensors.stream().map(ISensor::fetch)
+        .filter(Objects::nonNull)
+        .forEach(metrics::addAll);
+
+    return metrics;
+  }
+
+  @Override
+  public Collection<Symptom> executeDetectors(Collection<Measurement> measurements) {
     List<Symptom> symptoms = new ArrayList<>();
     if (detectors == null) {
       return symptoms;
     }
 
-    symptoms = detectors.stream().map(detector -> detector.detect())
-        .filter(detectedSymptoms -> detectedSymptoms != null)
-        .flatMap(List::stream).collect(Collectors.toList());
+    detectors.stream().map(detector -> detector.detect(measurements))
+        .filter(Objects::nonNull)
+        .forEach(symptoms::addAll);
 
     return symptoms;
   }
 
   @Override
-  public List<Diagnosis> executeDiagnosers(List<Symptom> symptoms) {
+  public Collection<Diagnosis> executeDiagnosers(Collection<Symptom> symptoms) {
     List<Diagnosis> diagnosis = new ArrayList<>();
     if (diagnosers == null) {
       return diagnosis;
     }
 
-    diagnosis = diagnosers.stream().map(diagnoser -> diagnoser.diagnose(symptoms))
-        .filter(diagnoses -> diagnoses != null)
-        .collect(Collectors.toList());
+    diagnosers.stream().map(diagnoser -> diagnoser.diagnose(symptoms))
+        .filter(Objects::nonNull)
+        .forEach(diagnosis::addAll);
 
     return diagnosis;
   }
 
-  @Override
-  public IResolver selectResolver(List<Diagnosis> diagnosis) {
+  protected IResolver selectResolver(Collection<Diagnosis> diagnosis) {
     if (resolvers == null) {
       return null;
     }
@@ -125,54 +162,59 @@ public class HealthPolicyImpl implements IHealthPolicy {
   }
 
   @Override
-  public List<Action> executeResolver(IResolver resolver, List<Diagnosis> diagnosis) {
-    if (oneTimeDelayTimestamp > 0 && oneTimeDelayTimestamp <= clock.currentTimeMillis()) {
+  public Collection<Action> executeResolvers(Collection<Diagnosis> diagnosis) {
+    if (oneTimeDelay != null && !oneTimeDelay.isAfter(clock.now())) {
       // reset one time delay timestamp
-      oneTimeDelayTimestamp = 0;
+      oneTimeDelay = null;
     }
 
-    List<Action> actions = new ArrayList<>();
+    IResolver resolver = selectResolver(diagnosis);
+
+    Collection<Action> actions = new ArrayList<>();
     if (resolver != null) {
       actions = resolver.resolve(diagnosis);
     }
 
-    lastExecutionTimeMills = clock.currentTimeMillis();
+    lastExecutionTimestamp = clock.now();
     return actions;
   }
 
   @Override
-  public long getDelay(TimeUnit unit) {
+  public Duration getDelay() {
     long delay;
-    if (lastExecutionTimeMills <= 0) {
+    if (lastExecutionTimestamp == null) {
       // first time execution of the policy will start immediately.
       delay = 0;
-    } else if (oneTimeDelayTimestamp > 0) {
-      delay = oneTimeDelayTimestamp - clock.currentTimeMillis();
+    } else if (oneTimeDelay != null) {
+      delay = oneTimeDelay.toEpochMilli() - clock.now().toEpochMilli();
     } else {
-      delay = lastExecutionTimeMills + intervalMillis - clock.currentTimeMillis();
+      delay = lastExecutionTimestamp.plus(interval).toEpochMilli() - clock.now().toEpochMilli();
     }
     delay = delay < 0 ? 0 : delay;
 
-    return unit.convert(delay, TimeUnit.MILLISECONDS);
+    return Duration.ofMillis(delay);
   }
 
   @Override
   public void close() {
+    if (sensors != null) {
+      sensors.forEach(ISensor::close);
+    }
     if (detectors != null) {
-      detectors.forEach(value -> value.close());
+      detectors.forEach(IDetector::close);
     }
     if (diagnosers != null) {
-      diagnosers.forEach(value -> value.close());
+      diagnosers.forEach(IDiagnoser::close);
     }
     if (resolvers != null) {
-      resolvers.forEach(value -> value.close());
+      resolvers.forEach(IResolver::close);
     }
   }
 
   @VisibleForTesting
   static class ClockTimeProvider {
-    long currentTimeMillis() {
-      return System.currentTimeMillis();
+    Instant now() {
+      return Instant.now();
     }
   }
 }

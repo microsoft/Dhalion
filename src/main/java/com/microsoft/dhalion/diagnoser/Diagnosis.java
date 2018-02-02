@@ -6,46 +6,50 @@
  */
 package com.microsoft.dhalion.diagnoser;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.microsoft.dhalion.detector.Symptom;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+
 /**
- * A {@link Diagnosis} instance is a representation of a possible causes of one or more
- * {@link Symptom}s. A {@link Symptom} could result in creation of one or more {@link Diagnosis}.
- * Similarly, correlated {@link Symptom}s can result in generation of a {@link Diagnosis} instance.
+ * A {@link Diagnosis} is a representation of a possible causes of one or more {@link Symptom}s. For e.g. resource
+ * under-provisioning
  */
 public class Diagnosis {
-  private String name;
-  private Map<String, Symptom> symptoms;
+  // diagnosis identifier
+  private final String name;
 
-  public Diagnosis(String diagnosisName) {
-    this(diagnosisName, new HashMap<>());
-  }
+  // instant when this diagnosis was created
+  private final Instant instant;
 
-  public Diagnosis(String diagnosisName, Symptom symptom) {
-    this(diagnosisName, new HashMap<>());
-    symptoms.put(symptom.getName(), symptom);
-  }
+  // symptoms corresponding to this symptom
+  private final Collection<Symptom> symptoms;
 
-  public Diagnosis(String diagnosisName, Map<String, Symptom> correlatedSymptoms) {
-    this.name = diagnosisName;
-    this.symptoms = correlatedSymptoms;
+  public Diagnosis(String name, Instant instant, Collection<Symptom> symptoms) {
+    this.name = name;
+    this.instant = instant;
+    this.symptoms = new ArrayList<>(symptoms);
   }
 
   public String getName() {
     return name;
   }
 
-  public Map<String, Symptom> getSymptoms() {
-    return symptoms;
+  public Instant getInstant() {
+    return instant;
+  }
+
+  public Collection<Symptom> getSymptoms() {
+    return Collections.unmodifiableCollection(symptoms);
   }
 
   @Override
   public String toString() {
     return "Diagnosis{" +
         "name='" + name + '\'' +
+        ", instant=" + instant +
         ", symptoms=" + symptoms +
         '}';
   }

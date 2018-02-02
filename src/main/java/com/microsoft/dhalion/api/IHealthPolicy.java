@@ -9,50 +9,68 @@ package com.microsoft.dhalion.api;
 
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.metrics.Measurement;
 import com.microsoft.dhalion.resolver.Action;
+import com.microsoft.dhalion.state.StateCache;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
+import java.util.Collection;
 
 /**
  * A {@link IHealthPolicy} strives to keep a distributed application healthy. It uses one or more of
- * {@link IDetector}s, {@link IDiagnoser}s and {@link IResolver}s to achieve this. It is expected that the policy
- * will be executed periodically.
+ * {@link IDetector}s, {@link IDiagnoser}s and {@link IResolver}s to achieve this. Once initialized, a policy is
+ * executed periodically. The policy executor invokes in order {@link ISensor}s, {@link IDetector}s,
+ * {@link IDiagnoser}s and {@link IResolver}s.
  */
 public interface IHealthPolicy {
   /**
    * Initializes this instance and should be invoked once by the system before its use.
    */
-  void initialize(List<IDetector> detectors, List<IDiagnoser> diagnosers, List<IResolver> resolvers);
+  void initialize(Collection<ISensor> sensors,
+                  Collection<IDetector> detectors,
+                  Collection<IDiagnoser> diagnosers,
+                  Collection<IResolver> resolvers);
 
   /**
-   * Invoked periodically, this method executes one or more {@link IDetector}s.
+   * Invoked periodically, this method executes one or more {@link ISensor}s. Typically, {@link ISensor} execution
+   * will add latest {@link Measurement}s in the {@link StateCache}.
+   *
+   * @return most recently fetched {@link Measurement}s
    */
-  List<Symptom> executeDetectors();
+  Collection<Measurement> executeSensors();
 
   /**
-   * Typically invoked after {@link IDetector}s, this method executes one or more
-   * {@link IDiagnoser}s.
+   * Invoked after {@link ISensor}s this method executes one or more {@link IDetector}s. Most recently fetched
+   * {@link Measurement}s are provided, while additional {@link Measurement}s can be obtained from {@link StateCache}.
+   *
+   * @param measurements most recently fetched {@link Measurement}s
+   * @return newly identified {@link Symptom}s
    */
-  List<Diagnosis> executeDiagnosers(List<Symptom> symptoms);
+  Collection<Symptom> executeDetectors(Collection<Measurement> measurements);
 
   /**
-   * Selects the most suitable {@link IResolver} based on the set of {@link Diagnosis} objects.
+   * Invoked after {@link IDetector}s, this method executes one or more {@link IDiagnoser}s.
+   * newly identified {@link Symptom}s
+   *
+   * @param symptoms recently identified {@link Symptom}s
+   * @return likely causes of the observed {@link Symptom}s
    */
-  IResolver selectResolver(List<Diagnosis> diagnosis);
+  Collection<Diagnosis> executeDiagnosers(Collection<Symptom> symptoms);
 
   /**
-   * Typically invoked after {@link IDiagnoser}s, this method executes one or more {@link IResolver}
-   * to fix any identified issues.
+   * Invoked after {@link IDiagnoser}s, this method executes one or more {@link IResolver} to fix any identified
+   * issues. Typically, a policy will invoke the most advantageous {@link IResolver} from the resolvers belonging to
+   * the policy to avoid overlapping {@link Action}s and conflicts.
+   *
+   * @param diagnosis recently identified likely-causes of the observed {@link Symptom}s
+   * @return actions executed to mitigate health issues
    */
-  List<Action> executeResolver(IResolver resolver, List<Diagnosis> diagnosis);
+  Collection<Action> executeResolvers(Collection<Diagnosis> diagnosis);
 
   /**
-   * @param unit the desired unit of time
-   * @return Returns the remaining delay before re-execution of this policy, in the
-   * given time unit.
+   * @return the remaining delay before re-execution of this policy
    */
-  long getDelay(TimeUnit unit);
+  Duration getDelay();
 
   /**
    * Release all acquired resources and prepare for termination of this instance

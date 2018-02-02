@@ -6,30 +6,40 @@
  */
 package com.microsoft.dhalion.api;
 
-import java.util.Map;
+import com.microsoft.dhalion.metrics.Measurement;
+import com.microsoft.dhalion.state.StateCache;
 
-import com.microsoft.dhalion.metrics.ComponentMetrics;
+import java.util.Collection;
 
 /**
- * A {@link ISensor} typically provides a system metric. For e.g. execute count
+ * A {@link ISensor} provides {@link Measurement}s for one or more system metrics. For e.g. throughput, latency, etc
  */
 public interface ISensor {
   /**
-   * @return returns a map of component id to metric value for all components
+   * @return returns names of metrics whose {@link Measurement}s are fetched by this {@link ISensor}
    */
-  default Map<String, ComponentMetrics> get(){
-    return null;
+  default Collection<String> getMetricNames() {
+    throw new UnsupportedOperationException();
   }
 
   /**
-   * @return returns a map of component id to metric value for specific components
+   * Initializes this instance and will be invoked once before this instance is used.
    */
-  default Map<String, ComponentMetrics> get(String... components) {
-    return null;
+  default void initialize() {
   }
 
   /**
-   * Release all acquired resources and prepare for termination of this instance
+   * Provides {@link Measurement}s of the metrics managed by this {@link ISensor} for all components of the application.
+   * The {@link ISensor}'s configuration can be used to customize the result. For e.g. duration for which the
+   * {@link Measurement}s are needed and external source configuration. Typically the fetched {@link Measurement}s
+   * will be cached in {@link StateCache}.
+   */
+  default Collection<Measurement> fetch() {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Releases all acquired resources and prepare for termination of this {@link ISensor}
    */
   default void close() {
   }

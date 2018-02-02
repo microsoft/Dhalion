@@ -6,56 +6,51 @@
  */
 package com.microsoft.dhalion.detector;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.microsoft.dhalion.metrics.Measurement;
 
-import com.microsoft.dhalion.metrics.ComponentMetrics;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * A {@link Symptom} identifies an anomaly or a potential health issue in a specific component of a
  * distributed application. For e.g. identification of irregular processing latency.
  */
 public class Symptom {
-  private String name;
-  private Map<String, ComponentMetrics> metrics = new HashMap<>();
+  // symptom identifier
+  private final String name;
 
-  public Symptom(String symptomName) {
+  // instant when this symptom was created
+  private final Instant instant;
+
+  // measurements corresponding to this symptom
+  private final Collection<Measurement> metrics;
+
+  public Symptom(String symptomName, Instant instant, Collection<Measurement> metrics) {
     this.name = symptomName;
-  }
-
-  public Symptom(String symptomName, ComponentMetrics metrics) {
-    this.name = symptomName;
-    addComponentMetrics(metrics);
-  }
-
-  public synchronized void addComponentMetrics(ComponentMetrics metrics) {
-    this.metrics.put(metrics.getName(), metrics);
+    this.instant = instant;
+    this.metrics = new ArrayList<>(metrics);
   }
 
   public String getName() {
     return name;
   }
 
-  public Map<String, ComponentMetrics> getComponents() {
-    return metrics;
+  public Instant getInstant() {
+    return instant;
   }
 
-  /**
-   * @return the only component exhibiting this symptom
-   */
-  public synchronized ComponentMetrics getComponent() {
-    if (metrics.size() > 1) {
-      throw new IllegalStateException();
-    }
-
-    return metrics.values().iterator().next();
+  public Collection<Measurement> getMetrics() {
+    return Collections.unmodifiableCollection(metrics);
   }
 
   @Override
   public String toString() {
     return "Symptom{" +
-        "name=" + name +
-        ", metrics=" + metrics +
+        "name='" + name + '\'' +
+        ", instant=" + instant +
+        ", metrics count=" + metrics.size() +
         '}';
   }
 }

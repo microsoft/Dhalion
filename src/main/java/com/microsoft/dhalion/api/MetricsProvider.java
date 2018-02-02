@@ -6,51 +6,41 @@
  */
 package com.microsoft.dhalion.api;
 
-import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.metrics.Measurement;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Map;
+import java.util.Collection;
 
 /**
- * A {@link MetricsProvider} implementation will fetch and provide metrics to the consumers. For
- * e.g. a {@link IDetector} may use it to get execute latency for a component.
+ * A {@link MetricsProvider} implements common utility methods to produce {@link Measurement}s. In some cases it will
+ * provide for connecting and authorizing with a remote metrics source. Or provide end points where external services
+ * can produce {@link Measurement}s. Typically {@link ISensor} will use this implementation to obtain raw metrics.
+ * {@link ISensor} may then process and cleanse the metrics.
  */
 public interface MetricsProvider {
-
   /**
-   * Returns metric value for all instances of one or more components of a distributed app. For e.g.
-   * returns total number of records processed in 60 seconds by all instances of a storm bolt.
-   *
-   * @param metric    id of the metric
-   * @param duration  the duration for which the metric was aggregated
-   * @param component ids of the components for which the metric is needed
-   * @return the map of component id to component metrics
+   * Initializes this instance and will be invoked once before this instance is used.
    */
-  default Map<String, ComponentMetrics> getComponentMetrics(String metric,
-                                                            Duration duration,
-                                                            String... component) {
-    return null;
+  default void initialize() {
   }
 
   /**
-   * Returns metric value for all instances of one or more components of a distributed app in a
-   * specified time window. For e.g. returns total number of records processed between time t1 and
-   * t2 by all instances of a storm bolt. The implementation may return multiple records per
-   * instance. For e.g. the implementation may return 3 records, one per minute, for an instance for
-   * a 3 minute long time window.
+   * Returns raw {@link Measurement}s for all instances of one or more components of a distributed app in a specified
+   * time window. For e.g. returns total number of records processed between time t1 and t2  by all instances of a
+   * storm bolt.
    *
-   * @param metric    id of the metric
-   * @param startTime metric aggregation window start time, endTime = startTime - duration
-   * @param duration  the duration for which the metric was aggregated
-   * @param component ids of the components for which the metric is needed
-   * @return the map of component id to component metrics
+   * @param startTime  metric aggregation window start time, endTime = startTime - duration
+   * @param duration   the duration for which the metric was aggregated
+   * @param metrics    ids of the metric
+   * @param components ids of the components for which the metric is needed
+   * @return collection of {@link Measurement}s
    */
-  default Map<String, ComponentMetrics> getComponentMetrics(String metric,
-                                                            Instant startTime,
-                                                            Duration duration,
-                                                            String... component) {
-    return null;
+  default Collection<Measurement> getMeasurements(Instant startTime,
+                                                  Duration duration,
+                                                  Collection<String> metrics,
+                                                  Collection<String> components) {
+    throw new UnsupportedOperationException("This method is not implemented in the metrics provider");
   }
 
   /**

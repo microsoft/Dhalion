@@ -6,32 +6,39 @@
  */
 package com.microsoft.dhalion.api;
 
-import java.util.List;
-
+import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.resolver.Action;
 
+import java.util.Collection;
+
 /**
- * A {@link IResolver}'s major goal is to resolve the anomaly identified by a {@link Diagnosis}.
- * Input to a {@link IResolver} is a {@link Diagnosis} instance and based on that, it executes
- * appropriate action to bring a linked component or system back to a healthy state.
+ * A {@link IResolver}'s major goal is to execute {@link Action}s to resolve an anomaly or health issue identified by a
+ * {@link IDiagnoser}. {@link IResolver} typically consume {@link Diagnosis} and executes appropriate action to bring a
+ * linked component or system back to a healthy state.
  */
 public interface IResolver {
   /**
-   * This method is invoked once to initialize the {@link IResolver} instance
+   * @return returns names of {@link Action}s created by this {@link IResolver}
+   */
+  default Collection<String> getActionNames() {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Initializes this instance and will be invoked once before this instance is used.
    */
   default void initialize() {
   }
 
   /**
-   * {@link IResolver#resolve} is invoked to fix one or more problems identified in the
-   * {@link Diagnosis} instance.
+   * Triggers execution of {@link Action}s which are expected to improved system health.
    *
-   * @param diagnosis a list of anomalies detected by a {@link IDiagnoser}s
+   * @param diagnosis recently identified likely-causes of the observed {@link Symptom}s
    * @return all the actions executed by this resolver to mitigate the problems
    */
-  default List<Action> resolve(List<Diagnosis> diagnosis){
-    return null;
+  default Collection<Action> resolve(Collection<Diagnosis> diagnosis){
+    throw new UnsupportedOperationException();
   }
 
   /**
