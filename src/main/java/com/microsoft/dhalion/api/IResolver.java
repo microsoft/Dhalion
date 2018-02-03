@@ -6,9 +6,9 @@
  */
 package com.microsoft.dhalion.api;
 
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.diagnoser.Diagnosis;
-import com.microsoft.dhalion.resolver.Action;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.Diagnosis;
+import com.microsoft.dhalion.core.Action;
 
 import java.util.Collection;
 

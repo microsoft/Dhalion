@@ -6,7 +6,7 @@
  */
 package com.microsoft.dhalion.api;
 
-import com.microsoft.dhalion.metrics.Measurement;
+import com.microsoft.dhalion.core.Measurement;
 
 import java.time.Duration;
 import java.time.Instant;

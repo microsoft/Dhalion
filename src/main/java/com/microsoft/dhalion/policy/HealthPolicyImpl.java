@@ -13,10 +13,10 @@ import com.microsoft.dhalion.api.IDiagnoser;
 import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.api.IResolver;
 import com.microsoft.dhalion.api.ISensor;
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.diagnoser.Diagnosis;
-import com.microsoft.dhalion.metrics.Measurement;
-import com.microsoft.dhalion.resolver.Action;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.Diagnosis;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.Action;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -113,16 +113,16 @@ public class HealthPolicyImpl implements IHealthPolicy {
 
   @Override
   public Collection<Measurement> executeSensors() {
-    Collection<Measurement> metrics = new ArrayList<>();
+    Collection<Measurement> measurements = new ArrayList<>();
     if (sensors == null) {
-      return metrics;
+      return measurements;
     }
 
     sensors.stream().map(ISensor::fetch)
         .filter(Objects::nonNull)
-        .forEach(metrics::addAll);
+        .forEach(measurements::addAll);
 
-    return metrics;
+    return measurements;
   }
 
   @Override

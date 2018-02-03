@@ -4,9 +4,7 @@
  * This program is made available under the terms of the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-package com.microsoft.dhalion.diagnoser;
-
-import com.microsoft.dhalion.detector.Symptom;
+package com.microsoft.dhalion.core;
 
 import java.time.Instant;
 import java.util.ArrayList;

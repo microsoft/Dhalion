@@ -8,10 +8,10 @@
 package com.microsoft.dhalion.policy;
 
 import com.microsoft.dhalion.api.IHealthPolicy;
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.diagnoser.Diagnosis;
-import com.microsoft.dhalion.metrics.Measurement;
-import com.microsoft.dhalion.resolver.Action;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.Diagnosis;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.Action;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -55,9 +55,9 @@ public class PoliciesExecutor {
         }
 
         LOG.info("Executing Policy: " + policy.getClass().getSimpleName());
-        Collection<Measurement> metrics = policy.executeSensors();
+        Collection<Measurement> measurements = policy.executeSensors();
         // TODO update CacheState
-        Collection<Symptom> symptoms = policy.executeDetectors(metrics);
+        Collection<Symptom> symptoms = policy.executeDetectors(measurements);
         Collection<Diagnosis> diagnosis = policy.executeDiagnosers(symptoms);
         Collection<Action> actions = policy.executeResolvers(diagnosis);
         // TODO pretty print

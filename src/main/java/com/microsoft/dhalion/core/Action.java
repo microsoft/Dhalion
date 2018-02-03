@@ -4,10 +4,9 @@
  * This program is made available under the terms of the MIT License.
  * See the LICENSE file in the project root for more information.
  */
-package com.microsoft.dhalion.resolver;
+package com.microsoft.dhalion.core;
 
 import com.microsoft.dhalion.api.IResolver;
-import com.microsoft.dhalion.diagnoser.Diagnosis;
 
 import java.time.Instant;
 import java.util.ArrayList;

@@ -8,10 +8,10 @@
 package com.microsoft.dhalion.policy;
 
 import com.microsoft.dhalion.api.IHealthPolicy;
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.diagnoser.Diagnosis;
-import com.microsoft.dhalion.metrics.Measurement;
-import com.microsoft.dhalion.resolver.Action;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.Diagnosis;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.Action;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
@@ -48,15 +48,15 @@ public class PoliciesExecutorTest {
 
   @Test
   public void verifyPolicyExecutionOrder() throws Exception {
-    List<Measurement> metrics = new ArrayList<>();
+    List<Measurement> measurements = new ArrayList<>();
     List<Symptom> symptoms = new ArrayList<>();
     List<Diagnosis> diagnosis = new ArrayList<>();
     List<Action> actions = new ArrayList<>();
 
     IHealthPolicy mockPolicy = mock(IHealthPolicy.class);
     when(mockPolicy.getDelay()).thenReturn(Duration.ZERO);
-    when(mockPolicy.executeSensors()).thenReturn(metrics);
-    when(mockPolicy.executeDetectors(metrics)).thenReturn(symptoms);
+    when(mockPolicy.executeSensors()).thenReturn(measurements);
+    when(mockPolicy.executeDetectors(measurements)).thenReturn(symptoms);
     when(mockPolicy.executeDiagnosers(symptoms)).thenReturn(diagnosis);
     when(mockPolicy.executeResolvers(diagnosis)).thenReturn(actions);
 
@@ -67,7 +67,7 @@ public class PoliciesExecutorTest {
     verify(mockPolicy, timeout(50l).atLeastOnce()).executeResolvers(diagnosis);
     InOrder order = Mockito.inOrder(mockPolicy);
     order.verify(mockPolicy).executeSensors();
-    order.verify(mockPolicy).executeDetectors(metrics);
+    order.verify(mockPolicy).executeDetectors(measurements);
     order.verify(mockPolicy).executeDiagnosers(symptoms);
     order.verify(mockPolicy).executeResolvers(diagnosis);
 

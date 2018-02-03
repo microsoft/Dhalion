@@ -6,8 +6,8 @@
  */
 package com.microsoft.dhalion.api;
 
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.metrics.Measurement;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.Measurement;
 
 import java.util.Collection;
 
