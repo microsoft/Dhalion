@@ -17,7 +17,7 @@ import java.util.Collections;
  */
 public class Symptom {
   // symptom identifier
-  private final String name;
+  private final String type;
 
   // instant when this symptom was created
   private final Instant instant;
@@ -25,14 +25,14 @@ public class Symptom {
   // measurements corresponding to this symptom
   private final Collection<Measurement> measurements;
 
-  public Symptom(String symptomName, Instant instant, Collection<Measurement> measurements) {
-    this.name = symptomName;
+  public Symptom(String symptomType, Instant instant, Collection<Measurement> measurements) {
+    this.type = symptomType;
     this.instant = instant;
     this.measurements = new ArrayList<>(measurements);
   }
 
-  public String getName() {
-    return name;
+  public String getType() {
+    return type;
   }
 
   public Instant getInstant() {
@@ -46,7 +46,7 @@ public class Symptom {
   @Override
   public String toString() {
     return "Symptom{" +
-        "name='" + name + '\'' +
+        "type='" + type + '\'' +
         ", instant=" + instant +
         ", measurements count=" + measurements.size() +
         '}';

@@ -19,9 +19,9 @@ import java.util.Collection;
  */
 public interface IDiagnoser {
   /**
-   * @return returns names of {@link Diagnosis}s created by this {@link IDiagnoser}
+   * @return returns types of {@link Diagnosis}s created by this {@link IDiagnoser}
    */
-  default Collection<String> getDiagnosisNames() {
+  default Collection<String> getDiagnosisTypes() {
     throw new UnsupportedOperationException();
   }
 

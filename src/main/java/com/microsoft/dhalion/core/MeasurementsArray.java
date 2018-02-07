@@ -35,33 +35,33 @@ import static tech.tablesaw.api.QueryHelper.or;
  */
 public class MeasurementsArray {
   private final Table measurements;
-  CategoryColumn component;
-  CategoryColumn instance;
-  CategoryColumn metricName;
-  LongColumn timeStamps;
-  DoubleColumn value;
+  private CategoryColumn component;
+  private CategoryColumn instance;
+  private CategoryColumn type;
+  private LongColumn timeStamps;
+  private DoubleColumn value;
 
   public enum SortKey {
-    COMPONENT, INSTANCE, TIME_STAMP, METRIC_NAME, VALUE
+    COMPONENT, INSTANCE, TIME_STAMP, TYPE, VALUE
   }
 
   private static final String COMPONENT = SortKey.COMPONENT.name();
   private static final String INSTANCE = SortKey.INSTANCE.name();
   private static final String TIME_STAMP = SortKey.TIME_STAMP.name();
-  private static final String METRIC_NAME = SortKey.METRIC_NAME.name();
+  private static final String TYPE = SortKey.TYPE.name();
   private static final String VALUE = SortKey.VALUE.name();
 
   private MeasurementsArray() {
     component = new CategoryColumn(COMPONENT);
     instance = new CategoryColumn(INSTANCE);
-    metricName = new CategoryColumn(METRIC_NAME);
+    type = new CategoryColumn(TYPE);
     timeStamps = new LongColumn(TIME_STAMP);
     value = new DoubleColumn(VALUE);
 
     measurements = Table.create("Measurements");
     measurements.addColumn(component);
     measurements.addColumn(instance);
-    measurements.addColumn(metricName);
+    measurements.addColumn(type);
     measurements.addColumn(timeStamps);
     measurements.addColumn(value);
   }
@@ -70,7 +70,7 @@ public class MeasurementsArray {
     this.measurements = table;
     component = measurements.categoryColumn(COMPONENT);
     instance = measurements.categoryColumn(INSTANCE);
-    metricName = measurements.categoryColumn(METRIC_NAME);
+    type = measurements.categoryColumn(TYPE);
     timeStamps = measurements.longColumn(TIME_STAMP);
     value = measurements.doubleColumn(VALUE);
   }
@@ -79,7 +79,7 @@ public class MeasurementsArray {
     measurements.forEach(measurement -> {
       component.append(measurement.component());
       instance.append(measurement.instance());
-      metricName.append(measurement.metricName());
+      type.append(measurement.type());
       timeStamps.append(measurement.instant().toEpochMilli());
       value.append(((ScalarMeasurement) measurement).value());
     });
@@ -96,31 +96,31 @@ public class MeasurementsArray {
   }
 
   /**
-   * @see #component(Collection)
    * @param name a component name
    * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
+   * @see #component(Collection)
    */
   public MeasurementsArray component(String name) {
     return component(Collections.singletonList(name));
   }
 
   /**
-   * Retains all {@link Measurement}s with given metric name.
+   * Retains all {@link Measurement}s with given metric type
    *
-   * @param names of the metrics, not null
+   * @param types names of the metric types, not null
    * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
    */
-  public MeasurementsArray metric(Collection<String> names) {
-    return applyCategoryFilter(names, METRIC_NAME);
+  public MeasurementsArray type(Collection<String> types) {
+    return applyCategoryFilter(types, TYPE);
   }
 
   /**
-   * @see #metric(Collection)
-   * @param name a metric name
+   * @param type a metric type
    * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
+   * @see #type(Collection)
    */
-  public MeasurementsArray metric(String name) {
-    return metric(Collections.singletonList(name));
+  public MeasurementsArray type(String type) {
+    return type(Collections.singletonList(type));
   }
 
   /**
@@ -134,9 +134,9 @@ public class MeasurementsArray {
   }
 
   /**
-   * @see #instance(String)
    * @param name instance name
    * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
+   * @see #instance(String)
    */
   public MeasurementsArray instance(String name) {
     return instance(Collections.singletonList(name));
@@ -238,9 +238,9 @@ public class MeasurementsArray {
   }
 
   /**
-   * @return unique metric names in this collection of {@link Measurement}s
+   * @return unique metric types in this collection of {@link Measurement}s
    */
-  public Collection<String> uniqueMetricNames() {
+  public Collection<String> uniqueTypes() {
     throw new UnsupportedOperationException();
   }
 
@@ -263,7 +263,12 @@ public class MeasurementsArray {
       columns[i] = sortKeys[i].name();
     }
 
-    Table result = measurements.sortOn(columns);
+    Table result;
+    if (descending) {
+      result = measurements.sortDescendingOn(columns);
+    } else {
+      result = measurements.sortAscendingOn(columns);
+    }
     return new MeasurementsArray(result);
   }
 
@@ -314,7 +319,7 @@ public class MeasurementsArray {
     for (int i = 0; i < measurements.rowCount(); i++) {
       result.add(new ScalarMeasurement(component.get(i),
                                        instance.get(i),
-                                       metricName.get(i),
+                                       type.get(i),
                                        Instant.ofEpochMilli(timeStamps.get(i)),
                                        value.get(i)));
     }

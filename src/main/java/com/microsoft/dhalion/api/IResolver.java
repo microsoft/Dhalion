@@ -20,9 +20,9 @@ import java.util.Collection;
  */
 public interface IResolver {
   /**
-   * @return returns names of {@link Action}s created by this {@link IResolver}
+   * @return returns types of {@link Action}s created by this {@link IResolver}
    */
-  default Collection<String> getActionNames() {
+  default Collection<String> getActionTypes() {
     throw new UnsupportedOperationException();
   }
 

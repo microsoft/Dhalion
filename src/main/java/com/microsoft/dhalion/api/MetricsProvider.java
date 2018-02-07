@@ -32,7 +32,7 @@ public interface MetricsProvider {
    *
    * @param startTime  metric aggregation window start time, endTime = startTime - duration
    * @param duration   the duration for which the metric was aggregated
-   * @param metrics    ids of the metric
+   * @param metrics    ids of the metrics
    * @param components ids of the components for which the metric is needed
    * @return collection of {@link Measurement}s
    */

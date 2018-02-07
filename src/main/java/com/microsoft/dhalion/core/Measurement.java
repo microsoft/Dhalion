@@ -14,17 +14,13 @@ import java.time.Instant;
 public abstract class Measurement {
   private final String component;
   private final String instance;
-  private final String metric;
+  private final String type;
   private final long instantMillis; // UTC
 
-  private Measurement(String component, String metricName, Instant instant) {
-    this(component, null, metricName, instant);
-  }
-
-  private Measurement(String component, String instance, String metricName, Instant instant) {
+  private Measurement(String component, String instance, String type, Instant instant) {
     this.component = component;
     this.instance = instance;
-    this.metric = metricName;
+    this.type = type;
     this.instantMillis = instant.toEpochMilli();
   }
 
@@ -36,8 +32,8 @@ public abstract class Measurement {
     return instance;
   }
 
-  public String metricName() {
-    return metric;
+  public String type() {
+    return type;
   }
 
   public Instant instant() {
@@ -47,13 +43,8 @@ public abstract class Measurement {
   public static class ScalarMeasurement extends Measurement {
     private final double value;
 
-    public ScalarMeasurement(String component, String instance, String metricName, Instant instant, double value) {
-      super(component, instance, metricName, instant);
-      this.value = value;
-    }
-
-    public ScalarMeasurement(String component, String metricName, Instant instant, double value) {
-      super(component, metricName, instant);
+    public ScalarMeasurement(String component, String instance, String metricType, Instant instant, double value) {
+      super(component, instance, metricType, instant);
       this.value = value;
     }
 
@@ -66,7 +57,7 @@ public abstract class Measurement {
       return "Measurement {" +
           "component=" + component() +
           ", instance=" + instance() +
-          ", metric=" + metricName() +
+          ", type=" + type() +
           ", instant=" + instant() +
           ", value=" + value +
           '}';
@@ -76,13 +67,8 @@ public abstract class Measurement {
   public static class ObjMeasurement extends Measurement {
     private final Object value;
 
-    public ObjMeasurement(String component, String instance, String metricName, Instant instant, Object value) {
-      super(component, instance, metricName, instant);
-      this.value = value;
-    }
-
-    public ObjMeasurement(String component, String metricName, Instant instant, Object value) {
-      super(component, metricName, instant);
+    public ObjMeasurement(String component, String instance, String metricType, Instant instant, Object value) {
+      super(component, instance, metricType, instant);
       this.value = value;
     }
 

@@ -18,7 +18,7 @@ import java.util.Collections;
  */
 public class Action {
   // action type
-  private final String name;
+  private final String type;
 
   // instant when this action was created
   private final Instant instant;
@@ -26,14 +26,14 @@ public class Action {
   // Diagnosis relevant to this action
   private final Collection<Diagnosis> diagnosis;
 
-  public Action(String name, Instant instant, Collection<Diagnosis> diagnosis) {
-    this.name = name;
+  public Action(String type, Instant instant, Collection<Diagnosis> diagnosis) {
+    this.type = type;
     this.instant = instant;
     this.diagnosis = new ArrayList<>(diagnosis);
   }
 
-  public String getName() {
-    return name;
+  public String getType() {
+    return type;
   }
 
   public Instant getInstant() {
@@ -47,7 +47,7 @@ public class Action {
   @Override
   public String toString() {
     return "Action{" +
-        "name='" + name + '\'' +
+        "type='" + type + '\'' +
         ", instant=" + instant +
         ", diagnosis=" + diagnosis +
         '}';

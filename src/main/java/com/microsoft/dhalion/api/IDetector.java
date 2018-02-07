@@ -18,9 +18,9 @@ import java.util.Collection;
  */
 public interface IDetector {
   /**
-   * @return returns names of {@link Symptom}s created by this {@link IDetector}
+   * @return returns types of {@link Symptom}s created by this {@link IDetector}
    */
-  default Collection<String> getSymptomNames() {
+  default Collection<String> getSymptomTypes() {
     throw new UnsupportedOperationException();
   }
 

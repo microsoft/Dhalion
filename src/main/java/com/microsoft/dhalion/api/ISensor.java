@@ -17,9 +17,9 @@ import java.util.Collection;
  */
 public interface ISensor {
   /**
-   * @return returns names of metrics whose {@link Measurement}s are fetched by this {@link ISensor}
+   * @return returns types of metrics whose {@link Measurement}s are fetched by this {@link ISensor}
    */
-  default Collection<String> getMetricNames() {
+  default Collection<String> getMetricTypes() {
     throw new UnsupportedOperationException();
   }
 

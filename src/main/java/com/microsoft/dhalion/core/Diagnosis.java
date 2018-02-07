@@ -17,7 +17,7 @@ import java.util.Collections;
  */
 public class Diagnosis {
   // diagnosis identifier
-  private final String name;
+  private final String type;
 
   // instant when this diagnosis was created
   private final Instant instant;
@@ -25,14 +25,14 @@ public class Diagnosis {
   // symptoms corresponding to this symptom
   private final Collection<Symptom> symptoms;
 
-  public Diagnosis(String name, Instant instant, Collection<Symptom> symptoms) {
-    this.name = name;
+  public Diagnosis(String type, Instant instant, Collection<Symptom> symptoms) {
+    this.type = type;
     this.instant = instant;
     this.symptoms = new ArrayList<>(symptoms);
   }
 
-  public String getName() {
-    return name;
+  public String getType() {
+    return type;
   }
 
   public Instant getInstant() {
@@ -46,7 +46,7 @@ public class Diagnosis {
   @Override
   public String toString() {
     return "Diagnosis{" +
-        "name='" + name + '\'' +
+        "type='" + type + '\'' +
         ", instant=" + instant +
         ", symptoms=" + symptoms +
         '}';

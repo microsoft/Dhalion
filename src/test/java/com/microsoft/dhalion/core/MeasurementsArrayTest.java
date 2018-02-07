@@ -68,9 +68,9 @@ public class MeasurementsArrayTest {
 
   @Test
   public void metric() {
-    resultArray = testArray.metric("m1");
+    resultArray = testArray.type("m1");
     assertEquals(12, resultArray.size());
-    resultArray.get().forEach(m -> assertEquals("m1", m.metricName()));
+    resultArray.get().forEach(m -> assertEquals("m1", m.type()));
   }
 
   @Test
@@ -200,13 +200,5 @@ public class MeasurementsArrayTest {
     assertEquals(2, components.size());
     assertTrue(components.contains("c1"));
     assertTrue(components.contains("c2"));
-  }
-
-  @Test
-  public void uniqueMetricNames() {
-  }
-
-  @Test
-  public void uniqueInstants() {
   }
 }
