@@ -89,7 +89,7 @@ public class MeasurementsArray {
    * Retains all {@link Measurement}s with given component names.
    *
    * @param names of the components, not null
-   * @return {@link Measurement} containing filtered {@link Measurement}s
+   * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
    */
   public MeasurementsArray component(Collection<String> names) {
     return applyCategoryFilter(names, COMPONENT);
@@ -97,6 +97,8 @@ public class MeasurementsArray {
 
   /**
    * @see #component(Collection)
+   * @param name a component name
+   * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
    */
   public MeasurementsArray component(String name) {
     return component(Collections.singletonList(name));
@@ -106,7 +108,7 @@ public class MeasurementsArray {
    * Retains all {@link Measurement}s with given metric name.
    *
    * @param names of the metrics, not null
-   * @return {@link Measurement} containing filtered {@link Measurement}s
+   * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
    */
   public MeasurementsArray metric(Collection<String> names) {
     return applyCategoryFilter(names, METRIC_NAME);
@@ -114,6 +116,8 @@ public class MeasurementsArray {
 
   /**
    * @see #metric(Collection)
+   * @param name a metric name
+   * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
    */
   public MeasurementsArray metric(String name) {
     return metric(Collections.singletonList(name));
@@ -123,7 +127,7 @@ public class MeasurementsArray {
    * Retains all {@link Measurement}s with given instance names.
    *
    * @param names of the instances, not null
-   * @return {@link Measurement} containing filtered {@link Measurement}s
+   * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
    */
   public MeasurementsArray instance(Collection<String> names) {
     return applyCategoryFilter(names, INSTANCE);
@@ -131,6 +135,8 @@ public class MeasurementsArray {
 
   /**
    * @see #instance(String)
+   * @param name instance name
+   * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
    */
   public MeasurementsArray instance(String name) {
     return instance(Collections.singletonList(name));
@@ -158,6 +164,21 @@ public class MeasurementsArray {
   }
 
   /**
+   * Retains only the {@link Measurement}s whose value is between <code>low</code> and <code>high</code>, both
+   * inclusive.
+   *
+   * @param low  the lowest value to be retained
+   * @param high the highest value to be retained
+   * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
+   */
+  public MeasurementsArray valueBetween(double low, double high) {
+    Table result = measurements.selectWhere(
+        both(column(VALUE).isGreaterThanOrEqualTo(low),
+             column(VALUE).isLessThanOrEqualTo(high)));
+    return new MeasurementsArray(result);
+  }
+
+  /**
    * @return count of {@link Measurement}s in this collection
    */
   public int size() {
@@ -165,38 +186,69 @@ public class MeasurementsArray {
   }
 
   /**
-   * @return max of all the {@link Measurement}s in this collection
+   * @return max of all the {@link Measurement}s values
    */
   public double max() {
     return value.max();
   }
 
   /**
-   * @return min of all the {@link Measurement}s in this collection
+   * @return min of all the {@link Measurement}s values
    */
   public double min() {
     return value.min();
   }
 
   /**
-   * @return mean of all the {@link Measurement}s in this collection
+   * @return mean of all the {@link Measurement}s values
    */
   public double mean() {
     return value.mean();
   }
 
   /**
-   * @return median of all the {@link Measurement}s in this collection
+   * @return median of all the {@link Measurement}s values
    */
   public double median() {
     return value.median();
   }
 
   /**
-   * @return variance of all the {@link Measurement}s in this collection
+   * @return variance of all the {@link Measurement}s values
    */
   public double variance() {
     return value.variance();
+  }
+
+  /**
+   * @return sum of all the {@link Measurement}s values
+   */
+  public double sum() {
+    return value.sum();
+  }
+
+  /**
+   * @return unique components names in this collection of {@link Measurement}s
+   */
+  public Collection<String> uniqueComponents() {
+    ArrayList<String> result = new ArrayList<>();
+    CategoryColumn uniqueColumn = component.unique();
+    uniqueColumn.forEach(result::add);
+    return result;
+  }
+
+  /**
+   * @return unique metric names in this collection of {@link Measurement}s
+   */
+  public Collection<String> uniqueMetricNames() {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * @return unique {@link Instant}s in this collection of {@link Measurement}s
+   */
+  public Collection<String> uniqueInstants() {
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -206,7 +258,13 @@ public class MeasurementsArray {
    * @return ordered {@link Measurement}s
    */
   public MeasurementsArray sort(boolean descending, SortKey... sortKeys) {
-    throw new UnsupportedOperationException();
+    String[] columns = new String[sortKeys.length];
+    for (int i = 0; i < sortKeys.length; i++) {
+      columns[i] = sortKeys[i].name();
+    }
+
+    Table result = measurements.sortOn(columns);
+    return new MeasurementsArray(result);
   }
 
   /**
@@ -218,19 +276,34 @@ public class MeasurementsArray {
    * @return {@link MeasurementsArray} containing specific {@link Measurement}s
    */
   public MeasurementsArray slice(int first, int last) {
-    throw new UnsupportedOperationException();
+    Table result = measurements.selectRows(first, last);
+    return new MeasurementsArray(result);
   }
 
   /**
-   * Retains only the {@link Measurement}s whose value is between <code>low</code> and <code>high</code>, both
-   * inclusive.
-   *
-   * @param low  the lowest value to be retained
-   * @param high the highest value to be retained
-   * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
+   * @return the first {@link Measurement}, if present
    */
-  public MeasurementsArray valueBetween(double low, double high) {
-    throw new UnsupportedOperationException();
+  public Measurement first() {
+    if (measurements.isEmpty()) {
+      return null;
+    }
+
+    Table result = measurements.first(1);
+    Collection<Measurement> measurementCollection = new MeasurementsArray(result).get();
+    return measurementCollection.iterator().next();
+  }
+
+  /**
+   * @return the last {@link Measurement}, if present
+   */
+  public Measurement last() {
+    if (measurements.isEmpty()) {
+      return null;
+    }
+
+    Table result = measurements.last(1);
+    Collection<Measurement> measurementCollection = new MeasurementsArray(result).get();
+    return measurementCollection.iterator().next();
   }
 
   /**
@@ -246,6 +319,10 @@ public class MeasurementsArray {
                                        value.get(i)));
     }
     return result;
+  }
+
+  public String toStringForDebugging() {
+    return measurements.print(measurements.rowCount());
   }
 
   /**
