@@ -13,10 +13,11 @@ import com.microsoft.dhalion.api.IDiagnoser;
 import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.api.IResolver;
 import com.microsoft.dhalion.api.ISensor;
-import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.Action;
 import com.microsoft.dhalion.core.Diagnosis;
 import com.microsoft.dhalion.core.Measurement;
-import com.microsoft.dhalion.core.Action;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -36,18 +37,19 @@ public class HealthPolicyImpl implements IHealthPolicy {
   private Instant lastExecutionTimestamp;
   private Instant oneTimeDelay = null;
 
+  private ExecutionContext executionContext;
+
   @VisibleForTesting
   ClockTimeProvider clock = new ClockTimeProvider();
 
   @Override
-  public void initialize(Collection<ISensor> sensors,
-                         Collection<IDetector> detectors,
-                         Collection<IDiagnoser> diagnosers,
-                         Collection<IResolver> resolvers) {
-    registerSensors(sensors.toArray(new ISensor[0]));
-    registerDetectors(detectors.toArray(new IDetector[0]));
-    registerDiagnosers(diagnosers.toArray(new IDiagnoser[0]));
-    registerResolvers(resolvers.toArray(new IResolver[0]));
+  public void initialize(ExecutionContext context) {
+    this.executionContext = context;
+
+    sensors.forEach(sensor -> sensor.initialize(executionContext));
+    detectors.forEach(detector -> detector.initialize(executionContext));
+    diagnosers.forEach(diagnoser -> diagnoser.initialize(executionContext));
+    resolvers.forEach(resolver -> resolver.initialize(executionContext));
   }
 
   public void registerSensors(ISensor... sensors) {
@@ -55,10 +57,7 @@ public class HealthPolicyImpl implements IHealthPolicy {
       throw new IllegalArgumentException("Null instance cannot be added.");
     }
 
-    Arrays.stream(sensors).forEach(sensor -> {
-      sensor.initialize();
-      this.sensors.add(sensor);
-    });
+    this.sensors.addAll(Arrays.asList(sensors));
   }
 
   public void registerDetectors(IDetector... detectors) {
@@ -66,30 +65,23 @@ public class HealthPolicyImpl implements IHealthPolicy {
       throw new IllegalArgumentException("Null instance cannot be added.");
     }
 
-    Arrays.stream(detectors).forEach(detector -> {
-      detector.initialize();
-      this.detectors.add(detector);
-    });
+    this.detectors.addAll(Arrays.asList(detectors));
   }
 
   public void registerDiagnosers(IDiagnoser... diagnosers) {
     if (diagnosers == null) {
       throw new IllegalArgumentException("Null instance cannot be added.");
     }
-    Arrays.stream(diagnosers).forEach(diagnoser -> {
-      diagnoser.initialize();
-      this.diagnosers.add(diagnoser);
-    });
+
+    this.diagnosers.addAll(Arrays.asList(diagnosers));
   }
 
   public void registerResolvers(IResolver... resolvers) {
     if (resolvers == null) {
       throw new IllegalArgumentException("Null instance cannot be added.");
     }
-    Arrays.stream(resolvers).forEach(resolver -> {
-      resolver.initialize();
-      this.resolvers.add(resolver);
-    });
+
+    this.resolvers.addAll(Arrays.asList(resolvers));
   }
 
   /**
@@ -197,18 +189,10 @@ public class HealthPolicyImpl implements IHealthPolicy {
 
   @Override
   public void close() {
-    if (sensors != null) {
-      sensors.forEach(ISensor::close);
-    }
-    if (detectors != null) {
-      detectors.forEach(IDetector::close);
-    }
-    if (diagnosers != null) {
-      diagnosers.forEach(IDiagnoser::close);
-    }
-    if (resolvers != null) {
-      resolvers.forEach(IResolver::close);
-    }
+    sensors.forEach(ISensor::close);
+    detectors.forEach(IDetector::close);
+    diagnosers.forEach(IDiagnoser::close);
+    resolvers.forEach(IResolver::close);
   }
 
   @VisibleForTesting

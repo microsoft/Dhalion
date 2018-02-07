@@ -6,8 +6,9 @@
  */
 package com.microsoft.dhalion.api;
 
-import com.microsoft.dhalion.core.Symptom;
 import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
 import java.util.Collection;
 
@@ -25,8 +26,10 @@ public interface IDetector {
 
   /**
    * Initializes this instance and will be invoked once before this instance is used.
+   *
+   * @param context execution context for this instance
    */
-  default void initialize() {
+  default void initialize(ExecutionContext context) {
   }
 
   /**

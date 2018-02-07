@@ -8,15 +8,19 @@
 package com.microsoft.dhalion.policy;
 
 import com.microsoft.dhalion.api.IHealthPolicy;
-import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.Action;
 import com.microsoft.dhalion.core.Diagnosis;
 import com.microsoft.dhalion.core.Measurement;
-import com.microsoft.dhalion.core.Action;
+import com.microsoft.dhalion.core.MeasurementsArray;
+import com.microsoft.dhalion.core.Symptom;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -26,10 +30,16 @@ import java.util.logging.Logger;
 public class PoliciesExecutor {
   private static final Logger LOG = Logger.getLogger(PoliciesExecutor.class.getName());
   private final List<IHealthPolicy> policies;
+  private final Map<IHealthPolicy, ExecutionContext> policyContextMap = new HashMap<>();
   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-  public PoliciesExecutor(List<IHealthPolicy> policies) {
-    this.policies = policies;
+  public PoliciesExecutor(Collection<IHealthPolicy> policies) {
+    this.policies = new ArrayList<>(policies);
+    for (IHealthPolicy policy : policies) {
+      ExecutionContext ctx = new ExecutionContext();
+      policy.initialize(ctx);
+      policyContextMap.put(policy, ctx);
+    }
   }
 
   public ScheduledFuture<?> start() {
@@ -56,12 +66,15 @@ public class PoliciesExecutor {
 
         LOG.info("Executing Policy: " + policy.getClass().getSimpleName());
         Collection<Measurement> measurements = policy.executeSensors();
-        // TODO update CacheState
+        policyContextMap.get(policy).measurementsArrayBuilder.addAll(measurements);
+
         Collection<Symptom> symptoms = policy.executeDetectors(measurements);
         Collection<Diagnosis> diagnosis = policy.executeDiagnosers(symptoms);
         Collection<Action> actions = policy.executeResolvers(diagnosis);
         // TODO pretty print
         LOG.info(actions.toString());
+
+        // TODO delete expired objects from state store
       }
 
     }, 1, 1, TimeUnit.MILLISECONDS);
@@ -71,5 +84,18 @@ public class PoliciesExecutor {
 
   public void destroy() {
     this.executor.shutdownNow();
+  }
+
+
+  public static class ExecutionContext {
+    private final MeasurementsArray.Builder measurementsArrayBuilder;
+
+    public ExecutionContext() {
+      measurementsArrayBuilder = new MeasurementsArray.Builder();
+    }
+
+    public MeasurementsArray measurements() {
+      return measurementsArrayBuilder.get();
+    }
   }
 }

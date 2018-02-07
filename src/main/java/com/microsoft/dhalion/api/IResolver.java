@@ -6,9 +6,10 @@
  */
 package com.microsoft.dhalion.api;
 
-import com.microsoft.dhalion.core.Symptom;
-import com.microsoft.dhalion.core.Diagnosis;
 import com.microsoft.dhalion.core.Action;
+import com.microsoft.dhalion.core.Diagnosis;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
 import java.util.Collection;
 
@@ -27,8 +28,10 @@ public interface IResolver {
 
   /**
    * Initializes this instance and will be invoked once before this instance is used.
+   *
+   * @param context execution context for this instance
    */
-  default void initialize() {
+  default void initialize(ExecutionContext context) {
   }
 
   /**
@@ -37,7 +40,7 @@ public interface IResolver {
    * @param diagnosis recently identified likely-causes of the observed {@link Symptom}s
    * @return all the actions executed by this resolver to mitigate the problems
    */
-  default Collection<Action> resolve(Collection<Diagnosis> diagnosis){
+  default Collection<Action> resolve(Collection<Diagnosis> diagnosis) {
     throw new UnsupportedOperationException();
   }
 

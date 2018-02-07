@@ -28,19 +28,19 @@ public abstract class Measurement {
     this.instantMillis = instant.toEpochMilli();
   }
 
-  public String getComponent() {
+  public String component() {
     return component;
   }
 
-  public String getInstance() {
+  public String instance() {
     return instance;
   }
 
-  public String getMetric() {
+  public String metricName() {
     return metric;
   }
 
-  public Instant getInstant() {
+  public Instant instant() {
     return Instant.ofEpochMilli(instantMillis);
   }
 
@@ -57,8 +57,19 @@ public abstract class Measurement {
       this.value = value;
     }
 
-    public double getValue() {
+    public double value() {
       return value;
+    }
+
+    @Override
+    public String toString() {
+      return "Measurement {" +
+          "component=" + component() +
+          ", instance=" + instance() +
+          ", metric=" + metricName() +
+          ", instant=" + instant() +
+          ", value=" + value +
+          '}';
     }
   }
 
@@ -75,7 +86,7 @@ public abstract class Measurement {
       this.value = value;
     }
 
-    public Object getValue() {
+    public Object value() {
       return value;
     }
   }

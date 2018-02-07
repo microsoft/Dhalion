@@ -7,11 +7,12 @@
 
 package com.microsoft.dhalion.api;
 
-import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.Action;
 import com.microsoft.dhalion.core.Diagnosis;
 import com.microsoft.dhalion.core.Measurement;
-import com.microsoft.dhalion.core.Action;
-import com.microsoft.dhalion.state.StateCache;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
+import com.microsoft.dhalion.state.StateStore;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -25,15 +26,14 @@ import java.util.Collection;
 public interface IHealthPolicy {
   /**
    * Initializes this instance and should be invoked once by the system before its use.
+   *
+   * @param context execution context of the policy
    */
-  void initialize(Collection<ISensor> sensors,
-                  Collection<IDetector> detectors,
-                  Collection<IDiagnoser> diagnosers,
-                  Collection<IResolver> resolvers);
+  void initialize(ExecutionContext context);
 
   /**
    * Invoked periodically, this method executes one or more {@link ISensor}s. Typically, {@link ISensor} execution
-   * will add latest {@link Measurement}s in the {@link StateCache}.
+   * will result in addition of latest {@link Measurement}s in the {@link StateStore}.
    *
    * @return most recently fetched {@link Measurement}s
    */
@@ -41,7 +41,7 @@ public interface IHealthPolicy {
 
   /**
    * Invoked after {@link ISensor}s this method executes one or more {@link IDetector}s. Most recently fetched
-   * {@link Measurement}s are provided, while additional {@link Measurement}s can be obtained from {@link StateCache}.
+   * {@link Measurement}s are provided, while additional {@link Measurement}s can be obtained from {@link StateStore}.
    *
    * @param measurements most recently fetched {@link Measurement}s
    * @return newly identified {@link Symptom}s

@@ -7,29 +7,24 @@
 
 package com.microsoft.dhalion.state;
 
-import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.Action;
 import com.microsoft.dhalion.core.Diagnosis;
 import com.microsoft.dhalion.core.Measurement;
-import com.microsoft.dhalion.core.Action;
+import com.microsoft.dhalion.core.MeasurementsArray;
+import com.microsoft.dhalion.core.Symptom;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 
-public class StateCache {
-  public void addMeasurements(Collection<Measurement> measurements) {
+public class StateStore {
+  private final MeasurementsArray measurementsArray;
+
+  public StateStore(MeasurementsArray measurementsArray) {
+    this.measurementsArray = measurementsArray;
   }
 
-  public void addSymptoms(Collection<Symptom> symptoms) {
-  }
-
-  public void addDiagnosis(Collection<Diagnosis> diagnosis) {
-  }
-
-  public void addActions(Collection<Action> actions) {
-  }
-
-  public Collection<Measurement> getMeasurements(Instant startTime, Duration duration, String... metrics) {
+  public MeasurementsArray getMeasurements() {
     return null;
   }
 

@@ -16,9 +16,6 @@ import org.junit.Test;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -28,41 +25,18 @@ import static org.mockito.Mockito.verify;
 
 public class HealthPolicyImplTest {
   @Test
-  public void testRegisterStages() {
-    ISensor sensor = mock(ISensor.class);
-    IDetector detector = mock(IDetector.class);
-    IResolver resolver = mock(IResolver.class);
-    IDiagnoser diagnoser = mock(IDiagnoser.class);
-
-    HealthPolicyImpl policy = new HealthPolicyImpl();
-    policy.registerSensors(sensor);
-    policy.registerDetectors(detector);
-    policy.registerDiagnosers(diagnoser);
-    policy.registerResolvers(resolver);
-
-    verify(sensor, times(1)).initialize();
-    verify(detector, times(1)).initialize();
-    verify(diagnoser, times(1)).initialize();
-    verify(resolver, times(1)).initialize();
-  }
-
-  @Test
   public void testInitialize() {
     ISensor sensor = mock(ISensor.class);
     IDetector detector = mock(IDetector.class);
-    IResolver resolver = mock(IResolver.class);
     IDiagnoser diagnoser = mock(IDiagnoser.class);
+    IResolver resolver = mock(IResolver.class);
 
-    HealthPolicyImpl policy = new HealthPolicyImpl();
-    policy.initialize(Collections.singletonList(sensor),
-        Collections.singletonList(detector),
-        Collections.singletonList(diagnoser),
-        Collections.singletonList(resolver));
+    createTestPolicy(sensor, detector, diagnoser, resolver);
 
-    verify(sensor, times(1)).initialize();
-    verify(detector, times(1)).initialize();
-    verify(diagnoser, times(1)).initialize();
-    verify(resolver, times(1)).initialize();
+    verify(sensor, times(1)).initialize(null);
+    verify(detector, times(1)).initialize(null);
+    verify(diagnoser, times(1)).initialize(null);
+    verify(resolver, times(1)).initialize(null);
   }
 
   @Test
@@ -101,11 +75,7 @@ public class HealthPolicyImplTest {
     IResolver resolver = mock(IResolver.class);
     IDiagnoser diagnoser = mock(IDiagnoser.class);
 
-    HealthPolicyImpl policy = new HealthPolicyImpl();
-    policy.initialize(Collections.singletonList(sensor),
-        Collections.singletonList(detector),
-        Collections.singletonList(diagnoser),
-        Collections.singletonList(resolver));
+    HealthPolicyImpl policy = createTestPolicy(sensor, detector, diagnoser, resolver);
 
     policy.close();
 
@@ -113,6 +83,16 @@ public class HealthPolicyImplTest {
     verify(detector, times(1)).close();
     verify(diagnoser, times(1)).close();
     verify(resolver, times(1)).close();
+  }
+
+  private HealthPolicyImpl createTestPolicy(ISensor s, IDetector d, IDiagnoser diagnoser, IResolver r) {
+    HealthPolicyImpl policy = new HealthPolicyImpl();
+    policy.registerSensors(s);
+    policy.registerDetectors(d);
+    policy.registerDiagnosers(diagnoser);
+    policy.registerResolvers(r);
+    policy.initialize(null);
+    return policy;
   }
 
   class TestClock extends ClockTimeProvider {
