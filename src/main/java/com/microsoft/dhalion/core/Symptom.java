@@ -9,46 +9,61 @@ package com.microsoft.dhalion.core;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A {@link Symptom} identifies an anomaly or a potential health issue in a specific component of a
  * distributed application. For e.g. identification of irregular processing latency.
  */
 public class Symptom {
+  private static final AtomicInteger idGenerator = new AtomicInteger(1);
+
   // symptom identifier
   private final String type;
+
+  // unique identifier of this instance
+  private final int id;
 
   // instant when this symptom was created
   private final Instant instant;
 
-  // measurements corresponding to this symptom
-  private final Collection<Measurement> measurements;
+  // cause identifiers
+  private final Collection<String> causeIds;
 
-  public Symptom(String symptomType, Instant instant, Collection<Measurement> measurements) {
-    this.type = symptomType;
-    this.instant = instant;
-    this.measurements = new ArrayList<>(measurements);
+  public Symptom(String symptomType, Instant instant, Collection<String> causeIds) {
+    this(idGenerator.incrementAndGet(), symptomType, instant, causeIds);
   }
 
-  public String getType() {
+  public Symptom(int id, String symptomType, Instant instant, Collection<String> causeIds) {
+    this.type = symptomType;
+    this.instant = instant;
+    this.causeIds = new ArrayList<>(causeIds);
+    this.id = id;
+  }
+
+  public int id() {
+    return id;
+  }
+
+  public String type() {
     return type;
   }
 
-  public Instant getInstant() {
+  public Instant instant() {
     return instant;
   }
 
-  public Collection<Measurement> getMeasurements() {
-    return Collections.unmodifiableCollection(measurements);
+  public Collection<String> causeIds() {
+    return causeIds;
   }
 
   @Override
   public String toString() {
     return "Symptom{" +
-        "type='" + type + '\'' +
+        "type=" + type +
+        ", id=" + id +
         ", instant=" + instant +
-        ", measurements count=" + measurements.size() +
+        ", causeIds=" + causeIds +
         '}';
   }
 }

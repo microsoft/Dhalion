@@ -136,7 +136,7 @@ public class MeasurementsArray {
   /**
    * @param name instance name
    * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
-   * @see #instance(String)
+   * @see #instance(Collection)
    */
   public MeasurementsArray instance(String name) {
     return instance(Collections.singletonList(name));
@@ -231,24 +231,33 @@ public class MeasurementsArray {
    * @return unique components names in this collection of {@link Measurement}s
    */
   public Collection<String> uniqueComponents() {
-    ArrayList<String> result = new ArrayList<>();
-    CategoryColumn uniqueColumn = component.unique();
-    uniqueColumn.forEach(result::add);
-    return result;
+    return findUniqueCategory(component);
   }
 
   /**
    * @return unique metric types in this collection of {@link Measurement}s
    */
   public Collection<String> uniqueTypes() {
-    throw new UnsupportedOperationException();
+    return findUniqueCategory(type);
   }
 
   /**
    * @return unique {@link Instant}s in this collection of {@link Measurement}s
    */
-  public Collection<String> uniqueInstants() {
-    throw new UnsupportedOperationException();
+  public Collection<Instant> uniqueInstants() {
+    ArrayList<Instant> result = new ArrayList<>();
+    LongColumn uniqueColumn = timeStamps.unique();
+    for (Long ts : uniqueColumn) {
+      result.add(Instant.ofEpochMilli(ts));
+    }
+    return result;
+  }
+
+  private Collection<String> findUniqueCategory(CategoryColumn column) {
+    ArrayList<String> result = new ArrayList<>();
+    CategoryColumn uniqueColumn = column.unique();
+    uniqueColumn.forEach(result::add);
+    return result;
   }
 
   /**

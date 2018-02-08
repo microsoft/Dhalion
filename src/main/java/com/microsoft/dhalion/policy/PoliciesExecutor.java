@@ -13,6 +13,7 @@ import com.microsoft.dhalion.core.Diagnosis;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.MeasurementsArray;
 import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.SymptomsArray;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class PoliciesExecutor {
     ScheduledFuture<?> future = executor.scheduleWithFixedDelay(() -> {
       // schedule the next execution cycle
       Duration nextScheduleDelay = policies.stream()
-          .map(x -> x.getDelay())
+          .map(IHealthPolicy::getDelay)
           .min(Comparator.naturalOrder())
           .orElse(Duration.ofSeconds(10));
 
@@ -89,13 +90,18 @@ public class PoliciesExecutor {
 
   public static class ExecutionContext {
     private final MeasurementsArray.Builder measurementsArrayBuilder;
+    private final SymptomsArray.Builder symptomsArrayBuilder;
 
-    public ExecutionContext() {
+    private ExecutionContext() {
       measurementsArrayBuilder = new MeasurementsArray.Builder();
+      symptomsArrayBuilder = new SymptomsArray.Builder();
     }
 
     public MeasurementsArray measurements() {
       return measurementsArrayBuilder.get();
+    }
+    public SymptomsArray symptoms() {
+      return symptomsArrayBuilder.get();
     }
   }
 }
