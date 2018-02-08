@@ -7,7 +7,6 @@
 
 package com.microsoft.dhalion.core;
 
-import com.microsoft.dhalion.core.Measurement.ScalarMeasurement;
 import com.microsoft.dhalion.core.MeasurementsArray.Builder;
 import com.microsoft.dhalion.core.MeasurementsArray.SortKey;
 import org.junit.Before;
@@ -38,9 +37,9 @@ public class MeasurementsArrayTest {
     for (String component : components) {
       for (String instance : instances) {
         for (String metric : metrics) {
-          measurements.add(new ScalarMeasurement(component, instance, metric, Instant.ofEpochMilli(value), value));
+          measurements.add(new Measurement(component, instance, metric, Instant.ofEpochMilli(value), value));
           value += 10;
-          measurements.add(new ScalarMeasurement(component, instance, metric, Instant.ofEpochMilli(value), value));
+          measurements.add(new Measurement(component, instance, metric, Instant.ofEpochMilli(value), value));
           value += 10;
         }
       }
@@ -170,27 +169,27 @@ public class MeasurementsArrayTest {
   public void slice() {
     assertEquals(24, testArray.size());
     Iterator<Measurement> measurements = testArray.get().iterator();
-    double firstValue = ((ScalarMeasurement) measurements.next()).value();
-    double secondValue = ((ScalarMeasurement) measurements.next()).value();
+    double firstValue = measurements.next().value();
+    double secondValue = measurements.next().value();
 
     resultArray = testArray.component("c1").slice(0, 1);
     assertEquals(2, resultArray.size());
     measurements = resultArray.get().iterator();
-    assertEquals(firstValue, ((ScalarMeasurement) measurements.next()).value(), 0.01);
-    assertEquals(secondValue, ((ScalarMeasurement) measurements.next()).value(), 0.01);
+    assertEquals(firstValue, measurements.next().value(), 0.01);
+    assertEquals(secondValue, measurements.next().value(), 0.01);
 
     resultArray = testArray.component("c3").slice(7, 7);
     assertEquals(1, resultArray.size());
     measurements = resultArray.get().iterator();
-    assertEquals(240, ((ScalarMeasurement) measurements.next()).value(), 0.01);
+    assertEquals(240, measurements.next().value(), 0.01);
   }
 
   @Test
   public void valueBetween() {
     resultArray = testArray.valueBetween(45, 65);
     assertEquals(2, resultArray.size());
-    resultArray.get().forEach(m -> assertTrue(45 <= ((ScalarMeasurement) m).value()));
-    resultArray.get().forEach(m -> assertTrue(65 >= ((ScalarMeasurement) m).value()));
+    resultArray.get().forEach(m -> assertTrue(45 <= m.value()));
+    resultArray.get().forEach(m -> assertTrue(65 >= m.value()));
   }
 
   @Test

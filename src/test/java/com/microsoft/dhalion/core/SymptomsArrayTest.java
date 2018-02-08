@@ -30,14 +30,14 @@ public class SymptomsArrayTest {
   public void createTestArray() {
     int[] ids = {1, 2, 3};
     String[] types = {"s1", "s2"};
-    List<String> causes = Arrays.asList("c1", "c2", "c3");
+    List<String> attributions = Arrays.asList("c1", "c2", "c3");
 
     Collection<Symptom> symptoms = new ArrayList<>();
 
     int value = 10;
     for (int id : ids) {
       for (String type : types) {
-        symptoms.add(new Symptom(id, type, Instant.ofEpochMilli(value), causes));
+        symptoms.add(new Symptom(id, type, Instant.ofEpochMilli(value), attributions));
         value += 10;
       }
     }
@@ -69,13 +69,13 @@ public class SymptomsArrayTest {
   }
 
   @Test
-  public void cause() {
-    resultArray = testArray.cause("c1");
+  public void assignment() {
+    resultArray = testArray.assignment("c1");
     assertEquals(6, resultArray.size());
-    resultArray.get().forEach(s -> assertEquals(1, s.causeIds().size()));
-    resultArray.get().forEach(s -> assertEquals("c1", s.causeIds().iterator().next()));
+    resultArray.get().forEach(s -> assertEquals(1, s.assignments().size()));
+    resultArray.get().forEach(s -> assertEquals("c1", s.assignments().iterator().next()));
 
-    resultArray = testArray.cause(Arrays.asList("c1", "c2"));
+    resultArray = testArray.assignment(Arrays.asList("c1", "c2"));
     assertEquals(12, resultArray.size());
   }
 
@@ -123,7 +123,7 @@ public class SymptomsArrayTest {
 
   @Test
   public void sort() {
-    resultArray = testArray.cause("c3").between(Instant.ofEpochMilli(20), Instant.ofEpochMilli(30));
+    resultArray = testArray.assignment("c3").between(Instant.ofEpochMilli(20), Instant.ofEpochMilli(30));
     assertEquals(2, resultArray.size());
     assertEquals("s2", resultArray.first().type());
     assertEquals("s1", resultArray.last().type());
@@ -150,20 +150,20 @@ public class SymptomsArrayTest {
     resultArray = testArray.id(1);
     assertEquals(6, resultArray.size());
     Iterator<Symptom> symptoms = testArray.get().iterator();
-    String firstCause = symptoms.next().causeIds().iterator().next();
-    String secondCause = symptoms.next().causeIds().iterator().next();
+    String assignment1 = symptoms.next().assignments().iterator().next();
+    String assignment2 = symptoms.next().assignments().iterator().next();
 
     resultArray = resultArray.slice(0, 1);
     assertEquals(2, resultArray.size());
     symptoms = resultArray.get().iterator();
-    assertEquals(firstCause, symptoms.next().causeIds().iterator().next());
-    assertEquals(secondCause, symptoms.next().causeIds().iterator().next());
+    assertEquals(assignment1, symptoms.next().assignments().iterator().next());
+    assertEquals(assignment2, symptoms.next().assignments().iterator().next());
   }
 
   @Test
   public void first() {
     Symptom symptom = testArray.first();
-    assertEquals("c1", symptom.causeIds().iterator().next());
+    assertEquals("c1", symptom.assignments().iterator().next());
     assertEquals(1, symptom.id());
     assertEquals(10, symptom.instant().toEpochMilli());
   }
@@ -171,7 +171,7 @@ public class SymptomsArrayTest {
   @Test
   public void last() {
     Symptom symptom = testArray.last();
-    assertEquals("c3", symptom.causeIds().iterator().next());
+    assertEquals("c3", symptom.assignments().iterator().next());
     assertEquals(3, symptom.id());
     assertEquals(60, symptom.instant().toEpochMilli());
   }

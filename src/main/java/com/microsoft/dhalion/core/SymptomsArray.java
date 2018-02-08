@@ -36,27 +36,27 @@ public class SymptomsArray {
   private final Table symptoms;
   private CategoryColumn type;
   private IntColumn id;
-  private CategoryColumn cause;
+  private CategoryColumn assignment;
   private LongColumn timeStamp;
 
   public enum SortKey {
-    ID, CAUSE, TIME_STAMP, TYPE
+    ID, ASSIGNMENT, TIME_STAMP, TYPE
   }
 
   private static final String ID = SortKey.ID.name();
-  private static final String CAUSE = SortKey.CAUSE.name();
+  private static final String ASSIGNMENT = SortKey.ASSIGNMENT.name();
   private static final String TIME_STAMP = SortKey.TIME_STAMP.name();
   private static final String TYPE = SortKey.TYPE.name();
 
   private SymptomsArray() {
     id = new IntColumn(ID);
-    cause = new CategoryColumn(CAUSE);
+    assignment = new CategoryColumn(ASSIGNMENT);
     type = new CategoryColumn(TYPE);
     timeStamp = new LongColumn(TIME_STAMP);
 
     symptoms = Table.create("Symptoms");
     symptoms.addColumn(id);
-    symptoms.addColumn(cause);
+    symptoms.addColumn(assignment);
     symptoms.addColumn(type);
     symptoms.addColumn(timeStamp);
   }
@@ -64,16 +64,16 @@ public class SymptomsArray {
   private SymptomsArray(Table table) {
     this.symptoms = table;
     id = symptoms.intColumn(ID);
-    cause = symptoms.categoryColumn(CAUSE);
+    assignment = symptoms.categoryColumn(ASSIGNMENT);
     type = symptoms.categoryColumn(TYPE);
     timeStamp = symptoms.longColumn(TIME_STAMP);
   }
 
   private void addAll(Collection<Symptom> symptoms) {
     symptoms.forEach(symptom -> {
-      symptom.causeIds().forEach(causeId -> {
+      symptom.assignments().forEach(assignment -> {
         id.append(symptom.id());
-        cause.append(causeId);
+        this.assignment.append(assignment);
         type.append(symptom.type());
         timeStamp.append(symptom.instant().toEpochMilli());
       });
@@ -109,22 +109,22 @@ public class SymptomsArray {
   }
 
   /**
-   * Retains all {@link Symptom}s with given cause ids.
+   * Retains all {@link Symptom}s with given assignment ids.
    *
-   * @param causeIds cause ids, not null
+   * @param assignments assignment ids, not null
    * @return {@link SymptomsArray} containing filtered {@link Symptom}s
    */
-  public SymptomsArray cause(Collection<String> causeIds) {
-    return applyCategoryFilter(causeIds, CAUSE);
+  public SymptomsArray assignment(Collection<String> assignments) {
+    return applyCategoryFilter(assignments, ASSIGNMENT);
   }
 
   /**
-   * @param causeId cause id
+   * @param assignment assignment id
    * @return {@link SymptomsArray} containing filtered {@link Symptom}s
-   * @see #cause(Collection)
+   * @see #assignment(Collection)
    */
-  public SymptomsArray cause(String causeId) {
-    return cause(Collections.singletonList(causeId));
+  public SymptomsArray assignment(String assignment) {
+    return assignment(Collections.singletonList(assignment));
   }
 
   private SymptomsArray applyCategoryFilter(Collection<String> names, String column) {
@@ -258,7 +258,7 @@ public class SymptomsArray {
       result.add(new Symptom(id.get(i),
                              type.get(i),
                              Instant.ofEpochMilli(timeStamp.get(i)),
-                             Collections.singletonList(cause.get(i))));
+                             Collections.singletonList(assignment.get(i))));
     }
     return result;
   }

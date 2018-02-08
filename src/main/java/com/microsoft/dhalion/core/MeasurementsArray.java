@@ -6,7 +6,6 @@
  */
 package com.microsoft.dhalion.core;
 
-import com.microsoft.dhalion.core.Measurement.ScalarMeasurement;
 import tech.tablesaw.api.CategoryColumn;
 import tech.tablesaw.api.DoubleColumn;
 import tech.tablesaw.api.LongColumn;
@@ -81,7 +80,7 @@ public class MeasurementsArray {
       instance.append(measurement.instance());
       type.append(measurement.type());
       timeStamps.append(measurement.instant().toEpochMilli());
-      value.append(((ScalarMeasurement) measurement).value());
+      value.append(measurement.value());
     });
   }
 
@@ -326,11 +325,11 @@ public class MeasurementsArray {
   public Collection<Measurement> get() {
     ArrayList<Measurement> result = new ArrayList<>();
     for (int i = 0; i < measurements.rowCount(); i++) {
-      result.add(new ScalarMeasurement(component.get(i),
-                                       instance.get(i),
-                                       type.get(i),
-                                       Instant.ofEpochMilli(timeStamps.get(i)),
-                                       value.get(i)));
+      result.add(new Measurement(component.get(i),
+                                 instance.get(i),
+                                 type.get(i),
+                                 Instant.ofEpochMilli(timeStamps.get(i)),
+                                 value.get(i)));
     }
     return result;
   }

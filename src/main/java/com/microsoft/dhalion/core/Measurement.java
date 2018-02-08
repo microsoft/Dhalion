@@ -11,17 +11,19 @@ import java.time.Instant;
 /**
  * A {@link Measurement} is value of a metric corresponding to an instance at a instant of time.
  */
-public abstract class Measurement {
+public class Measurement {
   private final String component;
   private final String instance;
   private final String type;
   private final long instantMillis; // UTC
+  private final double value;
 
-  private Measurement(String component, String instance, String type, Instant instant) {
+  public Measurement(String component, String instance, String type, Instant instant, double value) {
     this.component = component;
     this.instance = instance;
     this.type = type;
     this.instantMillis = instant.toEpochMilli();
+    this.value = value;
   }
 
   public String component() {
@@ -40,40 +42,31 @@ public abstract class Measurement {
     return Instant.ofEpochMilli(instantMillis);
   }
 
-  public static class ScalarMeasurement extends Measurement {
-    private final double value;
+  public double value() {
+    return value;
+  }
 
-    public ScalarMeasurement(String component, String instance, String metricType, Instant instant, double value) {
-      super(component, instance, metricType, instant);
-      this.value = value;
-    }
-
-    public double value() {
-      return value;
-    }
-
-    @Override
-    public String toString() {
-      return "Measurement {" +
-          "component=" + component() +
-          ", instance=" + instance() +
-          ", type=" + type() +
-          ", instant=" + instant() +
-          ", value=" + value +
-          '}';
-    }
+  @Override
+  public String toString() {
+    return "Measurement {" +
+        "component=" + component() +
+        ", instance=" + instance() +
+        ", type=" + type() +
+        ", instant=" + instant() +
+        ", value=" + value +
+        '}';
   }
 
   public static class ObjMeasurement extends Measurement {
-    private final Object value;
+    private final Object reference;
 
     public ObjMeasurement(String component, String instance, String metricType, Instant instant, Object value) {
-      super(component, instance, metricType, instant);
-      this.value = value;
+      super(component, instance, metricType, instant, 0);
+      this.reference = value;
     }
 
-    public Object value() {
-      return value;
+    public Object reference() {
+      return reference;
     }
   }
 }

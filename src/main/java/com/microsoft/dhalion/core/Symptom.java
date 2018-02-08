@@ -27,18 +27,18 @@ public class Symptom {
   // instant when this symptom was created
   private final Instant instant;
 
-  // cause identifiers
-  private final Collection<String> causeIds;
+  // ids to which the symptom is assigned, for e.g. instances
+  private final Collection<String> assignments;
 
-  public Symptom(String symptomType, Instant instant, Collection<String> causeIds) {
-    this(idGenerator.incrementAndGet(), symptomType, instant, causeIds);
+  public Symptom(String symptomType, Instant instant, Collection<String> assignments) {
+    this(idGenerator.incrementAndGet(), symptomType, instant, assignments);
   }
 
-  public Symptom(int id, String symptomType, Instant instant, Collection<String> causeIds) {
+  public Symptom(int id, String symptomType, Instant instant, Collection<String> assignments) {
+    this.id = id;
     this.type = symptomType;
     this.instant = instant;
-    this.causeIds = new ArrayList<>(causeIds);
-    this.id = id;
+    this.assignments = new ArrayList<>(assignments);
   }
 
   public int id() {
@@ -53,8 +53,8 @@ public class Symptom {
     return instant;
   }
 
-  public Collection<String> causeIds() {
-    return causeIds;
+  public Collection<String> assignments() {
+    return assignments;
   }
 
   @Override
@@ -63,7 +63,7 @@ public class Symptom {
         "type=" + type +
         ", id=" + id +
         ", instant=" + instant +
-        ", causeIds=" + causeIds +
+        ", assignments=" + assignments +
         '}';
   }
 }
