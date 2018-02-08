@@ -84,6 +84,12 @@ public class MeasurementsArray {
     });
   }
 
+  public MeasurementsArray of(Collection<Measurement> measurements) {
+    MeasurementsArray array = new MeasurementsArray();
+    array.addAll(measurements);
+    return array;
+  }
+
   /**
    * Retains all {@link Measurement}s with given component names.
    *
@@ -262,7 +268,8 @@ public class MeasurementsArray {
   /**
    * Sorts the {@link Measurement}s in this collection in the order of the specified keys
    *
-   * @param sortKeys one or more sort keys, e.g. {@link SortKey#COMPONENT}
+   * @param descending false for ascending order, true for descending
+   * @param sortKeys   one or more sort keys, e.g. {@link SortKey#COMPONENT}
    * @return ordered {@link Measurement}s
    */
   public MeasurementsArray sort(boolean descending, SortKey... sortKeys) {
@@ -297,26 +304,14 @@ public class MeasurementsArray {
    * @return the first {@link Measurement}, if present
    */
   public Measurement first() {
-    if (measurements.isEmpty()) {
-      return null;
-    }
-
-    Table result = measurements.first(1);
-    Collection<Measurement> measurementCollection = new MeasurementsArray(result).get();
-    return measurementCollection.iterator().next();
+    return get(0);
   }
 
   /**
    * @return the last {@link Measurement}, if present
    */
   public Measurement last() {
-    if (measurements.isEmpty()) {
-      return null;
-    }
-
-    Table result = measurements.last(1);
-    Collection<Measurement> measurementCollection = new MeasurementsArray(result).get();
-    return measurementCollection.iterator().next();
+    return get(measurements.rowCount() - 1);
   }
 
   /**
@@ -325,13 +320,29 @@ public class MeasurementsArray {
   public Collection<Measurement> get() {
     ArrayList<Measurement> result = new ArrayList<>();
     for (int i = 0; i < measurements.rowCount(); i++) {
-      result.add(new Measurement(component.get(i),
-                                 instance.get(i),
-                                 type.get(i),
-                                 Instant.ofEpochMilli(timeStamps.get(i)),
-                                 value.get(i)));
+      result.add(row2Obj(i));
     }
     return result;
+  }
+
+  /**
+   * @param index position in the table
+   * @return {@link Measurement} at the requested position
+   */
+  public Measurement get(int index) {
+    if (index < 0 || index >= measurements.rowCount() || measurements.isEmpty()) {
+      return null;
+    }
+
+    return row2Obj(index);
+  }
+
+  private Measurement row2Obj(int index) {
+    return new Measurement(component.get(index),
+                           instance.get(index),
+                           type.get(index),
+                           Instant.ofEpochMilli(timeStamps.get(index)),
+                           value.get(index));
   }
 
   public String toStringForDebugging() {

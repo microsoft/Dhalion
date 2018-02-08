@@ -192,7 +192,8 @@ public class SymptomsArray {
   /**
    * Sorts the {@link Symptom}s in this collection in the order of the specified keys
    *
-   * @param sortKeys one or more sort keys, e.g. {@link SortKey#ID}
+   * @param descending false for ascending order, true for descending
+   * @param sortKeys   one or more sort keys, e.g. {@link SortKey#ID}
    * @return ordered {@link Symptom}s
    */
   public SymptomsArray sort(boolean descending, SortKey... sortKeys) {
@@ -255,13 +256,30 @@ public class SymptomsArray {
   public Collection<Symptom> get() {
     ArrayList<Symptom> result = new ArrayList<>();
     for (int i = 0; i < symptoms.rowCount(); i++) {
-      result.add(new Symptom(id.get(i),
-                             type.get(i),
-                             Instant.ofEpochMilli(timeStamp.get(i)),
-                             Collections.singletonList(assignment.get(i))));
+      result.add(row2Obj(i));
     }
     return result;
   }
+
+  /**
+   * @param index position in the table
+   * @return {@link Symptom} at the requested position
+   */
+  public Symptom get(int index) {
+    if (index < 0 || index >= symptoms.rowCount() || symptoms.isEmpty()) {
+      return null;
+    }
+
+    return row2Obj(index);
+  }
+
+  private Symptom row2Obj(int index) {
+    return new Symptom(id.get(index),
+                       type.get(index),
+                       Instant.ofEpochMilli(timeStamp.get(index)),
+                       Collections.singletonList(assignment.get(index)));
+  }
+
 
   public String toStringForDebugging() {
     return symptoms.print(symptoms.rowCount());
