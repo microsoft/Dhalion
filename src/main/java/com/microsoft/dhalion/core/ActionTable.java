@@ -18,23 +18,23 @@ import java.util.Collections;
  * An ordered collection of {@link Action}s. It provides methods to filter, query and aggregate the
  * {@link Action}s.
  */
-public class ActionArray extends OutcomeArray<Action> {
-  private ActionArray() {
+public class ActionTable extends OutcomeTable<Action> {
+  private ActionTable() {
     super("Actions");
   }
 
-  private ActionArray(Table table) {
+  private ActionTable(Table table) {
     super(table);
   }
 
   /**
    * @param actions collections of actions
-   * @return a {@link ActionArray} holding the input
+   * @return a {@link ActionTable} holding the input
    */
-  public ActionArray of(Collection<Action> actions) {
-    ActionArray array = new ActionArray();
-    array.addAll(actions);
-    return array;
+  public ActionTable of(Collection<Action> actions) {
+    ActionTable table = new ActionTable();
+    table.addAll(actions);
+    return table;
   }
 
   private void addAll(Collection<Action> actions) {
@@ -52,27 +52,27 @@ public class ActionArray extends OutcomeArray<Action> {
    * @param id unique action id
    * @return {@link Action}s with the given id
    */
-  public ActionArray id(int id) {
+  public ActionTable id(int id) {
     Table result = filterId(id);
-    return new ActionArray(result);
+    return new ActionTable(result);
   }
 
   /**
    * Retains all {@link Action}s with given action type
    *
    * @param types names of the action types, not null
-   * @return {@link ActionArray} containing filtered {@link Action}s
+   * @return {@link ActionTable} containing filtered {@link Action}s
    */
-  public ActionArray type(Collection<String> types) {
-    return new ActionArray(filterType(types));
+  public ActionTable type(Collection<String> types) {
+    return new ActionTable(filterType(types));
   }
 
   /**
    * @param type a action type
-   * @return {@link ActionArray} containing filtered {@link Action}s
+   * @return {@link ActionTable} containing filtered {@link Action}s
    * @see #type(Collection)
    */
-  public ActionArray type(String type) {
+  public ActionTable type(String type) {
     return type(Collections.singletonList(type));
   }
 
@@ -80,18 +80,18 @@ public class ActionArray extends OutcomeArray<Action> {
    * Retains all {@link Action}s with given assignment ids.
    *
    * @param assignments assignment ids, not null
-   * @return {@link ActionArray} containing filtered {@link Action}s
+   * @return {@link ActionTable} containing filtered {@link Action}s
    */
-  public ActionArray assignment(Collection<String> assignments) {
-    return new ActionArray(filterAssignment(assignments));
+  public ActionTable assignment(Collection<String> assignments) {
+    return new ActionTable(filterAssignment(assignments));
   }
 
   /**
    * @param assignment assignment id
-   * @return {@link ActionArray} containing filtered {@link Action}s
+   * @return {@link ActionTable} containing filtered {@link Action}s
    * @see #assignment(Collection)
    */
-  public ActionArray assignment(String assignment) {
+  public ActionTable assignment(String assignment) {
     return assignment(Collections.singletonList(assignment));
   }
 
@@ -100,10 +100,10 @@ public class ActionArray extends OutcomeArray<Action> {
    *
    * @param oldest the oldest timestamp, null to ignore this condition
    * @param newest the newest timestamp, null to ignore this condition
-   * @return {@link ActionArray} containing filtered {@link Action}s
+   * @return {@link ActionTable} containing filtered {@link Action}s
    */
-  public ActionArray between(Instant oldest, Instant newest) {
-    return new ActionArray(filterTime(oldest, newest));
+  public ActionTable between(Instant oldest, Instant newest) {
+    return new ActionTable(filterTime(oldest, newest));
   }
 
   /**
@@ -113,8 +113,8 @@ public class ActionArray extends OutcomeArray<Action> {
    * @param sortKeys   one or more sort keys, e.g. {@link SortKey#ID}
    * @return ordered {@link Action}s
    */
-  public ActionArray sort(boolean descending, SortKey... sortKeys) {
-    return new ActionArray(sortTable(descending, sortKeys));
+  public ActionTable sort(boolean descending, SortKey... sortKeys) {
+    return new ActionTable(sortTable(descending, sortKeys));
   }
 
   /**
@@ -123,10 +123,10 @@ public class ActionArray extends OutcomeArray<Action> {
    *
    * @param first the lowest index {@link Action} to be retained
    * @param last  the highest index {@link Action} to be retained
-   * @return {@link ActionArray} containing specific {@link Action}s
+   * @return {@link ActionTable} containing specific {@link Action}s
    */
-  public ActionArray slice(int first, int last) {
-    return new ActionArray(sliceTable(first, last));
+  public ActionTable slice(int first, int last) {
+    return new ActionTable(sliceTable(first, last));
   }
 
   Action row2Obj(int index) {
@@ -138,13 +138,13 @@ public class ActionArray extends OutcomeArray<Action> {
 
 
   /**
-   * Builds {@link ActionArray} instance and provides ability to update it.
+   * Builds {@link ActionTable} instance and provides ability to update it.
    */
   public static class Builder {
-    private final ActionArray actionsArray = new ActionArray();
+    private final ActionTable actionsTable = new ActionTable();
 
-    public ActionArray get() {
-      return actionsArray;
+    public ActionTable get() {
+      return actionsTable;
     }
 
     public void addAll(Collection<Action> actions) {
@@ -152,7 +152,7 @@ public class ActionArray extends OutcomeArray<Action> {
         return;
       }
 
-      this.actionsArray.addAll(actions);
+      this.actionsTable.addAll(actions);
     }
   }
 }

@@ -32,7 +32,7 @@ import static tech.tablesaw.api.QueryHelper.or;
  * An ordered collection of {@link Outcome} instances. This class provides methods to filter, query and aggregate the
  * {@link Outcome} instances.
  */
-public abstract class OutcomeArray<T extends Outcome> {
+public abstract class OutcomeTable<T extends Outcome> {
   final Table table;
   final CategoryColumn type;
   final IntColumn id;
@@ -48,7 +48,7 @@ public abstract class OutcomeArray<T extends Outcome> {
     ID, ASSIGNMENT, TIME_STAMP, TYPE
   }
 
-  OutcomeArray(String name) {
+  OutcomeTable(String name) {
     id = new IntColumn(ID);
     assignment = new CategoryColumn(ASSIGNMENT);
     type = new CategoryColumn(TYPE);
@@ -61,7 +61,7 @@ public abstract class OutcomeArray<T extends Outcome> {
     table.addColumn(timeStamp);
   }
 
-  OutcomeArray(Table table) {
+  OutcomeTable(Table table) {
     this.table = table;
     id = this.table.intColumn(ID);
     assignment = this.table.categoryColumn(ASSIGNMENT);

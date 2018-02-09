@@ -9,8 +9,7 @@ package com.microsoft.dhalion.state;
 
 import com.microsoft.dhalion.core.Action;
 import com.microsoft.dhalion.core.Diagnosis;
-import com.microsoft.dhalion.core.Measurement;
-import com.microsoft.dhalion.core.MeasurementsArray;
+import com.microsoft.dhalion.core.MeasurementsTable;
 import com.microsoft.dhalion.core.Symptom;
 
 import java.time.Duration;
@@ -18,13 +17,13 @@ import java.time.Instant;
 import java.util.Collection;
 
 public class StateStore {
-  private final MeasurementsArray measurementsArray;
+  private final MeasurementsTable measurementsArray;
 
-  public StateStore(MeasurementsArray measurementsArray) {
+  public StateStore(MeasurementsTable measurementsArray) {
     this.measurementsArray = measurementsArray;
   }
 
-  public MeasurementsArray getMeasurements() {
+  public MeasurementsTable getMeasurements() {
     return null;
   }
 

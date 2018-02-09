@@ -18,23 +18,23 @@ import java.util.Collections;
  * An ordered collection of {@link Symptom}s. It provides methods to filter, query and aggregate the
  * {@link Symptom}s.
  */
-public class SymptomsArray extends OutcomeArray<Symptom> {
-  private SymptomsArray() {
+public class SymptomsTable extends OutcomeTable<Symptom> {
+  private SymptomsTable() {
     super("Symptoms");
   }
 
-  private SymptomsArray(Table table) {
+  private SymptomsTable(Table table) {
     super(table);
   }
 
   /**
    * @param symptoms collections of symptoms
-   * @return a {@link SymptomsArray} holding the input
+   * @return a {@link SymptomsTable} holding the input
    */
-  public SymptomsArray of(Collection<Symptom> symptoms) {
-    SymptomsArray array = new SymptomsArray();
-    array.addAll(symptoms);
-    return array;
+  public SymptomsTable of(Collection<Symptom> symptoms) {
+    SymptomsTable table = new SymptomsTable();
+    table.addAll(symptoms);
+    return table;
   }
 
   private void addAll(Collection<Symptom> symptoms) {
@@ -52,27 +52,27 @@ public class SymptomsArray extends OutcomeArray<Symptom> {
    * @param id unique symptom id
    * @return {@link Symptom}s with the given id
    */
-  public SymptomsArray id(int id) {
+  public SymptomsTable id(int id) {
     Table result = filterId(id);
-    return new SymptomsArray(result);
+    return new SymptomsTable(result);
   }
 
   /**
    * Retains all {@link Symptom}s with given symptom type
    *
    * @param types names of the symptom types, not null
-   * @return {@link SymptomsArray} containing filtered {@link Symptom}s
+   * @return {@link SymptomsTable} containing filtered {@link Symptom}s
    */
-  public SymptomsArray type(Collection<String> types) {
-    return new SymptomsArray(filterType(types));
+  public SymptomsTable type(Collection<String> types) {
+    return new SymptomsTable(filterType(types));
   }
 
   /**
    * @param type a symptom type
-   * @return {@link SymptomsArray} containing filtered {@link Symptom}s
+   * @return {@link SymptomsTable} containing filtered {@link Symptom}s
    * @see #type(Collection)
    */
-  public SymptomsArray type(String type) {
+  public SymptomsTable type(String type) {
     return type(Collections.singletonList(type));
   }
 
@@ -80,18 +80,18 @@ public class SymptomsArray extends OutcomeArray<Symptom> {
    * Retains all {@link Symptom}s with given assignment ids.
    *
    * @param assignments assignment ids, not null
-   * @return {@link SymptomsArray} containing filtered {@link Symptom}s
+   * @return {@link SymptomsTable} containing filtered {@link Symptom}s
    */
-  public SymptomsArray assignment(Collection<String> assignments) {
-    return new SymptomsArray(filterAssignment(assignments));
+  public SymptomsTable assignment(Collection<String> assignments) {
+    return new SymptomsTable(filterAssignment(assignments));
   }
 
   /**
    * @param assignment assignment id
-   * @return {@link SymptomsArray} containing filtered {@link Symptom}s
+   * @return {@link SymptomsTable} containing filtered {@link Symptom}s
    * @see #assignment(Collection)
    */
-  public SymptomsArray assignment(String assignment) {
+  public SymptomsTable assignment(String assignment) {
     return assignment(Collections.singletonList(assignment));
   }
 
@@ -100,10 +100,10 @@ public class SymptomsArray extends OutcomeArray<Symptom> {
    *
    * @param oldest the oldest timestamp, null to ignore this condition
    * @param newest the newest timestamp, null to ignore this condition
-   * @return {@link SymptomsArray} containing filtered {@link Symptom}s
+   * @return {@link SymptomsTable} containing filtered {@link Symptom}s
    */
-  public SymptomsArray between(Instant oldest, Instant newest) {
-    return new SymptomsArray(filterTime(oldest, newest));
+  public SymptomsTable between(Instant oldest, Instant newest) {
+    return new SymptomsTable(filterTime(oldest, newest));
   }
 
   /**
@@ -113,8 +113,8 @@ public class SymptomsArray extends OutcomeArray<Symptom> {
    * @param sortKeys   one or more sort keys, e.g. {@link SortKey#ID}
    * @return ordered {@link Symptom}s
    */
-  public SymptomsArray sort(boolean descending, SortKey... sortKeys) {
-    return new SymptomsArray(sortTable(descending, sortKeys));
+  public SymptomsTable sort(boolean descending, SortKey... sortKeys) {
+    return new SymptomsTable(sortTable(descending, sortKeys));
   }
 
   /**
@@ -123,10 +123,10 @@ public class SymptomsArray extends OutcomeArray<Symptom> {
    *
    * @param first the lowest index {@link Symptom} to be retained
    * @param last  the highest index {@link Symptom} to be retained
-   * @return {@link SymptomsArray} containing specific {@link Symptom}s
+   * @return {@link SymptomsTable} containing specific {@link Symptom}s
    */
-  public SymptomsArray slice(int first, int last) {
-    return new SymptomsArray(sliceTable(first, last));
+  public SymptomsTable slice(int first, int last) {
+    return new SymptomsTable(sliceTable(first, last));
   }
 
   Symptom row2Obj(int index) {
@@ -138,13 +138,13 @@ public class SymptomsArray extends OutcomeArray<Symptom> {
 
 
   /**
-   * Builds {@link SymptomsArray} instance and provides ability to update it.
+   * Builds {@link SymptomsTable} instance and provides ability to update it.
    */
   public static class Builder {
-    private final SymptomsArray symptomsArray = new SymptomsArray();
+    private final SymptomsTable symptomsTable = new SymptomsTable();
 
-    public SymptomsArray get() {
-      return symptomsArray;
+    public SymptomsTable get() {
+      return symptomsTable;
     }
 
     public void addAll(Collection<Symptom> symptoms) {
@@ -152,7 +152,7 @@ public class SymptomsArray extends OutcomeArray<Symptom> {
         return;
       }
 
-      this.symptomsArray.addAll(symptoms);
+      this.symptomsTable.addAll(symptoms);
     }
   }
 }

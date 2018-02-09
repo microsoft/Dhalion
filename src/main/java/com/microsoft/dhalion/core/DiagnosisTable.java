@@ -18,23 +18,23 @@ import java.util.Collections;
  * An ordered collection of {@link Diagnosis}. It provides methods to filter, query and aggregate the
  * {@link Diagnosis} .
  */
-public class DiagnosisArray extends OutcomeArray<Diagnosis> {
-  private DiagnosisArray() {
+public class DiagnosisTable extends OutcomeTable<Diagnosis> {
+  private DiagnosisTable() {
     super("Symptoms");
   }
 
-  private DiagnosisArray(Table table) {
+  private DiagnosisTable(Table table) {
     super(table);
   }
 
   /**
    * @param diagnosis collections of diagnosis
-   * @return a {@link DiagnosisArray} holding the input
+   * @return a {@link DiagnosisTable} holding the input
    */
-  public DiagnosisArray of(Collection<Diagnosis> diagnosis) {
-    DiagnosisArray array = new DiagnosisArray();
-    array.addAll(diagnosis);
-    return array;
+  public DiagnosisTable of(Collection<Diagnosis> diagnosis) {
+    DiagnosisTable table = new DiagnosisTable();
+    table.addAll(diagnosis);
+    return table;
   }
 
   private void addAll(Collection<Diagnosis> diagnosis) {
@@ -52,27 +52,27 @@ public class DiagnosisArray extends OutcomeArray<Diagnosis> {
    * @param id unique diagnosis id
    * @return {@link Diagnosis} with the given id
    */
-  public DiagnosisArray id(int id) {
+  public DiagnosisTable id(int id) {
     Table result = filterId(id);
-    return new DiagnosisArray(result);
+    return new DiagnosisTable(result);
   }
 
   /**
    * Retains all {@link Diagnosis} with given diagnosis type
    *
    * @param types names of the diagnosis types, not null
-   * @return {@link DiagnosisArray} containing filtered {@link Diagnosis}
+   * @return {@link DiagnosisTable} containing filtered {@link Diagnosis}
    */
-  public DiagnosisArray type(Collection<String> types) {
-    return new DiagnosisArray(filterType(types));
+  public DiagnosisTable type(Collection<String> types) {
+    return new DiagnosisTable(filterType(types));
   }
 
   /**
    * @param type a diagnosis type
-   * @return {@link DiagnosisArray} containing filtered {@link Diagnosis}
+   * @return {@link DiagnosisTable} containing filtered {@link Diagnosis}
    * @see #type(Collection)
    */
-  public DiagnosisArray type(String type) {
+  public DiagnosisTable type(String type) {
     return type(Collections.singletonList(type));
   }
 
@@ -80,18 +80,18 @@ public class DiagnosisArray extends OutcomeArray<Diagnosis> {
    * Retains all {@link Diagnosis} with given assignment ids.
    *
    * @param assignments assignment ids, not null
-   * @return {@link DiagnosisArray} containing filtered {@link Diagnosis}
+   * @return {@link DiagnosisTable} containing filtered {@link Diagnosis}
    */
-  public DiagnosisArray assignment(Collection<String> assignments) {
-    return new DiagnosisArray(filterAssignment(assignments));
+  public DiagnosisTable assignment(Collection<String> assignments) {
+    return new DiagnosisTable(filterAssignment(assignments));
   }
 
   /**
    * @param assignment assignment id
-   * @return {@link DiagnosisArray} containing filtered {@link Diagnosis}
+   * @return {@link DiagnosisTable} containing filtered {@link Diagnosis}
    * @see #assignment(Collection)
    */
-  public DiagnosisArray assignment(String assignment) {
+  public DiagnosisTable assignment(String assignment) {
     return assignment(Collections.singletonList(assignment));
   }
 
@@ -100,10 +100,10 @@ public class DiagnosisArray extends OutcomeArray<Diagnosis> {
    *
    * @param oldest the oldest timestamp, null to ignore this condition
    * @param newest the newest timestamp, null to ignore this condition
-   * @return {@link DiagnosisArray} containing filtered {@link Diagnosis}
+   * @return {@link DiagnosisTable} containing filtered {@link Diagnosis}
    */
-  public DiagnosisArray between(Instant oldest, Instant newest) {
-    return new DiagnosisArray(filterTime(oldest, newest));
+  public DiagnosisTable between(Instant oldest, Instant newest) {
+    return new DiagnosisTable(filterTime(oldest, newest));
   }
 
   /**
@@ -113,8 +113,8 @@ public class DiagnosisArray extends OutcomeArray<Diagnosis> {
    * @param sortKeys   one or more sort keys, e.g. {@link SortKey#ID}
    * @return ordered {@link Diagnosis}
    */
-  public DiagnosisArray sort(boolean descending, SortKey... sortKeys) {
-    return new DiagnosisArray(sortTable(descending, sortKeys));
+  public DiagnosisTable sort(boolean descending, SortKey... sortKeys) {
+    return new DiagnosisTable(sortTable(descending, sortKeys));
   }
 
   /**
@@ -123,10 +123,10 @@ public class DiagnosisArray extends OutcomeArray<Diagnosis> {
    *
    * @param first the lowest index {@link Diagnosis} to be retained
    * @param last  the highest index {@link Diagnosis} to be retained
-   * @return {@link DiagnosisArray} containing specific {@link Diagnosis}s
+   * @return {@link DiagnosisTable} containing specific {@link Diagnosis}s
    */
-  public DiagnosisArray slice(int first, int last) {
-    return new DiagnosisArray(sliceTable(first, last));
+  public DiagnosisTable slice(int first, int last) {
+    return new DiagnosisTable(sliceTable(first, last));
   }
 
   Diagnosis row2Obj(int index) {
@@ -138,13 +138,13 @@ public class DiagnosisArray extends OutcomeArray<Diagnosis> {
 
 
   /**
-   * Builds {@link DiagnosisArray} instance and provides ability to update it.
+   * Builds {@link DiagnosisTable} instance and provides ability to update it.
    */
   public static class Builder {
-    private final DiagnosisArray diagnosisArray = new DiagnosisArray();
+    private final DiagnosisTable diagnosisTable = new DiagnosisTable();
 
-    public DiagnosisArray get() {
-      return diagnosisArray;
+    public DiagnosisTable get() {
+      return diagnosisTable;
     }
 
     public void addAll(Collection<Diagnosis> diagnosis) {
@@ -152,7 +152,7 @@ public class DiagnosisArray extends OutcomeArray<Diagnosis> {
         return;
       }
 
-      this.diagnosisArray.addAll(diagnosis);
+      this.diagnosisTable.addAll(diagnosis);
     }
   }
 }

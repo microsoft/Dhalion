@@ -9,13 +9,13 @@ package com.microsoft.dhalion.policy;
 
 import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.core.Action;
-import com.microsoft.dhalion.core.ActionArray;
+import com.microsoft.dhalion.core.ActionTable;
 import com.microsoft.dhalion.core.Diagnosis;
-import com.microsoft.dhalion.core.DiagnosisArray;
+import com.microsoft.dhalion.core.DiagnosisTable;
 import com.microsoft.dhalion.core.Measurement;
-import com.microsoft.dhalion.core.MeasurementsArray;
+import com.microsoft.dhalion.core.MeasurementsTable;
 import com.microsoft.dhalion.core.Symptom;
-import com.microsoft.dhalion.core.SymptomsArray;
+import com.microsoft.dhalion.core.SymptomsTable;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -69,16 +69,16 @@ public class PoliciesExecutor {
 
         LOG.info("Executing Policy: " + policy.getClass().getSimpleName());
         Collection<Measurement> measurements = policy.executeSensors();
-        policyContextMap.get(policy).measurementsArrayBuilder.addAll(measurements);
+        policyContextMap.get(policy).measurementsTableBuilder.addAll(measurements);
 
         Collection<Symptom> symptoms = policy.executeDetectors(measurements);
-        policyContextMap.get(policy).symptomsArrayBuilder.addAll(symptoms);
+        policyContextMap.get(policy).symptomsTableBuilder.addAll(symptoms);
 
         Collection<Diagnosis> diagnosis = policy.executeDiagnosers(symptoms);
-        policyContextMap.get(policy).diagnsisArrayBuilder.addAll(diagnosis);
+        policyContextMap.get(policy).diagnsisTableBuilder.addAll(diagnosis);
 
         Collection<Action> actions = policy.executeResolvers(diagnosis);
-        policyContextMap.get(policy).actionArrayBuilder.addAll(actions);
+        policyContextMap.get(policy).actionTableBuilder.addAll(actions);
 
         // TODO pretty print
         LOG.info(actions.toString());
@@ -97,32 +97,32 @@ public class PoliciesExecutor {
 
 
   public static class ExecutionContext {
-    private final MeasurementsArray.Builder measurementsArrayBuilder;
-    private final SymptomsArray.Builder symptomsArrayBuilder;
-    private final DiagnosisArray.Builder diagnsisArrayBuilder;
-    private final ActionArray.Builder actionArrayBuilder;
+    private final MeasurementsTable.Builder measurementsTableBuilder;
+    private final SymptomsTable.Builder symptomsTableBuilder;
+    private final DiagnosisTable.Builder diagnsisTableBuilder;
+    private final ActionTable.Builder actionTableBuilder;
 
     private ExecutionContext() {
-      measurementsArrayBuilder = new MeasurementsArray.Builder();
-      symptomsArrayBuilder = new SymptomsArray.Builder();
-      diagnsisArrayBuilder = new DiagnosisArray.Builder();
-      actionArrayBuilder = new ActionArray.Builder();
+      measurementsTableBuilder = new MeasurementsTable.Builder();
+      symptomsTableBuilder = new SymptomsTable.Builder();
+      diagnsisTableBuilder = new DiagnosisTable.Builder();
+      actionTableBuilder = new ActionTable.Builder();
     }
 
-    public MeasurementsArray measurements() {
-      return measurementsArrayBuilder.get();
+    public MeasurementsTable measurements() {
+      return measurementsTableBuilder.get();
     }
 
-    public SymptomsArray symptoms() {
-      return symptomsArrayBuilder.get();
+    public SymptomsTable symptoms() {
+      return symptomsTableBuilder.get();
     }
 
-    public DiagnosisArray diagnosis() {
-      return diagnsisArrayBuilder.get();
+    public DiagnosisTable diagnosis() {
+      return diagnsisTableBuilder.get();
     }
 
-    public ActionArray actions() {
-      return actionArrayBuilder.get();
+    public ActionTable actions() {
+      return actionTableBuilder.get();
     }
   }
 }

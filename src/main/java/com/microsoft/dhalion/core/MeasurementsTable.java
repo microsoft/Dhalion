@@ -32,7 +32,7 @@ import static tech.tablesaw.api.QueryHelper.or;
  * An ordered collection of {@link Measurement}s. It provides methods to filter, query and aggregate the
  * {@link Measurement}s.
  */
-public class MeasurementsArray {
+public class MeasurementsTable {
   private final Table measurements;
   private CategoryColumn component;
   private CategoryColumn instance;
@@ -50,7 +50,7 @@ public class MeasurementsArray {
   private static final String TYPE = SortKey.TYPE.name();
   private static final String VALUE = SortKey.VALUE.name();
 
-  private MeasurementsArray() {
+  private MeasurementsTable() {
     component = new CategoryColumn(COMPONENT);
     instance = new CategoryColumn(INSTANCE);
     type = new CategoryColumn(TYPE);
@@ -65,7 +65,7 @@ public class MeasurementsArray {
     measurements.addColumn(value);
   }
 
-  private MeasurementsArray(Table table) {
+  private MeasurementsTable(Table table) {
     this.measurements = table;
     component = measurements.categoryColumn(COMPONENT);
     instance = measurements.categoryColumn(INSTANCE);
@@ -86,30 +86,30 @@ public class MeasurementsArray {
 
   /**
    * @param measurements collections of measurements
-   * @return a {@link MeasurementsArray} holding the input
+   * @return a {@link MeasurementsTable} holding the input
    */
-  public MeasurementsArray of(Collection<Measurement> measurements) {
-    MeasurementsArray array = new MeasurementsArray();
-    array.addAll(measurements);
-    return array;
+  public MeasurementsTable of(Collection<Measurement> measurements) {
+    MeasurementsTable table = new MeasurementsTable();
+    table.addAll(measurements);
+    return table;
   }
 
   /**
    * Retains all {@link Measurement}s with given component names.
    *
    * @param names of the components, not null
-   * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
+   * @return {@link MeasurementsTable} containing filtered {@link Measurement}s
    */
-  public MeasurementsArray component(Collection<String> names) {
+  public MeasurementsTable component(Collection<String> names) {
     return applyCategoryFilter(names, COMPONENT);
   }
 
   /**
    * @param name a component name
-   * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
+   * @return {@link MeasurementsTable} containing filtered {@link Measurement}s
    * @see #component(Collection)
    */
-  public MeasurementsArray component(String name) {
+  public MeasurementsTable component(String name) {
     return component(Collections.singletonList(name));
   }
 
@@ -117,18 +117,18 @@ public class MeasurementsArray {
    * Retains all {@link Measurement}s with given metric type
    *
    * @param types names of the metric types, not null
-   * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
+   * @return {@link MeasurementsTable} containing filtered {@link Measurement}s
    */
-  public MeasurementsArray type(Collection<String> types) {
+  public MeasurementsTable type(Collection<String> types) {
     return applyCategoryFilter(types, TYPE);
   }
 
   /**
    * @param type a metric type
-   * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
+   * @return {@link MeasurementsTable} containing filtered {@link Measurement}s
    * @see #type(Collection)
    */
-  public MeasurementsArray type(String type) {
+  public MeasurementsTable type(String type) {
     return type(Collections.singletonList(type));
   }
 
@@ -136,25 +136,25 @@ public class MeasurementsArray {
    * Retains all {@link Measurement}s with given instance names.
    *
    * @param names of the instances, not null
-   * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
+   * @return {@link MeasurementsTable} containing filtered {@link Measurement}s
    */
-  public MeasurementsArray instance(Collection<String> names) {
+  public MeasurementsTable instance(Collection<String> names) {
     return applyCategoryFilter(names, INSTANCE);
   }
 
   /**
    * @param name instance name
-   * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
+   * @return {@link MeasurementsTable} containing filtered {@link Measurement}s
    * @see #instance(Collection)
    */
-  public MeasurementsArray instance(String name) {
+  public MeasurementsTable instance(String name) {
     return instance(Collections.singletonList(name));
   }
 
-  private MeasurementsArray applyCategoryFilter(Collection<String> names, String column) {
+  private MeasurementsTable applyCategoryFilter(Collection<String> names, String column) {
     List<Filter> filters = names.stream().map(name -> column(column).isEqualTo(name)).collect(Collectors.toList());
     Table result = measurements.selectWhere(or(filters));
-    return new MeasurementsArray(result);
+    return new MeasurementsTable(result);
   }
 
   /**
@@ -162,14 +162,14 @@ public class MeasurementsArray {
    *
    * @param oldest the oldest timestamp, null to ignore this condition
    * @param newest the newest timestamp, null to ignore this condition
-   * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
+   * @return {@link MeasurementsTable} containing filtered {@link Measurement}s
    */
-  public MeasurementsArray between(Instant oldest, Instant newest) {
+  public MeasurementsTable between(Instant oldest, Instant newest) {
     Table result = measurements.selectWhere(
         both(new LongGreaterThanOrEqualTo(new ColumnReference(TIME_STAMP), oldest.toEpochMilli()),
              new LongLessThanOrEqualTo(new ColumnReference(TIME_STAMP), newest.toEpochMilli())));
 
-    return new MeasurementsArray(result);
+    return new MeasurementsTable(result);
   }
 
   /**
@@ -178,13 +178,13 @@ public class MeasurementsArray {
    *
    * @param low  the lowest value to be retained
    * @param high the highest value to be retained
-   * @return {@link MeasurementsArray} containing filtered {@link Measurement}s
+   * @return {@link MeasurementsTable} containing filtered {@link Measurement}s
    */
-  public MeasurementsArray valueBetween(double low, double high) {
+  public MeasurementsTable valueBetween(double low, double high) {
     Table result = measurements.selectWhere(
         both(column(VALUE).isGreaterThanOrEqualTo(low),
              column(VALUE).isLessThanOrEqualTo(high)));
-    return new MeasurementsArray(result);
+    return new MeasurementsTable(result);
   }
 
   /**
@@ -276,7 +276,7 @@ public class MeasurementsArray {
    * @param sortKeys   one or more sort keys, e.g. {@link SortKey#COMPONENT}
    * @return ordered {@link Measurement}s
    */
-  public MeasurementsArray sort(boolean descending, SortKey... sortKeys) {
+  public MeasurementsTable sort(boolean descending, SortKey... sortKeys) {
     String[] columns = new String[sortKeys.length];
     for (int i = 0; i < sortKeys.length; i++) {
       columns[i] = sortKeys[i].name();
@@ -288,7 +288,7 @@ public class MeasurementsArray {
     } else {
       result = measurements.sortAscendingOn(columns);
     }
-    return new MeasurementsArray(result);
+    return new MeasurementsTable(result);
   }
 
   /**
@@ -297,11 +297,11 @@ public class MeasurementsArray {
    *
    * @param first the lowest index {@link Measurement} to be retained
    * @param last  the highest index {@link Measurement} to be retained
-   * @return {@link MeasurementsArray} containing specific {@link Measurement}s
+   * @return {@link MeasurementsTable} containing specific {@link Measurement}s
    */
-  public MeasurementsArray slice(int first, int last) {
+  public MeasurementsTable slice(int first, int last) {
     Table result = measurements.selectRows(first, last);
-    return new MeasurementsArray(result);
+    return new MeasurementsTable(result);
   }
 
   /**
@@ -354,13 +354,13 @@ public class MeasurementsArray {
   }
 
   /**
-   * Builds {@link MeasurementsArray} instance and provides ability to update it.
+   * Builds {@link MeasurementsTable} instance and provides ability to update it.
    */
   public static class Builder {
-    private final MeasurementsArray measurementsArray = new MeasurementsArray();
+    private final MeasurementsTable measurementsTable = new MeasurementsTable();
 
-    public MeasurementsArray get() {
-      return measurementsArray;
+    public MeasurementsTable get() {
+      return measurementsTable;
     }
 
     public void addAll(Collection<Measurement> measurements) {
@@ -368,7 +368,7 @@ public class MeasurementsArray {
         return;
       }
 
-      this.measurementsArray.addAll(measurements);
+      this.measurementsTable.addAll(measurements);
     }
   }
 }
