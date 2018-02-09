@@ -31,7 +31,7 @@ public class SymptomsTable extends OutcomeTable<Symptom> {
    * @param symptoms collections of symptoms
    * @return a {@link SymptomsTable} holding the input
    */
-  public SymptomsTable of(Collection<Symptom> symptoms) {
+  public static SymptomsTable of(Collection<Symptom> symptoms) {
     SymptomsTable table = new SymptomsTable();
     table.addAll(symptoms);
     return table;

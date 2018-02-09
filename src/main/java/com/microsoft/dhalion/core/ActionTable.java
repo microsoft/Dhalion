@@ -31,7 +31,7 @@ public class ActionTable extends OutcomeTable<Action> {
    * @param actions collections of actions
    * @return a {@link ActionTable} holding the input
    */
-  public ActionTable of(Collection<Action> actions) {
+  public static ActionTable of(Collection<Action> actions) {
     ActionTable table = new ActionTable();
     table.addAll(actions);
     return table;

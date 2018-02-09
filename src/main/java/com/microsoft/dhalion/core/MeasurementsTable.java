@@ -88,7 +88,7 @@ public class MeasurementsTable {
    * @param measurements collections of measurements
    * @return a {@link MeasurementsTable} holding the input
    */
-  public MeasurementsTable of(Collection<Measurement> measurements) {
+  public static MeasurementsTable of(Collection<Measurement> measurements) {
     MeasurementsTable table = new MeasurementsTable();
     table.addAll(measurements);
     return table;
