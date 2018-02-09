@@ -7,63 +7,28 @@
 package com.microsoft.dhalion.core;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A {@link Symptom} identifies an anomaly or a potential health issue in a specific component of a
  * distributed application. For e.g. identification of irregular processing latency.
  */
-public class Symptom {
-  private static final AtomicInteger idGenerator = new AtomicInteger(1);
-
-  // symptom identifier
-  private final String type;
-
-  // unique identifier of this instance
-  private final int id;
-
-  // instant when this symptom was created
-  private final Instant instant;
-
-  // ids to which the symptom is assigned, for e.g. instances
-  private final Collection<String> assignments;
-
+public class Symptom extends Outcome {
   public Symptom(String symptomType, Instant instant, Collection<String> assignments) {
-    this(idGenerator.incrementAndGet(), symptomType, instant, assignments);
+    super(symptomType, instant, assignments);
   }
 
   public Symptom(int id, String symptomType, Instant instant, Collection<String> assignments) {
-    this.id = id;
-    this.type = symptomType;
-    this.instant = instant;
-    this.assignments = new ArrayList<>(assignments);
-  }
-
-  public int id() {
-    return id;
-  }
-
-  public String type() {
-    return type;
-  }
-
-  public Instant instant() {
-    return instant;
-  }
-
-  public Collection<String> assignments() {
-    return assignments;
+    super(id, symptomType, instant, assignments);
   }
 
   @Override
   public String toString() {
     return "Symptom{" +
-        "type=" + type +
-        ", id=" + id +
-        ", instant=" + instant +
-        ", assignments=" + assignments +
+        "type=" + type() +
+        ", id=" + id() +
+        ", instant=" + instant() +
+        ", assignments=" + assignments() +
         '}';
   }
 }

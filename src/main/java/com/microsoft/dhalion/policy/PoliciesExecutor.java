@@ -9,7 +9,9 @@ package com.microsoft.dhalion.policy;
 
 import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.core.Action;
+import com.microsoft.dhalion.core.ActionArray;
 import com.microsoft.dhalion.core.Diagnosis;
+import com.microsoft.dhalion.core.DiagnosisArray;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.MeasurementsArray;
 import com.microsoft.dhalion.core.Symptom;
@@ -70,8 +72,14 @@ public class PoliciesExecutor {
         policyContextMap.get(policy).measurementsArrayBuilder.addAll(measurements);
 
         Collection<Symptom> symptoms = policy.executeDetectors(measurements);
+        policyContextMap.get(policy).symptomsArrayBuilder.addAll(symptoms);
+
         Collection<Diagnosis> diagnosis = policy.executeDiagnosers(symptoms);
+        policyContextMap.get(policy).diagnsisArrayBuilder.addAll(diagnosis);
+
         Collection<Action> actions = policy.executeResolvers(diagnosis);
+        policyContextMap.get(policy).actionArrayBuilder.addAll(actions);
+
         // TODO pretty print
         LOG.info(actions.toString());
 
@@ -91,17 +99,30 @@ public class PoliciesExecutor {
   public static class ExecutionContext {
     private final MeasurementsArray.Builder measurementsArrayBuilder;
     private final SymptomsArray.Builder symptomsArrayBuilder;
+    private final DiagnosisArray.Builder diagnsisArrayBuilder;
+    private final ActionArray.Builder actionArrayBuilder;
 
     private ExecutionContext() {
       measurementsArrayBuilder = new MeasurementsArray.Builder();
       symptomsArrayBuilder = new SymptomsArray.Builder();
+      diagnsisArrayBuilder = new DiagnosisArray.Builder();
+      actionArrayBuilder = new ActionArray.Builder();
     }
 
     public MeasurementsArray measurements() {
       return measurementsArrayBuilder.get();
     }
+
     public SymptomsArray symptoms() {
       return symptomsArrayBuilder.get();
+    }
+
+    public DiagnosisArray diagnosis() {
+      return diagnsisArrayBuilder.get();
+    }
+
+    public ActionArray actions() {
+      return actionArrayBuilder.get();
     }
   }
 }

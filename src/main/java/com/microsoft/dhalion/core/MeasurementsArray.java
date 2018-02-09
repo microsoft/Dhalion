@@ -84,6 +84,10 @@ public class MeasurementsArray {
     });
   }
 
+  /**
+   * @param measurements collections of measurements
+   * @return a {@link MeasurementsArray} holding the input
+   */
   public MeasurementsArray of(Collection<Measurement> measurements) {
     MeasurementsArray array = new MeasurementsArray();
     array.addAll(measurements);

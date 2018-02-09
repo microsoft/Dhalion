@@ -7,8 +7,8 @@
 
 package com.microsoft.dhalion.core;
 
+import com.microsoft.dhalion.core.OutcomeArray.SortKey;
 import com.microsoft.dhalion.core.SymptomsArray.Builder;
-import com.microsoft.dhalion.core.SymptomsArray.SortKey;
 import org.junit.Before;
 import org.junit.Test;
 

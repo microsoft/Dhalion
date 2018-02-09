@@ -6,25 +6,11 @@
  */
 package com.microsoft.dhalion.core;
 
-import tech.tablesaw.api.CategoryColumn;
-import tech.tablesaw.api.IntColumn;
-import tech.tablesaw.api.LongColumn;
 import tech.tablesaw.api.Table;
-import tech.tablesaw.columns.ColumnReference;
-import tech.tablesaw.filtering.Filter;
-import tech.tablesaw.filtering.LongGreaterThanOrEqualTo;
-import tech.tablesaw.filtering.LongLessThanOrEqualTo;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static tech.tablesaw.api.QueryHelper.both;
-import static tech.tablesaw.api.QueryHelper.column;
-import static tech.tablesaw.api.QueryHelper.or;
 
 //TODO thread safety
 
@@ -32,41 +18,23 @@ import static tech.tablesaw.api.QueryHelper.or;
  * An ordered collection of {@link Symptom}s. It provides methods to filter, query and aggregate the
  * {@link Symptom}s.
  */
-public class SymptomsArray {
-  private final Table symptoms;
-  private CategoryColumn type;
-  private IntColumn id;
-  private CategoryColumn assignment;
-  private LongColumn timeStamp;
-
-  public enum SortKey {
-    ID, ASSIGNMENT, TIME_STAMP, TYPE
-  }
-
-  private static final String ID = SortKey.ID.name();
-  private static final String ASSIGNMENT = SortKey.ASSIGNMENT.name();
-  private static final String TIME_STAMP = SortKey.TIME_STAMP.name();
-  private static final String TYPE = SortKey.TYPE.name();
-
+public class SymptomsArray extends OutcomeArray<Symptom> {
   private SymptomsArray() {
-    id = new IntColumn(ID);
-    assignment = new CategoryColumn(ASSIGNMENT);
-    type = new CategoryColumn(TYPE);
-    timeStamp = new LongColumn(TIME_STAMP);
-
-    symptoms = Table.create("Symptoms");
-    symptoms.addColumn(id);
-    symptoms.addColumn(assignment);
-    symptoms.addColumn(type);
-    symptoms.addColumn(timeStamp);
+    super("Symptoms");
   }
 
   private SymptomsArray(Table table) {
-    this.symptoms = table;
-    id = symptoms.intColumn(ID);
-    assignment = symptoms.categoryColumn(ASSIGNMENT);
-    type = symptoms.categoryColumn(TYPE);
-    timeStamp = symptoms.longColumn(TIME_STAMP);
+    super(table);
+  }
+
+  /**
+   * @param symptoms collections of symptoms
+   * @return a {@link SymptomsArray} holding the input
+   */
+  public SymptomsArray of(Collection<Symptom> symptoms) {
+    SymptomsArray array = new SymptomsArray();
+    array.addAll(symptoms);
+    return array;
   }
 
   private void addAll(Collection<Symptom> symptoms) {
@@ -85,7 +53,7 @@ public class SymptomsArray {
    * @return {@link Symptom}s with the given id
    */
   public SymptomsArray id(int id) {
-    Table result = symptoms.selectWhere(column(ID).isEqualTo(id));
+    Table result = filterId(id);
     return new SymptomsArray(result);
   }
 
@@ -96,7 +64,7 @@ public class SymptomsArray {
    * @return {@link SymptomsArray} containing filtered {@link Symptom}s
    */
   public SymptomsArray type(Collection<String> types) {
-    return applyCategoryFilter(types, TYPE);
+    return new SymptomsArray(filterType(types));
   }
 
   /**
@@ -115,7 +83,7 @@ public class SymptomsArray {
    * @return {@link SymptomsArray} containing filtered {@link Symptom}s
    */
   public SymptomsArray assignment(Collection<String> assignments) {
-    return applyCategoryFilter(assignments, ASSIGNMENT);
+    return new SymptomsArray(filterAssignment(assignments));
   }
 
   /**
@@ -127,12 +95,6 @@ public class SymptomsArray {
     return assignment(Collections.singletonList(assignment));
   }
 
-  private SymptomsArray applyCategoryFilter(Collection<String> names, String column) {
-    List<Filter> filters = names.stream().map(name -> column(column).isEqualTo(name)).collect(Collectors.toList());
-    Table result = symptoms.selectWhere(or(filters));
-    return new SymptomsArray(result);
-  }
-
   /**
    * Retains all {@link Symptom}s with timestamp in the given range.
    *
@@ -141,52 +103,7 @@ public class SymptomsArray {
    * @return {@link SymptomsArray} containing filtered {@link Symptom}s
    */
   public SymptomsArray between(Instant oldest, Instant newest) {
-    Table result = symptoms.selectWhere(
-        both(new LongGreaterThanOrEqualTo(new ColumnReference(TIME_STAMP), oldest.toEpochMilli()),
-             new LongLessThanOrEqualTo(new ColumnReference(TIME_STAMP), newest.toEpochMilli())));
-
-    return new SymptomsArray(result);
-  }
-
-  /**
-   * @return count of {@link Symptom}s in this collection
-   */
-  public int size() {
-    return symptoms.rowCount();
-  }
-
-  /**
-   * @return unique symptom ids in this collection of {@link Symptom}s
-   */
-  public Collection<Integer> uniqueIds() {
-    ArrayList<Integer> result = new ArrayList<>();
-    IntColumn uniqueColumn = id.unique();
-    for (int id : uniqueColumn) {
-      result.add(id);
-    }
-    return result;
-  }
-
-  /**
-   * @return unique symptom types in this collection of {@link Symptom}s
-   */
-  public Collection<String> uniqueTypes() {
-    ArrayList<String> result = new ArrayList<>();
-    CategoryColumn uniqueColumn = type.unique();
-    uniqueColumn.forEach(result::add);
-    return result;
-  }
-
-  /**
-   * @return unique {@link Instant}s in this collection of {@link Symptom}s
-   */
-  public Collection<Instant> uniqueInstants() {
-    ArrayList<Instant> result = new ArrayList<>();
-    LongColumn uniqueColumn = timeStamp.unique();
-    for (Long ts : uniqueColumn) {
-      result.add(Instant.ofEpochMilli(ts));
-    }
-    return result;
+    return new SymptomsArray(filterTime(oldest, newest));
   }
 
   /**
@@ -197,18 +114,7 @@ public class SymptomsArray {
    * @return ordered {@link Symptom}s
    */
   public SymptomsArray sort(boolean descending, SortKey... sortKeys) {
-    String[] columns = new String[sortKeys.length];
-    for (int i = 0; i < sortKeys.length; i++) {
-      columns[i] = sortKeys[i].name();
-    }
-
-    Table result;
-    if (descending) {
-      result = symptoms.sortDescendingOn(columns);
-    } else {
-      result = symptoms.sortAscendingOn(columns);
-    }
-    return new SymptomsArray(result);
+    return new SymptomsArray(sortTable(descending, sortKeys));
   }
 
   /**
@@ -220,70 +126,16 @@ public class SymptomsArray {
    * @return {@link SymptomsArray} containing specific {@link Symptom}s
    */
   public SymptomsArray slice(int first, int last) {
-    Table result = symptoms.selectRows(first, last);
-    return new SymptomsArray(result);
+    return new SymptomsArray(sliceTable(first, last));
   }
 
-  /**
-   * @return the first {@link Symptom}, if present
-   */
-  public Symptom first() {
-    if (symptoms.isEmpty()) {
-      return null;
-    }
-
-    Table result = symptoms.first(1);
-    Collection<Symptom> measurementCollection = new SymptomsArray(result).get();
-    return measurementCollection.iterator().next();
-  }
-
-  /**
-   * @return the last {@link Symptom}, if present
-   */
-  public Symptom last() {
-    if (symptoms.isEmpty()) {
-      return null;
-    }
-
-    Table result = symptoms.last(1);
-    Collection<Symptom> measurementCollection = new SymptomsArray(result).get();
-    return measurementCollection.iterator().next();
-  }
-
-  /**
-   * @return all {@link Symptom}s in this collection
-   */
-  public Collection<Symptom> get() {
-    ArrayList<Symptom> result = new ArrayList<>();
-    for (int i = 0; i < symptoms.rowCount(); i++) {
-      result.add(row2Obj(i));
-    }
-    return result;
-  }
-
-  /**
-   * @param index position in the table
-   * @return {@link Symptom} at the requested position
-   */
-  public Symptom get(int index) {
-    if (index < 0 || index >= symptoms.rowCount() || symptoms.isEmpty()) {
-      return null;
-    }
-
-    return row2Obj(index);
-  }
-
-  private Symptom row2Obj(int index) {
+  Symptom row2Obj(int index) {
     return new Symptom(id.get(index),
                        type.get(index),
                        Instant.ofEpochMilli(timeStamp.get(index)),
                        Collections.singletonList(assignment.get(index)));
   }
 
-
-  public String toStringForDebugging() {
-    return symptoms.print(symptoms.rowCount());
-  }
 
   /**
    * Builds {@link SymptomsArray} instance and provides ability to update it.

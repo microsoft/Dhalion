@@ -9,47 +9,27 @@ package com.microsoft.dhalion.core;
 import com.microsoft.dhalion.api.IResolver;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 /**
  * {@link Action} is a representation of a action taken by {@link IResolver} to improve system health.
  */
-public class Action {
-  // action type
-  private final String type;
-
-  // instant when this action was created
-  private final Instant instant;
-
-  // Diagnosis relevant to this action
-  private final Collection<Diagnosis> diagnosis;
-
-  public Action(String type, Instant instant, Collection<Diagnosis> diagnosis) {
-    this.type = type;
-    this.instant = instant;
-    this.diagnosis = new ArrayList<>(diagnosis);
+public class Action extends Outcome {
+  public Action(String type, Instant instant, Collection<String> assignments) {
+    super(type, instant, assignments);
   }
 
-  public String getType() {
-    return type;
-  }
-
-  public Instant getInstant() {
-    return instant;
-  }
-
-  public Collection<Diagnosis> getDiagnosis() {
-    return Collections.unmodifiableCollection(diagnosis);
+  public Action(int id, String symptomType, Instant instant, Collection<String> assignments) {
+    super(id, symptomType, instant, assignments);
   }
 
   @Override
   public String toString() {
     return "Action{" +
-        "type='" + type + '\'' +
-        ", instant=" + instant +
-        ", diagnosis=" + diagnosis +
+        "id=" + id() +
+        ", type=" + type() +
+        ", instant=" + instant() +
+        ", assignments=" + assignments() +
         '}';
   }
 }
