@@ -244,6 +244,13 @@ public class MeasurementsTable {
   }
 
   /**
+   * @return unique instance names in this collection of {@link Measurement}s
+   */
+  public Collection<String> uniqueInstances() {
+    return findUniqueCategory(instance);
+  }
+
+  /**
    * @return unique metric types in this collection of {@link Measurement}s
    */
   public Collection<String> uniqueTypes() {
