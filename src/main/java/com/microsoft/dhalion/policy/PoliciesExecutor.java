@@ -75,7 +75,7 @@ public class PoliciesExecutor {
         policyContextMap.get(policy).symptomsTableBuilder.addAll(symptoms);
 
         Collection<Diagnosis> diagnosis = policy.executeDiagnosers(symptoms);
-        policyContextMap.get(policy).diagnsisTableBuilder.addAll(diagnosis);
+        policyContextMap.get(policy).diagnosisTableBuilder.addAll(diagnosis);
 
         Collection<Action> actions = policy.executeResolvers(diagnosis);
         policyContextMap.get(policy).actionTableBuilder.addAll(actions);
@@ -99,13 +99,13 @@ public class PoliciesExecutor {
   public static class ExecutionContext {
     private final MeasurementsTable.Builder measurementsTableBuilder;
     private final SymptomsTable.Builder symptomsTableBuilder;
-    private final DiagnosisTable.Builder diagnsisTableBuilder;
+    private final DiagnosisTable.Builder diagnosisTableBuilder;
     private final ActionTable.Builder actionTableBuilder;
 
     private ExecutionContext() {
       measurementsTableBuilder = new MeasurementsTable.Builder();
       symptomsTableBuilder = new SymptomsTable.Builder();
-      diagnsisTableBuilder = new DiagnosisTable.Builder();
+      diagnosisTableBuilder = new DiagnosisTable.Builder();
       actionTableBuilder = new ActionTable.Builder();
     }
 
@@ -118,7 +118,7 @@ public class PoliciesExecutor {
     }
 
     public DiagnosisTable diagnosis() {
-      return diagnsisTableBuilder.get();
+      return diagnosisTableBuilder.get();
     }
 
     public ActionTable actions() {

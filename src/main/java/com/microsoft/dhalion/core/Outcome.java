@@ -9,8 +9,8 @@ package com.microsoft.dhalion.core;
 import com.microsoft.dhalion.api.IDetector;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -30,7 +30,7 @@ abstract class Outcome {
   private final Instant instant;
 
   // ids of objects to which this outcome can be attributed to, for e.g. slow instance's id
-  private final Collection<String> assignments;
+  private final Collection<String> assignments = new ArrayList<>();
 
   Outcome(String type, Instant instant, Collection<String> assignments) {
     this(idGenerator.incrementAndGet(), type, instant, assignments);
@@ -40,7 +40,9 @@ abstract class Outcome {
     this.id = id;
     this.type = type;
     this.instant = instant;
-    this.assignments = Collections.unmodifiableCollection(assignments);
+    if (assignments != null) {
+      this.assignments.addAll(assignments);
+    }
   }
 
   public int id() {

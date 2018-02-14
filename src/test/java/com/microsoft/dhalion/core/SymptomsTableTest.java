@@ -37,7 +37,7 @@ public class SymptomsTableTest {
     int value = 10;
     for (int id : ids) {
       for (String type : types) {
-        symptoms.add(new Symptom(id, type, Instant.ofEpochMilli(value), attributions));
+        symptoms.add(new Symptom(id, type, Instant.ofEpochMilli(value), attributions, null));
         value += 10;
       }
     }

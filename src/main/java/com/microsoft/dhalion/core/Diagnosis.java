@@ -7,19 +7,44 @@
 package com.microsoft.dhalion.core;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * A {@link Diagnosis} is a representation of a possible causes of one or more {@link Symptom}s. For e.g. resource
  * under-provisioning
  */
 public class Diagnosis extends Outcome {
-  public Diagnosis(String type, Instant instant, Collection<String> assignments) {
+  // symtoms referred to create this instance
+  private final Collection<Symptom> symptoms = new ArrayList<>();
+
+  public Diagnosis(String type,
+                   Instant instant,
+                   Collection<String> assignments,
+                   Collection<Symptom> symptoms) {
     super(type, instant, assignments);
+    if (symptoms != null) {
+      this.symptoms.addAll(symptoms);
+    }
   }
 
-  public Diagnosis(int id, String symptomType, Instant instant, Collection<String> assignments) {
-    super(id, symptomType, instant, assignments);
+  public Diagnosis(int id,
+                   String type,
+                   Instant instant,
+                   Collection<String> assignments,
+                   Collection<Symptom> symptoms) {
+    super(id, type, instant, assignments);
+    if (symptoms != null) {
+      this.symptoms.addAll(symptoms);
+    }
+  }
+
+  /**
+   * @return {@link Symptom}s referred to when this {@link Diagnosis} was created
+   */
+  public Collection<Symptom> symptoms() {
+    return Collections.unmodifiableCollection(symptoms);
   }
 
   @Override

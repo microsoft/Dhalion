@@ -7,6 +7,7 @@
 package com.microsoft.dhalion.core;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -14,12 +15,35 @@ import java.util.Collection;
  * distributed application. For e.g. identification of irregular processing latency.
  */
 public class Symptom extends Outcome {
-  public Symptom(String symptomType, Instant instant, Collection<String> assignments) {
+  // measurements referred to create this instance
+  private final Collection<Measurement> measurements = new ArrayList<>();
+
+  public Symptom(String symptomType,
+                 Instant instant,
+                 Collection<String> assignments,
+                 Collection<Measurement> measurements) {
     super(symptomType, instant, assignments);
+    if (measurements != null) {
+      this.measurements.addAll(measurements);
+    }
   }
 
-  public Symptom(int id, String symptomType, Instant instant, Collection<String> assignments) {
+  public Symptom(int id,
+                 String symptomType,
+                 Instant instant,
+                 Collection<String> assignments,
+                 Collection<Measurement> measurements) {
     super(id, symptomType, instant, assignments);
+    if (measurements != null) {
+      this.measurements.addAll(measurements);
+    }
+  }
+
+  /**
+   * @return {@link Measurement}s referred to when this {@link Symptom} was created
+   */
+  public Collection<Measurement> measurements() {
+    return measurements;
   }
 
   @Override

@@ -11,6 +11,7 @@ import com.microsoft.dhalion.core.Measurement;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * A {@link MetricsProvider} implements common utility methods to produce {@link Measurement}s. In some cases it will
@@ -41,6 +42,24 @@ public interface MetricsProvider {
                                                   Collection<String> metrics,
                                                   Collection<String> components) {
     throw new UnsupportedOperationException("This method is not implemented in the metrics provider");
+  }
+
+  /**
+   * @param startTime metric aggregation window start time, endTime = startTime - duration
+   * @param duration  the duration for which the metric was aggregated
+   * @param metric    ids of the metrics
+   * @param component ids of the components for which the metric is needed
+   * @return collection of {@link Measurement}s
+   * @see #getMeasurements(Instant, Duration, Collection, Collection)
+   */
+  default Collection<Measurement> getMeasurements(Instant startTime,
+                                                  Duration duration,
+                                                  String metric,
+                                                  String component) {
+    return getMeasurements(startTime,
+                           duration,
+                           Collections.singletonList(metric),
+                           Collections.singletonList(component));
   }
 
   /**

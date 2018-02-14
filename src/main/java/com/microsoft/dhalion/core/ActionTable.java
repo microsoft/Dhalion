@@ -133,7 +133,8 @@ public class ActionTable extends OutcomeTable<Action> {
     return new Action(id.get(index),
                       type.get(index),
                       Instant.ofEpochMilli(timeStamp.get(index)),
-                      Collections.singletonList(assignment.get(index)));
+                      Collections.singletonList(assignment.get(index)),
+                      null);
   }
 
 

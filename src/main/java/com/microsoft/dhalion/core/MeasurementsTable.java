@@ -173,6 +173,16 @@ public class MeasurementsTable {
   }
 
   /**
+   * Retains all {@link Measurement}s created at the given timestamp.
+   *
+   * @param timestamp {@link Measurement} creation time.
+   * @return {@link MeasurementsTable} containing filtered {@link Measurement}s
+   */
+  public MeasurementsTable instant(Instant timestamp) {
+    return between(timestamp, timestamp);
+  }
+
+  /**
    * Retains only the {@link Measurement}s whose value is between <code>low</code> and <code>high</code>, both
    * inclusive.
    *

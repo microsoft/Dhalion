@@ -133,7 +133,8 @@ public class DiagnosisTable extends OutcomeTable<Diagnosis> {
     return new Diagnosis(id.get(index),
                          type.get(index),
                          Instant.ofEpochMilli(timeStamp.get(index)),
-                         Collections.singletonList(assignment.get(index)));
+                         Collections.singletonList(assignment.get(index)),
+                         null);
   }
 
 
