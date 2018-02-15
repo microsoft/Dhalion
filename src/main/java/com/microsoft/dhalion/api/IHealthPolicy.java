@@ -12,7 +12,6 @@ import com.microsoft.dhalion.core.Diagnosis;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.Symptom;
 import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
-import com.microsoft.dhalion.state.StateStore;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -33,7 +32,7 @@ public interface IHealthPolicy {
 
   /**
    * Invoked periodically, this method executes one or more {@link ISensor}s. Typically, {@link ISensor} execution
-   * will result in addition of latest {@link Measurement}s in the {@link StateStore}.
+   * will result in addition of latest {@link Measurement}s in the {@link ExecutionContext}.
    *
    * @return most recently fetched {@link Measurement}s
    */
@@ -41,7 +40,8 @@ public interface IHealthPolicy {
 
   /**
    * Invoked after {@link ISensor}s this method executes one or more {@link IDetector}s. Most recently fetched
-   * {@link Measurement}s are provided, while additional {@link Measurement}s can be obtained from {@link StateStore}.
+   * {@link Measurement}s are provided, while additional {@link Measurement}s can be obtained from
+   * {@link ExecutionContext}.
    *
    * @param measurements most recently fetched {@link Measurement}s
    * @return newly identified {@link Symptom}s

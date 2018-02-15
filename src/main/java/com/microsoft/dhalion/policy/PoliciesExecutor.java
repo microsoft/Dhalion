@@ -14,10 +14,12 @@ import com.microsoft.dhalion.core.Diagnosis;
 import com.microsoft.dhalion.core.DiagnosisTable;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.MeasurementsTable;
+import com.microsoft.dhalion.core.Outcome;
 import com.microsoft.dhalion.core.Symptom;
 import com.microsoft.dhalion.core.SymptomsTable;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -38,7 +40,7 @@ public class PoliciesExecutor {
 
   public PoliciesExecutor(Collection<IHealthPolicy> policies) {
     this.policies = new ArrayList<>(policies);
-    for (IHealthPolicy policy : policies) {
+    for (IHealthPolicy policy : this.policies) {
       ExecutionContext ctx = new ExecutionContext();
       policy.initialize(ctx);
       policyContextMap.put(policy, ctx);
@@ -67,18 +69,32 @@ public class PoliciesExecutor {
           continue;
         }
 
-        LOG.info("Executing Policy: " + policy.getClass().getSimpleName());
+        ExecutionContext context = policyContextMap.get(policy);
+        context.captureCheckpoint();
+        Instant previous = context.previousCheckpoint;
+        Instant current = context.checkpoint;
+
+        LOG.info(String.format("Executing Policy: %s, checkpoint: %s",
+                               policy.getClass().getSimpleName(),
+                               context.checkpoint));
+
         Collection<Measurement> measurements = policy.executeSensors();
-        policyContextMap.get(policy).measurementsTableBuilder.addAll(measurements);
+        measurements.stream()
+            .filter(m -> m.instant().isAfter(current) || m.instant().isBefore(previous))
+            .forEach(m -> LOG.info(m.toString() + "is outside checkpoint window"));
+        context.measurementsTableBuilder.addAll(measurements);
 
         Collection<Symptom> symptoms = policy.executeDetectors(measurements);
-        policyContextMap.get(policy).symptomsTableBuilder.addAll(symptoms);
+        identifyOutliers(previous, current, symptoms);
+        context.symptomsTableBuilder.addAll(symptoms);
 
         Collection<Diagnosis> diagnosis = policy.executeDiagnosers(symptoms);
-        policyContextMap.get(policy).diagnosisTableBuilder.addAll(diagnosis);
+        identifyOutliers(previous, current, diagnosis);
+        context.diagnosisTableBuilder.addAll(diagnosis);
 
         Collection<Action> actions = policy.executeResolvers(diagnosis);
-        policyContextMap.get(policy).actionTableBuilder.addAll(actions);
+        identifyOutliers(previous, current, actions);
+        context.actionTableBuilder.addAll(actions);
 
         // TODO pretty print
         LOG.info(actions.toString());
@@ -91,6 +107,12 @@ public class PoliciesExecutor {
     return future;
   }
 
+  private void identifyOutliers(Instant previous, Instant current, Collection<? extends Outcome> outcomes) {
+    outcomes.stream()
+        .filter(m -> m.instant().isAfter(current) || m.instant().isBefore(previous))
+        .forEach(m -> LOG.warning(m.toString() + "is outside checkpoint window"));
+  }
+
   public void destroy() {
     this.executor.shutdownNow();
   }
@@ -101,12 +123,22 @@ public class PoliciesExecutor {
     private final SymptomsTable.Builder symptomsTableBuilder;
     private final DiagnosisTable.Builder diagnosisTableBuilder;
     private final ActionTable.Builder actionTableBuilder;
+    private Instant checkpoint;
+    private Instant previousCheckpoint;
 
     private ExecutionContext() {
       measurementsTableBuilder = new MeasurementsTable.Builder();
       symptomsTableBuilder = new SymptomsTable.Builder();
       diagnosisTableBuilder = new DiagnosisTable.Builder();
       actionTableBuilder = new ActionTable.Builder();
+    }
+
+    private void captureCheckpoint() {
+      if (checkpoint != null) {
+        previousCheckpoint = checkpoint;
+      }
+
+      checkpoint = Instant.now();
     }
 
     public MeasurementsTable measurements() {
@@ -123,6 +155,23 @@ public class PoliciesExecutor {
 
     public ActionTable actions() {
       return actionTableBuilder.get();
+    }
+
+    /**
+     * A checkpoint is a timestamp at which policy execution begins. This value can be used to identify outcomes
+     * created during a particular cycle.
+     *
+     * @return the timestamp(checkpoint) at which this policy's current execution started
+     */
+    public Instant checkpoint() {
+      return checkpoint;
+    }
+
+    /**
+     * @return the timestamp(checkpoint) at which this policy's previous execution had started
+     */
+    public Instant previousCheckpoint() {
+      return previousCheckpoint;
     }
   }
 }

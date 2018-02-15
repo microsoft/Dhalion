@@ -18,6 +18,10 @@ public class Symptom extends Outcome {
   // measurements referred to create this instance
   private final Collection<Measurement> measurements = new ArrayList<>();
 
+  public Symptom(String type, Instant instant, Collection<String> assignments) {
+    this(type, instant, assignments, null);
+  }
+
   public Symptom(String symptomType,
                  Instant instant,
                  Collection<String> assignments,
@@ -28,11 +32,11 @@ public class Symptom extends Outcome {
     }
   }
 
-  public Symptom(int id,
-                 String symptomType,
-                 Instant instant,
-                 Collection<String> assignments,
-                 Collection<Measurement> measurements) {
+  Symptom(int id,
+          String symptomType,
+          Instant instant,
+          Collection<String> assignments,
+          Collection<Measurement> measurements) {
     super(id, symptomType, instant, assignments);
     if (measurements != null) {
       this.measurements.addAll(measurements);

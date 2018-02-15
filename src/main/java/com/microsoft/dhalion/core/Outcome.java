@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * A {@link Outcome} represent result of execution of a Dhalion phase. For e.g. {@link IDetector} phase's results in
  * {@link Symptom}s
  */
-abstract class Outcome {
+public abstract class Outcome {
   private static final AtomicInteger idGenerator = new AtomicInteger(1);
 
   // unique identifier of this instance

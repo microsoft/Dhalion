@@ -19,6 +19,10 @@ public class Diagnosis extends Outcome {
   // symtoms referred to create this instance
   private final Collection<Symptom> symptoms = new ArrayList<>();
 
+  public Diagnosis(String type, Instant instant, Collection<String> assignments) {
+    this(type, instant, assignments, null);
+  }
+
   public Diagnosis(String type,
                    Instant instant,
                    Collection<String> assignments,
@@ -29,11 +33,7 @@ public class Diagnosis extends Outcome {
     }
   }
 
-  public Diagnosis(int id,
-                   String type,
-                   Instant instant,
-                   Collection<String> assignments,
-                   Collection<Symptom> symptoms) {
+  Diagnosis(int id, String type, Instant instant, Collection<String> assignments, Collection<Symptom> symptoms) {
     super(id, type, instant, assignments);
     if (symptoms != null) {
       this.symptoms.addAll(symptoms);

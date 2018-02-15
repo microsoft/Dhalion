@@ -19,6 +19,10 @@ import java.util.Collections;
 public class Action extends Outcome {
   private final Collection<Diagnosis> diagnosis = new ArrayList<>();
 
+  public Action(String type, Instant instant, Collection<String> assignments) {
+    this(type, instant, assignments, null);
+  }
+
   public Action(String type, Instant instant, Collection<String> assignments, Collection<Diagnosis> diagnosis) {
     super(type, instant, assignments);
     if (diagnosis != null) {
@@ -26,7 +30,7 @@ public class Action extends Outcome {
     }
   }
 
-  public Action(int id, String type, Instant instant, Collection<String> assignments, Collection<Diagnosis> diagnosis) {
+  Action(int id, String type, Instant instant, Collection<String> assignments, Collection<Diagnosis> diagnosis) {
     super(id, type, instant, assignments);
     if (diagnosis != null) {
       this.diagnosis.addAll(diagnosis);

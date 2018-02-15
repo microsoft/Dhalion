@@ -8,7 +8,6 @@ package com.microsoft.dhalion.api;
 
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
-import com.microsoft.dhalion.state.StateStore;
 
 import java.util.Collection;
 
@@ -34,8 +33,7 @@ public interface ISensor {
   /**
    * Provides {@link Measurement}s of the metrics managed by this {@link ISensor} for all components of the application.
    * The {@link ISensor}'s configuration can be used to customize the result. For e.g. duration for which the
-   * {@link Measurement}s are needed and external source configuration. Typically the fetched {@link Measurement}s
-   * will be cached in {@link StateStore}.
+   * {@link Measurement}s are needed and external source configuration.
    *
    * @return latest {@link Measurement}s
    */

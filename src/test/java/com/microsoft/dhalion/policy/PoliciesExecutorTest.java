@@ -8,19 +8,21 @@
 package com.microsoft.dhalion.policy;
 
 import com.microsoft.dhalion.api.IHealthPolicy;
-import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.Action;
 import com.microsoft.dhalion.core.Diagnosis;
 import com.microsoft.dhalion.core.Measurement;
-import com.microsoft.dhalion.core.Action;
+import com.microsoft.dhalion.core.Symptom;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
+import org.mockito.exceptions.verification.WantedButNotInvoked;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 
 import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.mock;
@@ -62,9 +64,18 @@ public class PoliciesExecutorTest {
 
     List<IHealthPolicy> policies = Collections.singletonList(mockPolicy);
     PoliciesExecutor executor = new PoliciesExecutor(policies);
-    executor.start();
+    ScheduledFuture<?> future = executor.start();
 
-    verify(mockPolicy, timeout(50l).atLeastOnce()).executeResolvers(diagnosis);
+    try {
+      verify(mockPolicy, timeout(50l).atLeastOnce()).executeResolvers(diagnosis);
+    } catch (WantedButNotInvoked e) {
+      if (future.isDone()) {
+        System.out.println(future.get());
+      }
+      throw e;
+    }
+
+
     InOrder order = Mockito.inOrder(mockPolicy);
     order.verify(mockPolicy).executeSensors();
     order.verify(mockPolicy).executeDetectors(measurements);
