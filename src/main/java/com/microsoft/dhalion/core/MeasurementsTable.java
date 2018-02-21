@@ -10,10 +10,7 @@ import tech.tablesaw.api.CategoryColumn;
 import tech.tablesaw.api.DoubleColumn;
 import tech.tablesaw.api.LongColumn;
 import tech.tablesaw.api.Table;
-import tech.tablesaw.columns.ColumnReference;
 import tech.tablesaw.filtering.Filter;
-import tech.tablesaw.filtering.LongGreaterThanOrEqualTo;
-import tech.tablesaw.filtering.LongLessThanOrEqualTo;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -165,11 +162,7 @@ public class MeasurementsTable {
    * @return {@link MeasurementsTable} containing filtered {@link Measurement}s
    */
   public MeasurementsTable between(Instant oldest, Instant newest) {
-    Table result = measurements.selectWhere(
-        both(new LongGreaterThanOrEqualTo(new ColumnReference(TIME_STAMP), oldest.toEpochMilli()),
-             new LongLessThanOrEqualTo(new ColumnReference(TIME_STAMP), newest.toEpochMilli())));
-
-    return new MeasurementsTable(result);
+    return new MeasurementsTable(TableUtils.filterTime(measurements, TIME_STAMP, oldest, newest));
   }
 
   /**
@@ -250,40 +243,28 @@ public class MeasurementsTable {
    * @return unique components names in this collection of {@link Measurement}s
    */
   public Collection<String> uniqueComponents() {
-    return findUniqueCategory(component);
+    return TableUtils.uniqueCategory(component);
   }
 
   /**
    * @return unique instance names in this collection of {@link Measurement}s
    */
   public Collection<String> uniqueInstances() {
-    return findUniqueCategory(instance);
+    return TableUtils.uniqueCategory(instance);
   }
 
   /**
    * @return unique metric types in this collection of {@link Measurement}s
    */
   public Collection<String> uniqueTypes() {
-    return findUniqueCategory(type);
+    return TableUtils.uniqueCategory(type);
   }
 
   /**
    * @return unique {@link Instant}s in this collection of {@link Measurement}s
    */
   public Collection<Instant> uniqueInstants() {
-    ArrayList<Instant> result = new ArrayList<>();
-    LongColumn uniqueColumn = timeStamps.unique();
-    for (Long ts : uniqueColumn) {
-      result.add(Instant.ofEpochMilli(ts));
-    }
-    return result;
-  }
-
-  private Collection<String> findUniqueCategory(CategoryColumn column) {
-    ArrayList<String> result = new ArrayList<>();
-    CategoryColumn uniqueColumn = column.unique();
-    uniqueColumn.forEach(result::add);
-    return result;
+    return TableUtils.uniqueInstants(timeStamps);
   }
 
   /**
@@ -299,13 +280,7 @@ public class MeasurementsTable {
       columns[i] = sortKeys[i].name();
     }
 
-    Table result;
-    if (descending) {
-      result = measurements.sortDescendingOn(columns);
-    } else {
-      result = measurements.sortAscendingOn(columns);
-    }
-    return new MeasurementsTable(result);
+    return new MeasurementsTable(TableUtils.sort(measurements, descending, columns));
   }
 
   /**

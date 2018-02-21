@@ -10,10 +10,7 @@ import tech.tablesaw.api.CategoryColumn;
 import tech.tablesaw.api.IntColumn;
 import tech.tablesaw.api.LongColumn;
 import tech.tablesaw.api.Table;
-import tech.tablesaw.columns.ColumnReference;
 import tech.tablesaw.filtering.Filter;
-import tech.tablesaw.filtering.LongGreaterThanOrEqualTo;
-import tech.tablesaw.filtering.LongLessThanOrEqualTo;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -22,7 +19,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static tech.tablesaw.api.QueryHelper.both;
 import static tech.tablesaw.api.QueryHelper.column;
 import static tech.tablesaw.api.QueryHelper.or;
 
@@ -33,7 +29,7 @@ import static tech.tablesaw.api.QueryHelper.or;
  * {@link Outcome} instances.
  */
 public abstract class OutcomeTable<T extends Outcome> {
-  final Table table;
+  private final Table table;
   final CategoryColumn type;
   final IntColumn id;
   final CategoryColumn assignment;
@@ -43,6 +39,8 @@ public abstract class OutcomeTable<T extends Outcome> {
   private static final String ASSIGNMENT = SortKey.ASSIGNMENT.name();
   private static final String TIME_STAMP = SortKey.TIME_STAMP.name();
   private static final String TYPE = SortKey.TYPE.name();
+
+  static final Collection<String> EMPTY_ASSIGNMENT = Collections.singletonList(CategoryColumn.MISSING_VALUE);
 
   public enum SortKey {
     ID, ASSIGNMENT, TIME_STAMP, TYPE
@@ -67,6 +65,16 @@ public abstract class OutcomeTable<T extends Outcome> {
     assignment = this.table.categoryColumn(ASSIGNMENT);
     type = this.table.categoryColumn(TYPE);
     timeStamp = this.table.longColumn(TIME_STAMP);
+  }
+
+  protected final void add(Outcome outcome) {
+    Collection<String> assignments = outcome.assignments().isEmpty() ? EMPTY_ASSIGNMENT : outcome.assignments();
+    assignments.forEach(assignedComponent -> {
+      id.append(outcome.id());
+      assignment.append(assignedComponent);
+      type.append(outcome.type());
+      timeStamp.append(outcome.instant().toEpochMilli());
+    });
   }
 
   Table filterId(int id) {
@@ -95,9 +103,7 @@ public abstract class OutcomeTable<T extends Outcome> {
   }
 
   Table filterTime(Instant oldest, Instant newest) {
-    return table.selectWhere(
-        both(new LongGreaterThanOrEqualTo(new ColumnReference(TIME_STAMP), oldest.toEpochMilli()),
-             new LongLessThanOrEqualTo(new ColumnReference(TIME_STAMP), newest.toEpochMilli())));
+    return TableUtils.filterTime(table, TIME_STAMP, oldest, newest);
   }
 
   /**
@@ -123,22 +129,14 @@ public abstract class OutcomeTable<T extends Outcome> {
    * @return unique {@link Outcome} types in this collection
    */
   public Collection<String> uniqueTypes() {
-    ArrayList<String> result = new ArrayList<>();
-    CategoryColumn uniqueColumn = type.unique();
-    uniqueColumn.forEach(result::add);
-    return result;
+    return TableUtils.uniqueCategory(type);
   }
 
   /**
    * @return unique {@link Instant}s at which {@link Outcome} objects were created
    */
   public Collection<Instant> uniqueInstants() {
-    ArrayList<Instant> result = new ArrayList<>();
-    LongColumn uniqueColumn = timeStamp.unique();
-    for (Long ts : uniqueColumn) {
-      result.add(Instant.ofEpochMilli(ts));
-    }
-    return result;
+    return TableUtils.uniqueInstants(timeStamp);
   }
 
   Table sortTable(boolean descending, SortKey... sortKeys) {
@@ -147,13 +145,7 @@ public abstract class OutcomeTable<T extends Outcome> {
       columns[i] = sortKeys[i].name();
     }
 
-    Table result;
-    if (descending) {
-      result = table.sortDescendingOn(columns);
-    } else {
-      result = table.sortAscendingOn(columns);
-    }
-    return result;
+    return TableUtils.sort(table, descending, columns);
   }
 
   Table sliceTable(int first, int last) {

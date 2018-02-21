@@ -38,14 +38,7 @@ public class SymptomsTable extends OutcomeTable<Symptom> {
   }
 
   private void addAll(Collection<Symptom> symptoms) {
-    symptoms.forEach(symptom -> {
-      symptom.assignments().forEach(assignment -> {
-        id.append(symptom.id());
-        this.assignment.append(assignment);
-        type.append(symptom.type());
-        timeStamp.append(symptom.instant().toEpochMilli());
-      });
-    });
+    symptoms.forEach(this::add);
   }
 
   /**

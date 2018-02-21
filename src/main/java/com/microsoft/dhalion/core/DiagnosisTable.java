@@ -38,14 +38,7 @@ public class DiagnosisTable extends OutcomeTable<Diagnosis> {
   }
 
   private void addAll(Collection<Diagnosis> diagnosis) {
-    diagnosis.forEach(diagnoses -> {
-      diagnoses.assignments().forEach(assignment -> {
-        id.append(diagnoses.id());
-        this.assignment.append(assignment);
-        type.append(diagnoses.type());
-        timeStamp.append(diagnoses.instant().toEpochMilli());
-      });
-    });
+    diagnosis.forEach(this::add);
   }
 
   /**

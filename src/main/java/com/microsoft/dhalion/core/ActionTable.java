@@ -38,14 +38,7 @@ public class ActionTable extends OutcomeTable<Action> {
   }
 
   private void addAll(Collection<Action> actions) {
-    actions.forEach(action -> {
-      action.assignments().forEach(assignment -> {
-        id.append(action.id());
-        this.assignment.append(assignment);
-        type.append(action.type());
-        timeStamp.append(action.instant().toEpochMilli());
-      });
-    });
+    actions.forEach(this::add);
   }
 
   /**
