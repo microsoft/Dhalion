@@ -8,61 +8,79 @@
 package com.microsoft.dhalion.policy;
 
 import com.microsoft.dhalion.api.IHealthPolicy;
-import com.microsoft.dhalion.api.IResolver;
+import com.microsoft.dhalion.core.Action;
+import com.microsoft.dhalion.core.Diagnosis;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.Symptom;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
+import org.mockito.exceptions.verification.WantedButNotInvoked;
 
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ScheduledFuture;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class PoliciesExecutorTest {
   @Test
   public void verifyPeriodicPolicyInvocation() throws Exception {
     HealthPolicyImpl policy1 = spy(new HealthPolicyImpl());
-    policy1.setPolicyExecutionInterval(TimeUnit.MILLISECONDS, 20);
+    policy1.setPolicyExecutionInterval(Duration.ofMillis(20));
     HealthPolicyImpl policy2 = spy(new HealthPolicyImpl());
-    policy2.setPolicyExecutionInterval(TimeUnit.MILLISECONDS, 50);
+    policy2.setPolicyExecutionInterval(Duration.ofMillis(50));
 
-    List<IHealthPolicy> policies = new ArrayList<>();
-    policies.add(policy1);
-    policies.add(policy2);
+    List<IHealthPolicy> policies = Arrays.asList(policy1, policy2);
     PoliciesExecutor executor = new PoliciesExecutor(policies);
     executor.start();
 
-    verify(policy1, timeout(1000l).atLeast(5)).executeResolver(any(), anyList());
-    verify(policy2, timeout(1000l).atLeast(2)).executeResolver(any(), anyList());
+    verify(policy1, timeout(1000l).atLeast(5)).executeResolvers(anyList());
+    verify(policy2, timeout(1000l).atLeast(2)).executeResolvers(anyList());
     executor.destroy();
   }
 
   @Test
   public void verifyPolicyExecutionOrder() throws Exception {
-    List symptoms = new ArrayList<>();
-    List diagnosis = new ArrayList<>();
-    IResolver resolver = mock(IResolver.class);
-    List actions = new ArrayList<>();
+    List<Measurement> measurements = new ArrayList<>();
+    List<Symptom> symptoms = new ArrayList<>();
+    List<Diagnosis> diagnosis = new ArrayList<>();
+    List<Action> actions = new ArrayList<>();
 
     IHealthPolicy mockPolicy = mock(IHealthPolicy.class);
-    when(mockPolicy.executeDetectors()).thenReturn(symptoms);
+    when(mockPolicy.getDelay()).thenReturn(Duration.ZERO);
+    when(mockPolicy.executeSensors()).thenReturn(measurements);
+    when(mockPolicy.executeDetectors(measurements)).thenReturn(symptoms);
     when(mockPolicy.executeDiagnosers(symptoms)).thenReturn(diagnosis);
-    when(mockPolicy.selectResolver(diagnosis)).thenReturn(resolver);
-    when(mockPolicy.executeResolver(resolver, diagnosis)).thenReturn(actions);
+    when(mockPolicy.executeResolvers(diagnosis)).thenReturn(actions);
 
-    List<IHealthPolicy> policies = new ArrayList<>();
-    policies.add(mockPolicy);
+    List<IHealthPolicy> policies = Collections.singletonList(mockPolicy);
     PoliciesExecutor executor = new PoliciesExecutor(policies);
-    executor.start();
+    ScheduledFuture<?> future = executor.start();
 
-    verify(mockPolicy, timeout(50l).atLeastOnce()).executeResolver(resolver, diagnosis);
+    try {
+      verify(mockPolicy, timeout(50l).atLeastOnce()).executeResolvers(diagnosis);
+    } catch (WantedButNotInvoked e) {
+      if (future.isDone()) {
+        System.out.println(future.get());
+      }
+      throw e;
+    }
+
+
     InOrder order = Mockito.inOrder(mockPolicy);
-    order.verify(mockPolicy).executeDetectors();
+    order.verify(mockPolicy).executeSensors();
+    order.verify(mockPolicy).executeDetectors(measurements);
     order.verify(mockPolicy).executeDiagnosers(symptoms);
-    order.verify(mockPolicy).selectResolver(diagnosis);
-    order.verify(mockPolicy).executeResolver(resolver, diagnosis);
+    order.verify(mockPolicy).executeResolvers(diagnosis);
 
     executor.destroy();
   }

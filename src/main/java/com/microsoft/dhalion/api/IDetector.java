@@ -6,28 +6,45 @@
  */
 package com.microsoft.dhalion.api;
 
-import java.util.List;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
-import com.microsoft.dhalion.detector.Symptom;
+import java.util.Collection;
 
+/**
+ * {@link IDetector} typically examines {@link Measurement}s and produce {@link Symptom}s for any observed anomalies or
+ * system health issues.
+ */
 public interface IDetector {
   /**
-   * Initializes this instance and should be invoked once by the system before its use.
+   * @return returns types of {@link Symptom}s created by this {@link IDetector}
    */
-  default void initialize() {
+  default Collection<String> getSymptomTypes() {
+    throw new UnsupportedOperationException();
   }
 
   /**
-   * Detects a problem or anomaly with the distributed application
+   * Initializes this instance and will be invoked once before this instance is used.
    *
-   * @return a list of issues detected by the symptom detectors
+   * @param context execution context for this instance
    */
-  default List<Symptom> detect() {
-    return null;
+  default void initialize(ExecutionContext context) {
   }
 
   /**
-   * Release all acquired resources and prepare for termination of this instance
+   * Triggers system health examination typically using latest {@link Measurement}s and produces {@link Symptom}s
+   * representing the observations.
+   *
+   * @param measurements most recently fetched {@link Measurement}s
+   * @return the {@link Symptom}s created using latest observations
+   */
+  default Collection<Symptom> detect(Collection<Measurement> measurements) {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Releases all acquired resources and prepare for termination of this {@link IDetector}
    */
   default void close() {
   }

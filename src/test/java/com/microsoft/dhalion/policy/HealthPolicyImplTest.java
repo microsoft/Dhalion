@@ -7,109 +7,65 @@
 
 package com.microsoft.dhalion.policy;
 
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-
 import com.microsoft.dhalion.api.IDetector;
 import com.microsoft.dhalion.api.IDiagnoser;
 import com.microsoft.dhalion.api.IResolver;
 import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.policy.HealthPolicyImpl.ClockTimeProvider;
-
-import com.microsoft.dhalion.state.MetricsState;
-import org.junit.Assert;
 import org.junit.Test;
 
-import static org.mockito.Matchers.anyList;
+import java.time.Duration;
+import java.time.Instant;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 public class HealthPolicyImplTest {
   @Test
-  public void testRegisterStages() {
-    IDetector detector = mock(IDetector.class);
-    IResolver resolver = mock(IResolver.class);
-    IDiagnoser diagnoser = mock(IDiagnoser.class);
-
-    HealthPolicyImpl policy = new HealthPolicyImpl();
-    policy.registerDetectors(detector);
-    policy.registerDiagnosers(diagnoser);
-    policy.registerResolvers(resolver);
-
-    policy.executeDetectors();
-    policy.executeDiagnosers(new ArrayList<>());
-    policy.executeResolver(resolver, new ArrayList<>());
-
-    verify(detector, times(1)).detect();
-    verify(diagnoser, times(1)).diagnose(anyList());
-    verify(resolver, times(1)).resolve(anyList());
-  }
-
-  @Test
   public void testInitialize() {
-
-    ArrayList<ISensor> sensors = new ArrayList<>();
     ISensor sensor = mock(ISensor.class);
-    sensors.add(sensor);
-
-    ArrayList<IDetector> detectors = new ArrayList<>();
     IDetector detector = mock(IDetector.class);
-    detectors.add(detector);
-
-    ArrayList<IDiagnoser> diagnosers = new ArrayList<>();
     IDiagnoser diagnoser = mock(IDiagnoser.class);
-    diagnosers.add(diagnoser);
-
-    ArrayList<IResolver> resolvers = new ArrayList<>();
     IResolver resolver = mock(IResolver.class);
-    resolvers.add(resolver);
 
-    HealthPolicyImpl policy = new HealthPolicyImpl();
-    policy.initialize(sensors, detectors, diagnosers, resolvers);
+    createTestPolicy(sensor, detector, diagnoser, resolver);
 
-    MetricsState metricsState = new MetricsState();
-    policy.executeSensors(metricsState);
-    policy.executeDetectors();
-    policy.executeDiagnosers(new ArrayList<>());
-    policy.executeResolver(resolver, new ArrayList<>());
-
-    verify(sensor, times(1)).fetchMetrics();
-    verify(detector, times(1)).detect();
-    verify(diagnoser, times(1)).diagnose(anyList());
-    verify(resolver, times(1)).resolve(anyList());
+    verify(sensor, times(1)).initialize(null);
+    verify(detector, times(1)).initialize(null);
+    verify(diagnoser, times(1)).initialize(null);
+    verify(resolver, times(1)).initialize(null);
   }
 
   @Test
   public void testGetDelay() {
     HealthPolicyImpl policy = new HealthPolicyImpl();
-    policy.setPolicyExecutionInterval(TimeUnit.MILLISECONDS, 100);
+    policy.setPolicyExecutionInterval(Duration.ofMillis(100));
 
     TestClock testClock = new TestClock();
     policy.clock = testClock;
     testClock.timestamp = 12345;
 
     // first execution should start with 0 delay
-    long delay = policy.getDelay(TimeUnit.MILLISECONDS);
-    Assert.assertEquals(0, delay);
+    Duration delay = policy.getDelay();
+    assertTrue(delay.isZero());
 
-    policy.executeResolver(null, null);
-    delay = policy.getDelay(TimeUnit.MILLISECONDS);
-    Assert.assertEquals(100, delay);
-    delay = policy.getDelay(TimeUnit.MILLISECONDS);
-    Assert.assertEquals(100, delay);
+    policy.executeResolvers(null);
+    delay = policy.getDelay();
+    assertEquals(100, delay.toMillis());
 
     // one time delay overrides original
-    policy.setOneTimeDelay(TimeUnit.MILLISECONDS, 10);
-    delay = policy.getDelay(TimeUnit.MILLISECONDS);
-    Assert.assertEquals(10, delay);
-
+    policy.setOneTimeDelay(Duration.ofMillis(10));
+    delay = policy.getDelay();
+    assertEquals(10, delay.toMillis());
 
     testClock.timestamp += 10;
     // new cycle should  reset one time delay
-    policy.executeResolver(null, null);
-    delay = policy.getDelay(TimeUnit.MILLISECONDS);
-    Assert.assertEquals(100, delay);
+    policy.executeResolvers(null);
+    delay = policy.getDelay();
+    assertEquals(100, delay.toMillis());
   }
 
   @Test
@@ -119,11 +75,7 @@ public class HealthPolicyImplTest {
     IResolver resolver = mock(IResolver.class);
     IDiagnoser diagnoser = mock(IDiagnoser.class);
 
-    HealthPolicyImpl policy = new HealthPolicyImpl();
-    policy.registerSensors(sensor);
-    policy.registerDetectors(detector);
-    policy.registerDiagnosers(diagnoser);
-    policy.registerResolvers(resolver);
+    HealthPolicyImpl policy = createTestPolicy(sensor, detector, diagnoser, resolver);
 
     policy.close();
 
@@ -133,12 +85,22 @@ public class HealthPolicyImplTest {
     verify(resolver, times(1)).close();
   }
 
+  private HealthPolicyImpl createTestPolicy(ISensor s, IDetector d, IDiagnoser diagnoser, IResolver r) {
+    HealthPolicyImpl policy = new HealthPolicyImpl();
+    policy.registerSensors(s);
+    policy.registerDetectors(d);
+    policy.registerDiagnosers(diagnoser);
+    policy.registerResolvers(r);
+    policy.initialize(null);
+    return policy;
+  }
+
   class TestClock extends ClockTimeProvider {
     long timestamp = -1;
 
     @Override
-    long currentTimeMillis() {
-      return timestamp < 0 ? System.currentTimeMillis() : timestamp;
+    Instant now() {
+      return timestamp < 0 ? Instant.now() : Instant.ofEpochMilli(timestamp);
     }
   }
 }

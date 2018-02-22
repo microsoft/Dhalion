@@ -6,55 +6,43 @@
  */
 package com.microsoft.dhalion.api;
 
-import com.microsoft.dhalion.metrics.ComponentMetrics;
-import com.microsoft.dhalion.metrics.MetricsStats;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.Collection;
 
 /**
- * A {@link ISensor} typically provides a system metric. For e.g. execute count
+ * A {@link ISensor} provides {@link Measurement}s for one or more system metrics. For e.g. throughput, latency, etc
  */
 public interface ISensor {
   /**
-   * @return returns name of the metric on which this sensor operates
+   * @return returns types of metrics whose {@link Measurement}s are fetched by this {@link ISensor}
    */
-  default String getMetricName() {
-    return null;
-  }
-
-  /**
-   * Pulls a given metric information for all component from an external source. The sensor instance then manages the
-   * pulled information in local state. It also updates the {@link MetricsStats} associated with this sensor.
-   */
-  default ComponentMetrics fetchMetrics() {
+  default Collection<String> getMetricTypes() {
     throw new UnsupportedOperationException();
   }
 
   /**
-   * @return returns the most recently fetched metric value for all components
+   * Initializes this instance and will be invoked once before this instance is used.
+   *
+   * @param context execution context for this instance
    */
-  default ComponentMetrics readMetrics() {
-    return fetchMetrics();
+  default void initialize(ExecutionContext context) {
   }
 
   /**
-   * @return returns latest metric stats for all components as a map
+   * Provides {@link Measurement}s of the metrics managed by this {@link ISensor} for all components of the application.
+   * The {@link ISensor}'s configuration can be used to customize the result. For e.g. duration for which the
+   * {@link Measurement}s are needed and external source configuration.
+   *
+   * @return latest {@link Measurement}s
    */
-  default Map<String, MetricsStats> readStats() {
-    return new HashMap<>();
+  default Collection<Measurement> fetch() {
+    throw new UnsupportedOperationException();
   }
 
   /**
-   * @return returns latest metric stats for a specific component
-   */
-  default Optional<MetricsStats> readStats(String component) {
-    return Optional.empty();
-  }
-
-  /**
-   * Releases all acquired resources and prepare for termination of this instance
+   * Releases all acquired resources and prepare for termination of this {@link ISensor}
    */
   default void close() {
   }
