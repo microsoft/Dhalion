@@ -109,7 +109,7 @@ public class PoliciesExecutor {
   private void identifyOutliers(Instant previous, Instant current, Collection<? extends Outcome> outcomes) {
     outcomes.stream()
         .filter(m -> m.instant().isAfter(current) || m.instant().isBefore(previous))
-        .forEach(m -> LOG.warning(m.toString() + "is outside checkpoint window"));
+        .forEach(m -> LOG.warning(m.toString() + " is outside checkpoint window"));
   }
 
   public void destroy() {

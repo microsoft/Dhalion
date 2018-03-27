@@ -67,7 +67,7 @@ public class PoliciesExecutorTest {
     ScheduledFuture<?> future = executor.start();
 
     try {
-      verify(mockPolicy, timeout(50l).atLeastOnce()).executeResolvers(diagnosis);
+      verify(mockPolicy, timeout(200l).atLeastOnce()).executeResolvers(diagnosis);
     } catch (WantedButNotInvoked e) {
       if (future.isDone()) {
         System.out.println(future.get());
