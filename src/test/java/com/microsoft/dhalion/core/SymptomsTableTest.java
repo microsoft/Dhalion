@@ -90,6 +90,18 @@ public class SymptomsTableTest {
   }
 
   @Test
+  public void expire() {
+    Instant expiration = Instant.ofEpochMilli(20);
+    resultTable = testTable.between(null, expiration);
+    assertEquals(6, resultTable.size());
+
+    resultTable = testTable.expire(expiration);
+    assertEquals(12, resultTable.size());
+    resultTable = resultTable.between(null, expiration);
+    assertEquals(0, resultTable.size());
+  }
+
+  @Test
   public void size() {
     assertEquals(18, testTable.size());
   }

@@ -99,7 +99,11 @@ public class PoliciesExecutor {
         // TODO pretty print
         LOG.info(actions.toString());
 
-        // TODO delete expired objects from state store
+        Instant expiration = current.minus(Duration.ofMinutes(30));
+        context.measurementsTableBuilder.expireBefore(expiration);
+        context.symptomsTableBuilder.expireBefore(expiration);
+        context.diagnosisTableBuilder.expireBefore(expiration);
+        context.actionTableBuilder.expireBefore(expiration);
       }
     }, 1, 1, TimeUnit.MILLISECONDS);
 
@@ -133,10 +137,7 @@ public class PoliciesExecutor {
     }
 
     private void captureCheckpoint() {
-      if (checkpoint != null) {
-        previousCheckpoint = checkpoint;
-      }
-
+      previousCheckpoint = checkpoint != null ? checkpoint : Instant.MIN;
       checkpoint = Instant.now();
     }
 

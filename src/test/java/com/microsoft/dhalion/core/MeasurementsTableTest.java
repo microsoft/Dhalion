@@ -90,6 +90,18 @@ public class MeasurementsTableTest {
   }
 
   @Test
+  public void expire() {
+    Instant expiration = Instant.ofEpochMilli(70);
+    resultTable = testTable.between(null, expiration);
+    assertEquals(7, resultTable.size());
+
+    resultTable = testTable.expire(expiration);
+    assertEquals(17, resultTable.size());
+    resultTable = resultTable.between(null, expiration);
+    assertEquals(0, resultTable.size());
+  }
+
+  @Test
   public void max() {
     assertEquals(240, testTable.max(), 0.01);
   }
