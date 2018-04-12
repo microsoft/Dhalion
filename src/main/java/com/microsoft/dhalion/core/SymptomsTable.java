@@ -42,6 +42,16 @@ public class SymptomsTable extends OutcomeTable<Symptom> {
   }
 
   /**
+   * Deletes all rows corresponding to {@link Symptom}s older than or recorded at the given expiration
+   *
+   * @param expiration timestamp
+   * @return {@link SymptomsTable} containing retained {@link Symptom}s
+   */
+  public SymptomsTable expire(Instant expiration) {
+    return new SymptomsTable(super.expireBefore(expiration));
+  }
+
+  /**
    * @param id unique symptom id
    * @return {@link Symptom}s with the given id
    */
@@ -135,7 +145,7 @@ public class SymptomsTable extends OutcomeTable<Symptom> {
    * Builds {@link SymptomsTable} instance and provides ability to update it.
    */
   public static class Builder {
-    private final SymptomsTable symptomsTable = new SymptomsTable();
+    private SymptomsTable symptomsTable = new SymptomsTable();
 
     public SymptomsTable get() {
       return symptomsTable;
@@ -147,6 +157,10 @@ public class SymptomsTable extends OutcomeTable<Symptom> {
       }
 
       this.symptomsTable.addAll(symptoms);
+    }
+
+    public void expireBefore(Instant expiration) {
+      this.symptomsTable = symptomsTable.expire(expiration);
     }
   }
 }

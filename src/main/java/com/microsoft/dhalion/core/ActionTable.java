@@ -42,6 +42,16 @@ public class ActionTable extends OutcomeTable<Action> {
   }
 
   /**
+   * Deletes all rows corresponding to actions older than or recorded at the given expiration
+   *
+   * @param expiration timestamp
+   * @return {@link ActionTable} containing retained {@link Action}s
+   */
+  public ActionTable expire(Instant expiration) {
+    return new ActionTable(super.expireBefore(expiration));
+  }
+
+  /**
    * @param id unique action id
    * @return {@link Action}s with the given id
    */
@@ -135,7 +145,7 @@ public class ActionTable extends OutcomeTable<Action> {
    * Builds {@link ActionTable} instance and provides ability to update it.
    */
   public static class Builder {
-    private final ActionTable actionsTable = new ActionTable();
+    private ActionTable actionsTable = new ActionTable();
 
     public ActionTable get() {
       return actionsTable;
@@ -147,6 +157,10 @@ public class ActionTable extends OutcomeTable<Action> {
       }
 
       this.actionsTable.addAll(actions);
+    }
+
+    public void expireBefore(Instant expiration) {
+      this.actionsTable = actionsTable.expire(expiration);
     }
   }
 }

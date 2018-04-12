@@ -11,6 +11,7 @@ import tech.tablesaw.api.IntColumn;
 import tech.tablesaw.api.LongColumn;
 import tech.tablesaw.api.Table;
 import tech.tablesaw.filtering.Filter;
+import tech.tablesaw.util.Selection;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -21,8 +22,6 @@ import java.util.stream.Collectors;
 
 import static tech.tablesaw.api.QueryHelper.column;
 import static tech.tablesaw.api.QueryHelper.or;
-
-//TODO thread safety
 
 /**
  * An ordered collection of {@link Outcome} instances. This class provides methods to filter, query and aggregate the
@@ -77,6 +76,11 @@ public abstract class OutcomeTable<T extends Outcome> {
     });
   }
 
+  public Table expireBefore(Instant expiration) {
+    Selection s = TableUtils.filterTime(table, TIME_STAMP, null, expiration);
+    return table.dropRows(s.toIntArrayList());
+  }
+
   Table filterId(int id) {
     return table.selectWhere(column(ID).isEqualTo(id));
   }
@@ -103,7 +107,7 @@ public abstract class OutcomeTable<T extends Outcome> {
   }
 
   Table filterTime(Instant oldest, Instant newest) {
-    return TableUtils.filterTime(table, TIME_STAMP, oldest, newest);
+    return table.selectWhere(TableUtils.filterTime(table, TIME_STAMP, oldest, newest));
   }
 
   /**

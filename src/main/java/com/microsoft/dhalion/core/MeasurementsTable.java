@@ -11,6 +11,7 @@ import tech.tablesaw.api.DoubleColumn;
 import tech.tablesaw.api.LongColumn;
 import tech.tablesaw.api.Table;
 import tech.tablesaw.filtering.Filter;
+import tech.tablesaw.util.Selection;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -92,6 +93,17 @@ public class MeasurementsTable {
   }
 
   /**
+   * Deletes all rows corresponding to measurements older than or recorded at the given expiration
+   *
+   * @param expiration timestamp
+   * @return {@link MeasurementsTable} containing retained {@link Measurement}s
+   */
+  public MeasurementsTable expire(Instant expiration) {
+    Selection s = TableUtils.filterTime(measurements, TIME_STAMP, null, expiration);
+    return new MeasurementsTable(measurements.dropRows(s.toIntArrayList()));
+  }
+
+  /**
    * Retains all {@link Measurement}s with given component names.
    *
    * @param names of the components, not null
@@ -162,7 +174,8 @@ public class MeasurementsTable {
    * @return {@link MeasurementsTable} containing filtered {@link Measurement}s
    */
   public MeasurementsTable between(Instant oldest, Instant newest) {
-    return new MeasurementsTable(TableUtils.filterTime(measurements, TIME_STAMP, oldest, newest));
+    Selection selection = TableUtils.filterTime(measurements, TIME_STAMP, oldest, newest);
+    return new MeasurementsTable(measurements.selectWhere(selection));
   }
 
   /**
@@ -349,7 +362,7 @@ public class MeasurementsTable {
    * Builds {@link MeasurementsTable} instance and provides ability to update it.
    */
   public static class Builder {
-    private final MeasurementsTable measurementsTable = new MeasurementsTable();
+    private MeasurementsTable measurementsTable = new MeasurementsTable();
 
     public MeasurementsTable get() {
       return measurementsTable;
@@ -361,6 +374,10 @@ public class MeasurementsTable {
       }
 
       this.measurementsTable.addAll(measurements);
+    }
+
+    public void expireBefore(Instant expiration) {
+      this.measurementsTable = measurementsTable.expire(expiration);
     }
   }
 }

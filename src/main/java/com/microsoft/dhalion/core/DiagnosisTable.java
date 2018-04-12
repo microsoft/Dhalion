@@ -51,6 +51,16 @@ public class DiagnosisTable extends OutcomeTable<Diagnosis> {
   }
 
   /**
+   * Deletes all rows corresponding to diagnosis older than or recorded at the given expiration
+   *
+   * @param expiration timestamp
+   * @return {@link DiagnosisTable} containing retained {@link Diagnosis}
+   */
+  public DiagnosisTable expire(Instant expiration) {
+    return new DiagnosisTable(super.expireBefore(expiration));
+  }
+
+  /**
    * Retains all {@link Diagnosis} with given diagnosis type
    *
    * @param types names of the diagnosis types, not null
@@ -135,7 +145,7 @@ public class DiagnosisTable extends OutcomeTable<Diagnosis> {
    * Builds {@link DiagnosisTable} instance and provides ability to update it.
    */
   public static class Builder {
-    private final DiagnosisTable diagnosisTable = new DiagnosisTable();
+    private DiagnosisTable diagnosisTable = new DiagnosisTable();
 
     public DiagnosisTable get() {
       return diagnosisTable;
@@ -147,6 +157,10 @@ public class DiagnosisTable extends OutcomeTable<Diagnosis> {
       }
 
       this.diagnosisTable.addAll(diagnosis);
+    }
+
+    public void expireBefore(Instant expiration) {
+      this.diagnosisTable = diagnosisTable.expire(expiration);
     }
   }
 }

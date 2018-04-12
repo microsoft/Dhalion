@@ -14,6 +14,7 @@ import tech.tablesaw.columns.ColumnReference;
 import tech.tablesaw.filtering.Filter;
 import tech.tablesaw.filtering.LongGreaterThanOrEqualTo;
 import tech.tablesaw.filtering.LongLessThanOrEqualTo;
+import tech.tablesaw.util.Selection;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ class TableUtils {
     return result;
   }
 
-  static Table filterTime(Table table, String column, Instant oldest, Instant newest) {
+  static Selection filterTime(Table table, String column, Instant oldest, Instant newest) {
     List<Filter> filters = new ArrayList<>();
 
     if (oldest != null) {
@@ -43,11 +44,12 @@ class TableUtils {
     if (newest != null) {
       filters.add(new LongLessThanOrEqualTo(new ColumnReference(column), newest.toEpochMilli()));
     }
+
     if (filters.isEmpty()) {
-      return table;
+      throw new IllegalArgumentException();
     }
 
-    return table.selectWhere(allOf(filters));
+    return allOf(filters).apply(table);
   }
 
   static Collection<Instant> uniqueInstants(LongColumn timeStamps) {
