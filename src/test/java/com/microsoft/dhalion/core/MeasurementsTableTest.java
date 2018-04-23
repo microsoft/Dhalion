@@ -178,6 +178,20 @@ public class MeasurementsTableTest {
   }
 
   @Test
+  public void lastN() {
+    MeasurementsTable measurement = testTable.last(3);
+    assertEquals(3, measurement.size());
+
+    assertEquals("c3", measurement.get(2).component());
+    assertEquals("c3", measurement.get(1).component());
+    assertEquals("c3", measurement.get(0).component());
+
+    assertEquals(240, measurement.get(2).instant().toEpochMilli());
+    assertEquals(230, measurement.get(1).instant().toEpochMilli());
+    assertEquals(220, measurement.get(0).instant().toEpochMilli());
+  }
+
+  @Test
   public void slice() {
     assertEquals(24, testTable.size());
     Iterator<Measurement> measurements = testTable.get().iterator();

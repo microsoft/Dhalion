@@ -6,19 +6,18 @@
  */
 package com.microsoft.dhalion.core;
 
-import tech.tablesaw.api.CategoryColumn;
-import tech.tablesaw.api.DoubleColumn;
-import tech.tablesaw.api.LongColumn;
-import tech.tablesaw.api.Table;
-import tech.tablesaw.filtering.Filter;
-import tech.tablesaw.util.Selection;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import tech.tablesaw.api.CategoryColumn;
+import tech.tablesaw.api.DoubleColumn;
+import tech.tablesaw.api.LongColumn;
+import tech.tablesaw.api.Table;
+import tech.tablesaw.filtering.Filter;
+import tech.tablesaw.util.Selection;
 
 import static tech.tablesaw.api.QueryHelper.both;
 import static tech.tablesaw.api.QueryHelper.column;
@@ -31,23 +30,17 @@ import static tech.tablesaw.api.QueryHelper.or;
  * {@link Measurement}s.
  */
 public class MeasurementsTable {
+  private static final String COMPONENT = SortKey.COMPONENT.name();
+  private static final String INSTANCE = SortKey.INSTANCE.name();
+  private static final String TIME_STAMP = SortKey.TIME_STAMP.name();
+  private static final String TYPE = SortKey.TYPE.name();
+  private static final String VALUE = SortKey.VALUE.name();
   private final Table measurements;
   private CategoryColumn component;
   private CategoryColumn instance;
   private CategoryColumn type;
   private LongColumn timeStamps;
   private DoubleColumn value;
-
-  public enum SortKey {
-    COMPONENT, INSTANCE, TIME_STAMP, TYPE, VALUE
-  }
-
-  private static final String COMPONENT = SortKey.COMPONENT.name();
-  private static final String INSTANCE = SortKey.INSTANCE.name();
-  private static final String TIME_STAMP = SortKey.TIME_STAMP.name();
-  private static final String TYPE = SortKey.TYPE.name();
-  private static final String VALUE = SortKey.VALUE.name();
-
   private MeasurementsTable() {
     component = new CategoryColumn(COMPONENT);
     instance = new CategoryColumn(INSTANCE);
@@ -72,16 +65,6 @@ public class MeasurementsTable {
     value = measurements.doubleColumn(VALUE);
   }
 
-  private void addAll(Collection<Measurement> measurements) {
-    measurements.forEach(measurement -> {
-      component.append(measurement.component());
-      instance.append(measurement.instance());
-      type.append(measurement.type());
-      timeStamps.append(measurement.instant().toEpochMilli());
-      value.append(measurement.value());
-    });
-  }
-
   /**
    * @param measurements collections of measurements
    * @return a {@link MeasurementsTable} holding the input
@@ -90,6 +73,16 @@ public class MeasurementsTable {
     MeasurementsTable table = new MeasurementsTable();
     table.addAll(measurements);
     return table;
+  }
+
+  private void addAll(Collection<Measurement> measurements) {
+    measurements.forEach(measurement -> {
+      component.append(measurement.component());
+      instance.append(measurement.instance());
+      type.append(measurement.type());
+      timeStamps.append(measurement.instant().toEpochMilli());
+      value.append(measurement.value());
+    });
   }
 
   /**
@@ -199,7 +192,7 @@ public class MeasurementsTable {
   public MeasurementsTable valueBetween(double low, double high) {
     Table result = measurements.selectWhere(
         both(column(VALUE).isGreaterThanOrEqualTo(low),
-             column(VALUE).isLessThanOrEqualTo(high)));
+            column(VALUE).isLessThanOrEqualTo(high)));
     return new MeasurementsTable(result);
   }
 
@@ -324,6 +317,16 @@ public class MeasurementsTable {
   }
 
   /**
+   * @param N the number of measurements to return
+   * @return the last N {@link Measurement}, if present
+   */
+  public MeasurementsTable last(int N) {
+    Table result = measurements.selectRows(measurements.rowCount() - N,
+        measurements.rowCount() - 1);
+    return new MeasurementsTable(result);
+  }
+
+  /**
    * @return all {@link Measurement}s in this collection
    */
   public Collection<Measurement> get() {
@@ -348,14 +351,18 @@ public class MeasurementsTable {
 
   private Measurement row2Obj(int index) {
     return new Measurement(component.get(index),
-                           instance.get(index),
-                           type.get(index),
-                           Instant.ofEpochMilli(timeStamps.get(index)),
-                           value.get(index));
+        instance.get(index),
+        type.get(index),
+        Instant.ofEpochMilli(timeStamps.get(index)),
+        value.get(index));
   }
 
   public String toStringForDebugging() {
     return measurements.print(measurements.rowCount());
+  }
+
+  public enum SortKey {
+    COMPONENT, INSTANCE, TIME_STAMP, TYPE, VALUE
   }
 
   /**
