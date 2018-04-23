@@ -41,7 +41,7 @@ public class PoliciesExecutor {
   public PoliciesExecutor(Collection<IHealthPolicy> policies) {
     this.policies = new ArrayList<>(policies);
     for (IHealthPolicy policy : this.policies) {
-      ExecutionContext ctx = new ExecutionContext();
+      ExecutionContext ctx = new ExecutionContext(policy);
       policy.initialize(ctx);
       policyContextMap.put(policy, ctx);
     }
@@ -128,8 +128,10 @@ public class PoliciesExecutor {
     private final ActionTable.Builder actionTableBuilder;
     private Instant checkpoint;
     private Instant previousCheckpoint;
+    private IHealthPolicy policy;
 
-    private ExecutionContext() {
+    private ExecutionContext(IHealthPolicy policy) {
+      this.policy = policy;
       measurementsTableBuilder = new MeasurementsTable.Builder();
       symptomsTableBuilder = new SymptomsTable.Builder();
       diagnosisTableBuilder = new DiagnosisTable.Builder();
@@ -138,7 +140,7 @@ public class PoliciesExecutor {
 
     private void captureCheckpoint() {
       previousCheckpoint = checkpoint != null ? checkpoint : Instant.MIN;
-      checkpoint = Instant.now();
+      checkpoint = policy.getNextCheckpoint();
     }
 
     public MeasurementsTable measurements() {

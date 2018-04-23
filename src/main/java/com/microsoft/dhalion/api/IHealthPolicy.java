@@ -14,6 +14,7 @@ import com.microsoft.dhalion.core.Symptom;
 import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 
 /**
@@ -71,6 +72,14 @@ public interface IHealthPolicy {
    * @return the remaining delay before re-execution of this policy
    */
   Duration getDelay();
+
+  /**
+   * @return the timestamp/checkpoint to be use for next execution cycle
+   */
+  default Instant getNextCheckpoint() {
+    return Instant.now();
+  }
+
 
   /**
    * Release all acquired resources and prepare for termination of this instance
