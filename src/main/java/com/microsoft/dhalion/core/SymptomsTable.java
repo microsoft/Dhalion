@@ -110,6 +110,14 @@ public class SymptomsTable extends OutcomeTable<Symptom> {
   }
 
   /**
+   * @param n the number of symptoms to return
+   * @return the last n {@link Symptom}, if present
+   */
+  public SymptomsTable last(int n) {
+    return new SymptomsTable(sliceTable(size()-n, size()-1));
+  }
+
+  /**
    * Sorts the {@link Symptom}s in this collection in the order of the specified keys
    *
    * @param descending false for ascending order, true for descending

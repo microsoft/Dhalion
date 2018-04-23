@@ -317,11 +317,11 @@ public class MeasurementsTable {
   }
 
   /**
-   * @param N the number of measurements to return
-   * @return the last N {@link Measurement}, if present
+   * @param n the number of measurements to return
+   * @return the last n {@link Measurement}, if present
    */
-  public MeasurementsTable last(int N) {
-    Table result = measurements.selectRows(measurements.rowCount() - N,
+  public MeasurementsTable last(int n) {
+    Table result = measurements.selectRows(measurements.rowCount() - n,
         measurements.rowCount() - 1);
     return new MeasurementsTable(result);
   }

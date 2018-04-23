@@ -7,17 +7,18 @@
 
 package com.microsoft.dhalion.core;
 
-import com.microsoft.dhalion.core.OutcomeTable.SortKey;
-import com.microsoft.dhalion.core.SymptomsTable.Builder;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
+import com.microsoft.dhalion.core.OutcomeTable.SortKey;
+import com.microsoft.dhalion.core.SymptomsTable.Builder;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -87,6 +88,16 @@ public class SymptomsTableTest {
     assertEquals(6, resultTable.size());
     resultTable.get().forEach(s -> assertTrue(20 <= s.instant().toEpochMilli()));
     resultTable.get().forEach(s -> assertTrue(30 >= s.instant().toEpochMilli()));
+  }
+
+  @Test
+  public void lastN() {
+    SymptomsTable symptomsTable = testTable.last(2);
+    assertEquals(2, symptomsTable.size());
+
+    symptomsTable.get().forEach(symptom -> assertEquals(3, symptom.id()));
+    assertEquals("s2", symptomsTable.get(0).type());
+    assertEquals("s2", symptomsTable.get(1).type());
   }
 
   @Test
