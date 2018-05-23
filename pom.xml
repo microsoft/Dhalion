@@ -182,6 +182,11 @@
       <artifactId>tablesaw-core</artifactId>
       <version>0.11.4</version>
     </dependency>
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>1.21</version>
+    </dependency>
 
     <dependency>
       <groupId>junit</groupId>
