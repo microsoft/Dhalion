@@ -97,11 +97,7 @@ public class HealthManager {
     confBuilder.loadConfig(Paths.get(configDir, (String) Key.HEALTHMGR_CONF.getDefault()));
     Map<String, Object> conf = confBuilder.getKeyValues();
 
-    //Read the ConfigBuilder class
-    String configBuilderClass = (String) conf.get(Key.CONFIG_BUILDER_CLASS.value());
-    Class<ConfigBuilder> cbClass
-        = (Class<ConfigBuilder>) this.getClass().getClassLoader().loadClass(configBuilderClass);
-    ConfigBuilder cb = injector.getInstance(cbClass);
+    ConfigBuilder cb = injector.getInstance(ConfigBuilder.class);
 
     cb.loadConfig(conf).loadPolicyConf();
     config = cb.build();
