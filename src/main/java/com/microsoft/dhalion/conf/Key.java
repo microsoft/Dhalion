@@ -14,7 +14,6 @@ public enum Key {
   POLICY_INTERVAL("health.policy.interval.ms"),
   POLICY_CONF_SENSOR_DURATION_SUFFIX(".duration"),
 
-  CONFIG_BUILDER_CLASS("config.builder.class", ConfigBuilder.class.getName()),
   METRICS_PROVIDER_CLASS("metrics.provider.class");
 
   private final String value;
