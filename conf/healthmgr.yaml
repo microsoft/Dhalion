@@ -1,0 +1,3 @@
+healthmgr.data.dir: C:\Users\avflor\IdeaProjects\Dhalion\src\test\resources
+metrics.provider.class: com.microsoft.dhalion.examples.CSVMetricsProvider
+component.names: NodeA,NodeB
