@@ -188,7 +188,7 @@ public class HealthPolicyImpl implements IHealthPolicy {
     diagnosers.forEach(IDiagnoser::close);
     resolvers.forEach(IResolver::close);
   }
-
+  
   @VisibleForTesting
   static class ClockTimeProvider {
     Instant now() {
