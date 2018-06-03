@@ -1,9 +1,13 @@
 health.policies:
-  - clustered-slow-outlier
-clustered-slow-outlier:
+  - example-policy
+example-policy:
   health.policy.class: com.microsoft.dhalion.examples.AlertPolicy
   health.policy.interval.ms: 300
   AboveThresholdDetector.threshold_Cpu: 90.0
   AboveThresholdDetector.threshold_Mem: 900.0
-  BelowThresholdDetector.threshold_Mem: 200.0
   BelowThresholdDetector.threshold_Cpu: 40.0
+  BelowThresholdDetector.threshold_Mem: 200.0
+  AboveThresholdDetector.noCheckpoints_Cpu: 1.0
+  AboveThresholdDetector.noCheckpoints_Mem: 1.0
+  BelowThresholdDetector.noCheckpoints_Cpu: 1.0
+  BelowThresholdDetector.noCheckpoints_Mem: 1.0
