@@ -6,7 +6,7 @@ import com.microsoft.dhalion.conf.PolicyConfig;
 import com.microsoft.dhalion.detectors.AboveThresholdDetector;
 import com.microsoft.dhalion.detectors.BelowThresholdDetector;
 import com.microsoft.dhalion.policy.HealthPolicyImpl;
-import com.microsoft.dhalion.sensors.DirectSensor;
+import com.microsoft.dhalion.sensors.BasicSensor;
 
 import javax.inject.Inject;
 import java.time.Instant;
@@ -20,7 +20,6 @@ import static com.microsoft.dhalion.examples.MetricName.METRIC_MEMORY;
 
 
 public class AlertPolicy extends HealthPolicyImpl implements IHealthPolicy {
-
   private Instant currentCheckPoint;
   private static final Pattern timeData =
       Pattern.compile("((?<Time>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2,4}\\.\\d{2,4})" + "(?<Type>[Z]))");
@@ -37,30 +36,36 @@ public class AlertPolicy extends HealthPolicyImpl implements IHealthPolicy {
       currentCheckPoint = getTimestamp(matcher).get();
     }
 
-    DirectSensor cpuUtilizationSensor = new DirectSensor(policyConfig, sysConfig, METRIC_CPU.text(), metricsProvider);
-    DirectSensor memoryUtilizationSensor = new DirectSensor(policyConfig, sysConfig, METRIC_MEMORY.text(),
-                                                            metricsProvider);
-    AboveThresholdDetector cpuAboveThresholdDetector = new AboveThresholdDetector(policyConfig, METRIC_CPU.text());
-    AboveThresholdDetector memoryAboveThresholdDetector = new AboveThresholdDetector(policyConfig,
-                                                                                     METRIC_MEMORY.text());
-    BelowThresholdDetector cpuBelowThresholdDetector = new BelowThresholdDetector(policyConfig, METRIC_CPU.text());
-    BelowThresholdDetector memoryBelowThresholdDetector = new BelowThresholdDetector(policyConfig,
-                                                                                     METRIC_MEMORY.text());
+    BasicSensor cpuUtilizationSensor = new BasicSensor(sysConfig, METRIC_CPU.text(), metricsProvider);
+    BasicSensor memoryUtilizationSensor = new BasicSensor(sysConfig, METRIC_MEMORY.text(), metricsProvider);
+
+    AboveThresholdDetector cpuAboveThresholdDetector
+        = new AboveThresholdDetector(policyConfig, METRIC_CPU.text());
+    AboveThresholdDetector memoryAboveThresholdDetector
+        = new AboveThresholdDetector(policyConfig, METRIC_MEMORY.text());
+    BelowThresholdDetector cpuBelowThresholdDetector
+        = new BelowThresholdDetector(policyConfig, METRIC_CPU.text());
+    BelowThresholdDetector memoryBelowThresholdDetector
+        = new BelowThresholdDetector(policyConfig, METRIC_MEMORY.text());
 
     registerSensors(cpuUtilizationSensor, memoryUtilizationSensor);
-    registerDetectors(cpuAboveThresholdDetector, memoryAboveThresholdDetector, cpuBelowThresholdDetector,
+
+    registerDetectors(cpuAboveThresholdDetector,
+                      memoryAboveThresholdDetector,
+                      cpuBelowThresholdDetector,
                       memoryBelowThresholdDetector);
+
     registerDiagnosers(uncommonUtilizationDiagnoser);
     registerResolvers(alertResolver);
 
     setPolicyExecutionInterval(policyConfig.interval());
   }
 
+  @Override
   public Instant getNextCheckpoint() {
     currentCheckPoint = currentCheckPoint.plus(1, ChronoUnit.MINUTES);
     return currentCheckPoint;
   }
-
 
   Optional<Matcher> getDataMatcher(String time) {
     Matcher tsMatcher = timeData.matcher(time);

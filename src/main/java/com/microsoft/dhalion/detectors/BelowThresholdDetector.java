@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Logger;
 
-public class BelowThresholdDetector extends BaseDetector {
+public class BelowThresholdDetector extends Detector {
   public static String SYMPTOM_LOW = BelowThresholdDetector.class.getSimpleName();
 
   public static final String LOW_THRESHOLD_CONF = "BelowThresholdDetector.threshold";
