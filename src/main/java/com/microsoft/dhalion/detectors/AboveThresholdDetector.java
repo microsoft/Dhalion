@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Logger;
 
-public class AboveThresholdDetector extends BaseDetector {
+public class AboveThresholdDetector extends Detector {
   public static String SYMPTOM_HIGH = AboveThresholdDetector.class.getSimpleName();
 
   public static final String HIGH_THRESHOLD_CONF = "AboveThresholdDetector.threshold";
