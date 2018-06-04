@@ -13,6 +13,8 @@ public enum Key {
   POLICY_CLASS("health.policy.class"),
   POLICY_INTERVAL("health.policy.interval.ms"),
   POLICY_CONF_SENSOR_DURATION_SUFFIX(".duration"),
+  CONF_COMPONENT_NAMES("component.names"),
+
 
   METRICS_PROVIDER_CLASS("metrics.provider.class");
 
@@ -27,6 +29,7 @@ public enum Key {
     this.value = value;
     this.defaultValue = defaultValue;
   }
+
   /**
    * Get the key value for this enum
    *
