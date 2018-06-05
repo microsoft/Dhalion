@@ -18,7 +18,11 @@ import java.util.regex.Pattern;
 import static com.microsoft.dhalion.examples.MetricName.METRIC_CPU;
 import static com.microsoft.dhalion.examples.MetricName.METRIC_MEMORY;
 
-
+/**
+ * This is an example Policy that operates on the example data file. The file contains different types of nodes
+ * with their corresponding cpu and memory utilization at different timestamps. The policy alerts the user
+ * when a node is over utilized or under utilized.
+ */
 public class AlertPolicy extends HealthPolicyImpl implements IHealthPolicy {
   private Instant currentCheckPoint;
   private static final Pattern timeData =
