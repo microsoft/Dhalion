@@ -4,7 +4,6 @@ import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.conf.Config;
 import com.microsoft.dhalion.conf.Key;
 import com.microsoft.dhalion.core.Measurement;
-import com.microsoft.dhalion.detectors.BelowThresholdDetector;
 
 import javax.inject.Inject;
 import java.io.BufferedReader;
@@ -19,6 +18,9 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+/**
+ * This is an example CSV metrics provider to be used when reading the example data file.
+ */
 public class CSVMetricsProvider implements MetricsProvider {
   private static final Logger LOG = Logger.getLogger(CSVMetricsProvider.class.getSimpleName());
 
@@ -68,5 +70,4 @@ public class CSVMetricsProvider implements MetricsProvider {
     }
     return metrics;
   }
-
 }

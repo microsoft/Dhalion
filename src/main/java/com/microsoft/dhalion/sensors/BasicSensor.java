@@ -15,6 +15,15 @@ import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * The Basic Sensor consumes metrics from the metrics provider and returns them directly in their current form.
+ * It can be used when the metrics returned by the metrics provider do not require any further manipulation before
+ * being consumed by the detectors. Every time the Basic Sensor is invoked it returns metrics that correspond to the
+ * time window between the timestamp of the previous policy invocation and the current timestamp.
+ * <p>
+ * The Basic Sensor takes as input a metric name, the metrics provider, and a set of components.
+ * It collects the values of the given metric for these components.
+ */
 public class BasicSensor implements ISensor {
   private static final Logger LOG = Logger.getLogger(BasicSensor.class.getName());
   private static final Duration DEFAULT_METRIC_DURATION = Duration.ofSeconds(60);
@@ -58,6 +67,11 @@ public class BasicSensor implements ISensor {
     return Collections.singletonList(metricName);
   }
 
+  /**
+   * Fetches the required metrics
+   *
+   * @return a Collection of Measurements
+   */
   @Override
   public Collection<Measurement> fetch() {
     Instant startTime = context.checkpoint();
