@@ -8,6 +8,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Logger;
 
+/**
+ * This is an example Resolver that is used by the Alert Policy.
+ * It simply prints log records with the current diagnoses.
+ */
 public class AlertResolver implements IResolver {
 
   private static final Logger LOG = Logger.getLogger(AlertResolver.class.getName());

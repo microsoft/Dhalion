@@ -1,5 +1,8 @@
 package com.microsoft.dhalion.examples;
 
+/**
+ * Metric names to be used with the Alert Policy.
+ */
 public enum MetricName {
   METRIC_CPU("Cpu"),
   METRIC_MEMORY("Mem");

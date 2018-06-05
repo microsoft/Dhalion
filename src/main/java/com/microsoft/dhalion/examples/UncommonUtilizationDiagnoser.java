@@ -19,11 +19,17 @@ import static com.microsoft.dhalion.detectors.BelowThresholdDetector.SYMPTOM_LOW
 import static com.microsoft.dhalion.examples.MetricName.METRIC_CPU;
 import static com.microsoft.dhalion.examples.MetricName.METRIC_MEMORY;
 
+/**
+ * This is an example Diagnoser that is used by the Alert Policy. It operates on the example data file
+ * and returns DIAGNOSIS_OVER_UTILIZED_NODE diagnosis when a node in the data file has both high cpu and memory
+ * utilization. It returns a DIAGNOSIS_UNDER_UTILIZED_NODE diagnosis when a node has both low cpu and memory
+ * utilization.
+ */
 public class UncommonUtilizationDiagnoser implements IDiagnoser {
 
   private static final Logger LOG = Logger.getLogger(UncommonUtilizationDiagnoser.class.getSimpleName());
   public static String DIAGNOSIS_OVER_UTILIZED_NODE = Utils.getCompositeName(UncommonUtilizationDiagnoser.class
-      .getSimpleName(), "over_utilized_node");
+                                                                                 .getSimpleName(), "over_utilized_node");
   public static String DIAGNOSIS_UNDER_UTILIZED_NODE = Utils.getCompositeName(UncommonUtilizationDiagnoser.class
                                                                                   .getSimpleName(),
                                                                               "under_utilized_node");
