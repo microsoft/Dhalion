@@ -2,21 +2,26 @@ package com.microsoft.dhalion.examples;
 
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.conf.Config;
-import com.microsoft.dhalion.conf.Key;
+import com.microsoft.dhalion.conf.ConfigName;
 import com.microsoft.dhalion.core.Measurement;
 
 import javax.inject.Inject;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * This is an example CSV metrics provider to be used when reading the example data file.
@@ -25,12 +30,31 @@ public class CSVMetricsProvider implements MetricsProvider {
   private static final Logger LOG = Logger.getLogger(CSVMetricsProvider.class.getSimpleName());
 
   private NodeStat nodeStat;
-  Config sysConf;
+  private List<String> lines;
 
   @Inject
-  public CSVMetricsProvider(Config sysConfig) {
+  public CSVMetricsProvider(Config sysConfig) throws IOException {
+    String dataDir = (String) sysConfig.get(ConfigName.DATA_DIR);
+    Path dataFile = Paths.get(dataDir, "data.txt");
+
+    if (Files.exists(dataFile)) {
+      lines = Files.readAllLines(dataFile);
+      LOG.info("Loaded metrics data from " + dataFile);
+    } else {
+      // try to find the in the classpath
+      InputStream stream = CSVMetricsProvider.class.getClassLoader().getResourceAsStream(dataFile.toString());
+      if (stream == null) {
+        throw new IllegalArgumentException("Missing metrics data file: " + dataFile);
+      }
+
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+        lines = reader.lines().collect(Collectors.toList());
+      }
+
+      LOG.info("Loaded metrics resource data from " + dataFile);
+    }
+
     nodeStat = new NodeStat();
-    this.sysConf = sysConfig;
   }
 
   public Collection<Measurement> getMeasurements(Instant startTS,
@@ -46,28 +70,18 @@ public class CSVMetricsProvider implements MetricsProvider {
     return measurements;
   }
 
-  private Collection<Measurement> getMeasurements(String metric, Instant startTS, Duration duration, String
-      component) {
-    Collection<Measurement> metrics = new ArrayList<>();
+  private Collection<Measurement> getMeasurements(String metric,
+                                                  Instant startTS,
+                                                  Duration duration,
+                                                  String component) {
     Instant endTS = startTS.minus(duration);
     HashSet<String> componentSet = new HashSet<>();
     componentSet.add(component);
-    BufferedReader br;
-    try {
-      br = new BufferedReader(new FileReader(new File(sysConf.get(Key.DATA_DIR.value()).toString(), "data.txt")));
-      String line = br.readLine();
-      while (line != null) {
-        Optional<Measurement> metricData = nodeStat.getMeasurement(line, metric, componentSet);
-        if (metricData.isPresent()) {
-          if (metricData.get().instant().compareTo(endTS) > 0 && metricData.get().instant().compareTo(startTS) <= 0) {
-            metrics.add(metricData.get());
-          }
-        }
-        line = br.readLine();
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return metrics;
+
+    return lines.stream().map(line -> nodeStat.getMeasurement(line, metric, componentSet))
+                .filter(Optional::isPresent).map(Optional::get)
+                .filter(reading -> reading.instant().isAfter(endTS))
+                .filter(reading -> !reading.instant().isAfter(startTS))
+                .collect(Collectors.toList());
   }
 }
