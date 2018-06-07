@@ -8,8 +8,8 @@ import com.google.inject.name.Names;
 import com.microsoft.dhalion.api.IHealthPolicy;
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.conf.Config;
-import com.microsoft.dhalion.conf.ConfigBuilder;
-import com.microsoft.dhalion.conf.Key;
+import com.microsoft.dhalion.conf.Config.ConfigBuilder;
+import com.microsoft.dhalion.conf.ConfigName;
 import com.microsoft.dhalion.conf.PolicyConfig;
 import com.microsoft.dhalion.policy.PoliciesExecutor;
 import org.apache.commons.cli.CommandLine;
@@ -20,14 +20,14 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.logging.Logger;
-
 
 public class HealthManager {
   public static final String CONF_DIR = "conf.dir";
@@ -36,23 +36,8 @@ public class HealthManager {
   private final String configDir;
 
   private Injector injector;
-  private Config config;
   private List<IHealthPolicy> healthPolicies = new ArrayList<>();
   private final MetricsProvider metricsProvider;
-
-  enum CliArgs {
-    CONFIG_DIR("config_dir");
-
-    private String text;
-
-    CliArgs(String name) {
-      this.text = name;
-    }
-
-    public String text() {
-      return text;
-    }
-  }
 
   public static void main(String[] args) throws Exception {
     CommandLineParser parser = new DefaultParser();
@@ -79,37 +64,34 @@ public class HealthManager {
   }
 
   private HealthManager(CommandLine cmd) throws ClassNotFoundException {
-    this.configDir = getOptionValue(cmd, CliArgs.CONFIG_DIR);
+    this.configDir = cmd.getOptionValue(CONF_DIR, "");
+    if (!Files.isDirectory(Paths.get(configDir))) {
+      throw new IllegalArgumentException("The config path provided must be a directory: " + configDir);
+    }
+
+    //Read healthmgr.yaml and create a hashmap with the configurations
+    ConfigBuilder confBuilder = new ConfigBuilder(configDir);
+    final Config sysConfig = confBuilder
+        .loadConfig(Paths.get(configDir, (String) ConfigName.HEALTHMGR_CONF.getDefault()))
+        .build();
 
     AbstractModule module = new AbstractModule() {
       @Override
       protected void configure() {
-        bind(String.class)
-            .annotatedWith(Names.named(CONF_DIR))
-            .toInstance(configDir);
+        bind(String.class).annotatedWith(Names.named(CONF_DIR)).toInstance(configDir);
+        bind(Config.class).toInstance(sysConfig);
       }
     };
 
     injector = Guice.createInjector(module);
 
-    //Read healthmgr.yaml and create a hashmap with the configurations
-    ConfigBuilder confBuilder = new ConfigBuilder(configDir);
-    confBuilder.loadConfig(Paths.get(configDir, (String) Key.HEALTHMGR_CONF.getDefault()));
-    Map<String, Object> conf = confBuilder.getKeyValues();
-
-    ConfigBuilder cb = injector.getInstance(ConfigBuilder.class);
-
-    cb.loadConfig(conf).loadPolicyConf();
-    config = cb.build();
-
     //Read the MetricsProvider class
-    String metricsProviderClass = (String) conf.get(Key.METRICS_PROVIDER_CLASS.value());
+    String metricsProviderClass = (String) sysConfig.get(ConfigName.METRICS_PROVIDER_CLASS);
     Class<MetricsProvider> mpClass
         = (Class<MetricsProvider>) this.getClass().getClassLoader().loadClass(metricsProviderClass);
     injector = injector.createChildInjector(new AbstractModule() {
       @Override
       protected void configure() {
-        bind(Config.class).toInstance(config);
         bind(mpClass).in(Singleton.class);
       }
     });
@@ -123,12 +105,13 @@ public class HealthManager {
       }
     });
 
-    initializePolicies();
+    Set<PolicyConfig> policyConfs = confBuilder.loadPolicyConf();
+    initializePolicies(policyConfs);
   }
 
 
-  private void initializePolicies() throws ClassNotFoundException {
-    for (PolicyConfig policyConf : config.policies()) {
+  private void initializePolicies(Set<PolicyConfig> policyConfs) throws ClassNotFoundException {
+    for (PolicyConfig policyConf : policyConfs) {
       String policyClassName = policyConf.policyClass();
       LOG.info(String.format("Initializing %s with class %s", policyConf.id(), policyClassName));
       Class<IHealthPolicy> policyClass
@@ -167,9 +150,8 @@ public class HealthManager {
 
     Option configFile = Option.builder("p")
                               .desc("Path of the config files")
-                              .longOpt(CliArgs.CONFIG_DIR.text)
+                              .longOpt(CONF_DIR)
                               .hasArgs()
-                              .required()
                               .argName("config path")
                               .build();
 
@@ -195,7 +177,4 @@ public class HealthManager {
     formatter.printHelp(HealthManager.class.getSimpleName(), options);
   }
 
-  private String getOptionValue(CommandLine cmd, CliArgs argName) {
-    return cmd.getOptionValue(argName.text, null);
-  }
 }
