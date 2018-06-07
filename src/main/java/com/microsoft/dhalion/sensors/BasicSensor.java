@@ -3,7 +3,7 @@ package com.microsoft.dhalion.sensors;
 import com.microsoft.dhalion.api.ISensor;
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.conf.Config;
-import com.microsoft.dhalion.conf.Key;
+import com.microsoft.dhalion.conf.ConfigName;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
@@ -48,7 +48,7 @@ public class BasicSensor implements ISensor {
     if (components != null) {
       this.components = components;
     } else {
-      Object result = policyConf.get(Key.CONF_COMPONENT_NAMES.value());
+      Object result = policyConf.get(ConfigName.CONF_COMPONENT_NAMES);
       if (result != null) {
         this.components = Arrays.asList(result.toString().split(","));
       } else {
