@@ -1,6 +1,6 @@
 package com.microsoft.dhalion.conf;
 
-public enum Key {
+public enum ConfigName {
   CONF_DIR("healthmgr.conf.dir"),
   DATA_DIR("healthmgr.data.dir"),
 
@@ -15,32 +15,31 @@ public enum Key {
   POLICY_CONF_SENSOR_DURATION_SUFFIX(".duration"),
   CONF_COMPONENT_NAMES("component.names"),
 
-
   METRICS_PROVIDER_CLASS("metrics.provider.class");
 
-  private final String value;
+  private final String configName;
   private final Object defaultValue;
 
-  Key(String value) {
-    this(value, null);
+  ConfigName(String configName) {
+    this(configName, null);
   }
 
-  Key(String value, Object defaultValue) {
-    this.value = value;
+  ConfigName(String configName, Object defaultValue) {
+    this.configName = configName;
     this.defaultValue = defaultValue;
   }
 
   /**
-   * Get the key value for this enum
+   * Get the key configName for this enum
    *
-   * @return key value
+   * @return key configName
    */
-  public String value() {
-    return value;
+  public String configName() {
+    return configName;
   }
 
   /**
-   * Return the default value
+   * Return the default configName
    */
   public Object getDefault() {
     return this.defaultValue;

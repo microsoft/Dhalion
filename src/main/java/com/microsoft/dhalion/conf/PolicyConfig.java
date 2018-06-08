@@ -19,15 +19,15 @@ public class PolicyConfig {
   }
 
   public String policyClass() {
-    return (String) get(Key.POLICY_CLASS);
+    return (String) get(ConfigName.POLICY_CLASS);
   }
 
   public Duration interval() {
-    return Duration.ofMillis((int) getConfig(Key.POLICY_INTERVAL.value(), 60000));
+    return Duration.ofMillis((int) getConfig(ConfigName.POLICY_INTERVAL.configName(), 60000));
   }
 
-  private Object get(Key key) {
-    return getConfig(key.value());
+  private Object get(ConfigName configName) {
+    return getConfig(configName.configName());
   }
 
   public Object getConfig(String configName) {
