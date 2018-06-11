@@ -129,19 +129,19 @@ public class PoliciesExecutorTest {
           // verify result of expiry in previous cycle
           assertEquals(2, measurements.size());
           assertEquals(1, context.measurements().size());
-          assertEquals(now, context.measurements().get().iterator().next().instant());
+          assertEquals(now.toEpochMilli(), context.measurements().get().iterator().next().instant().toEpochMilli());
 
           assertEquals(2, symptoms.size());
           assertEquals(1, context.symptoms().size());
-          assertEquals(now, context.symptoms().get().iterator().next().instant());
+          assertEquals(now.toEpochMilli(), context.symptoms().get().iterator().next().instant().toEpochMilli());
 
           assertEquals(2, diagnosis.size());
           assertEquals(1, context.diagnosis().size());
-          assertEquals(now, context.diagnosis().get().iterator().next().instant());
+          assertEquals(now.toEpochMilli(), context.diagnosis().get().iterator().next().instant().toEpochMilli());
 
           assertEquals(2, actions.size());
           assertEquals(1, context.actions().size());
-          assertEquals(now, context.actions().get().iterator().next().instant());
+          assertEquals(now.toEpochMilli(), context.actions().get().iterator().next().instant().toEpochMilli());
 
           barrier.countDown();
         }
