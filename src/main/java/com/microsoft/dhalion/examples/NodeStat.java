@@ -16,6 +16,9 @@ public class NodeStat {
   static final String NODE_ID = "Id";
   static final String TIME = "Time";
 
+  NodeStat() {
+  }
+
   private static final Pattern linePatternData =
       Pattern.compile("^((?<Node>Node.)\\[(?<Id>\\d+)\\]):" + "Mem=(?<Mem>\\d+)MB," + "Cpu=(?<Cpu>[^,]+)%,"
                           + "(Time=(?<Time>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2,4}\\.\\d{2,4})" +
@@ -27,7 +30,9 @@ public class NodeStat {
     return tsMatcher.matches() ? Optional.of(tsMatcher) : Optional.empty();
   }
 
-  Optional<Measurement> getMeasurement(String line, String metric, Set<String> components) {
+  Optional<Measurement> getMeasurement(String line,
+                                       String metric,
+                                       Set<String> components) {
     Matcher matcher = getDataMatcher(line).orElse(null);
     if (matcher == null) {
       return Optional.empty();

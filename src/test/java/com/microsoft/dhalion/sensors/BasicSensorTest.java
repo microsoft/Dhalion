@@ -2,10 +2,11 @@ package com.microsoft.dhalion.sensors;
 
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.conf.Config;
-import com.microsoft.dhalion.conf.Config.ConfigBuilder;
-import com.microsoft.dhalion.conf.ConfigName;
+import com.microsoft.dhalion.conf.ConfigBuilder;
+import com.microsoft.dhalion.conf.Key;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.MeasurementsTable;
+import com.microsoft.dhalion.examples.CSVMetricsProvider;
 import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 import org.junit.Test;
 
@@ -15,6 +16,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,7 +31,7 @@ public class BasicSensorTest {
     Instant startTS = Instant.parse("2018-01-08T01:37:36.934Z");
 
     Config sysConfig = new ConfigBuilder("")
-        .put(ConfigName.CONF_COMPONENT_NAMES, "NodeB")
+        .put(Key.CONF_COMPONENT_NAMES, "NodeB")
         .build();
 
     Measurement measurement1 = new Measurement("NodeB", "I1", METRIC_CPU.text(), startTS, 2);
@@ -63,7 +65,7 @@ public class BasicSensorTest {
     Instant startTS = Instant.parse("2018-01-08T01:37:36.934Z");
 
     Config sysConfig = new ConfigBuilder("")
-        .put(ConfigName.CONF_COMPONENT_NAMES, "NodeB")
+        .put(Key.CONF_COMPONENT_NAMES, "NodeB")
         .build();
 
     Measurement measurement1 = new Measurement("NodeB", "I1", METRIC_CPU.text(), startTS, 2);

@@ -1,7 +1,7 @@
 package com.microsoft.dhalion.examples;
 
 import com.microsoft.dhalion.conf.Config;
-import com.microsoft.dhalion.conf.ConfigName;
+import com.microsoft.dhalion.conf.Key;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.MeasurementsTable;
 import org.junit.Test;
@@ -21,10 +21,10 @@ public class CSVMetricsProviderTest {
   private CSVMetricsProvider provider;
 
   @Test
-  public void testCSVMetricsProvider() throws Exception {
+  public void testCSVMetricsProvider() {
+
     Config conf = mock(Config.class);
-    when(conf.get(ConfigName.DATA_DIR))
-        .thenReturn(CSVMetricsProvider.class.getClassLoader().getResource(".").getFile());
+    when(conf.get(Key.DATA_DIR.value())).thenReturn(CSVMetricsProvider.class.getClassLoader().getResource(".").getFile());
     provider = new CSVMetricsProvider(conf);
 
     Instant startTS = Instant.parse("2018-01-08T01:37:36.934Z");
@@ -50,10 +50,10 @@ public class CSVMetricsProviderTest {
   }
 
   @Test
-  public void testCSVMetricsProvider2() throws Exception {
+  public void testCSVMetricsProvider2() {
+
     Config conf = mock(Config.class);
-    when(conf.get(ConfigName.DATA_DIR))
-        .thenReturn(CSVMetricsProvider.class.getClassLoader().getResource(".").getFile());
+    when(conf.get(Key.DATA_DIR.value())).thenReturn(CSVMetricsProvider.class.getClassLoader().getResource(".").getFile());
     provider = new CSVMetricsProvider(conf);
 
     Instant startTS = Instant.parse("2018-01-08T01:37:36.934Z");
@@ -61,7 +61,14 @@ public class CSVMetricsProviderTest {
     Duration duration = Duration.ofMinutes(2);
     String comp = "NodeB";
 
-    MeasurementsTable metrics = MeasurementsTable.of(provider.getMeasurements(startTS, duration, metric, comp));
+    Collection<String> metricNames = new ArrayList<>();
+    metricNames.add(metric);
+    Collection<String> components = new ArrayList<>();
+    components.add(comp);
+
+
+    MeasurementsTable metrics = MeasurementsTable.of(
+        provider.getMeasurements(startTS, duration, metricNames, components));
     assertEquals(4, metrics.size());
     assertEquals(4, metrics.type(metric).size());
     assertEquals(2, metrics.component(comp).instance("2").size());
