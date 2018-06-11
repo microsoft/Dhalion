@@ -17,12 +17,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-import static com.microsoft.dhalion.detectors.AboveThresholdDetector.ABOVE_THRESHOLD_NO_CHECKPOINTS;
 import static com.microsoft.dhalion.detectors.BelowThresholdDetector.BELOW_THRESHOLD_NO_CHECKPOINTS;
 import static com.microsoft.dhalion.detectors.BelowThresholdDetector.LOW_THRESHOLD_CONF;
 import static com.microsoft.dhalion.detectors.BelowThresholdDetector.SYMPTOM_LOW;
-import static com.microsoft.dhalion.examples.MetricName.METRIC_CPU;
-import static com.microsoft.dhalion.examples.MetricName.METRIC_MEMORY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -46,23 +43,23 @@ public class BelowThresholdDetectorTest {
     context = mock(ExecutionContext.class);
     when(context.checkpoint()).thenReturn(currentInstant);
 
-    Measurement instance1 = new Measurement("c1", "i1", METRIC_MEMORY.text(), currentInstant, 10);
-    Measurement instance2 = new Measurement("c2", "i2", METRIC_MEMORY.text(), currentInstant, 91);
-    Measurement instance3 = new Measurement("c3", "i3", METRIC_MEMORY.text(), currentInstant, 50);
-    Measurement instance4 = new Measurement("c4", "i4", METRIC_MEMORY.text(), currentInstant, 60);
-    Measurement instance5 = new Measurement("c5", "i5", METRIC_MEMORY.text(), currentInstant, 20);
-    Measurement instance6 = new Measurement("c6", "i6", METRIC_MEMORY.text(), currentInstant, 80);
-    Measurement instance7 = new Measurement("c7", "i7", METRIC_MEMORY.text(), currentInstant, 9);
-    Measurement instance8 = new Measurement("c8", "i8", METRIC_MEMORY.text(), currentInstant, 60);
+    Measurement instance1 = new Measurement("c1", "i1", "memory", currentInstant, 10);
+    Measurement instance2 = new Measurement("c2", "i2", "memory", currentInstant, 91);
+    Measurement instance3 = new Measurement("c3", "i3", "memory", currentInstant, 50);
+    Measurement instance4 = new Measurement("c4", "i4", "memory", currentInstant, 60);
+    Measurement instance5 = new Measurement("c5", "i5", "memory", currentInstant, 20);
+    Measurement instance6 = new Measurement("c6", "i6", "memory", currentInstant, 80);
+    Measurement instance7 = new Measurement("c7", "i7", "memory", currentInstant, 9);
+    Measurement instance8 = new Measurement("c8", "i8", "memory", currentInstant, 60);
 
-    Measurement instance9 = new Measurement("c1", "i1", METRIC_MEMORY.text(), previousInstant, 90);
-    Measurement instance10 = new Measurement("c2", "i2", METRIC_MEMORY.text(), previousInstant, 9);
-    Measurement instance11 = new Measurement("c3", "i3", METRIC_MEMORY.text(), previousInstant, 50);
-    Measurement instance12 = new Measurement("c4", "i4", METRIC_MEMORY.text(), previousInstant, 60);
-    Measurement instance13 = new Measurement("c5", "i5", METRIC_MEMORY.text(), previousInstant, 20);
-    Measurement instance14 = new Measurement("c6", "i6", METRIC_MEMORY.text(), previousInstant, 80);
-    Measurement instance15 = new Measurement("c7", "i7", METRIC_MEMORY.text(), previousInstant, 11);
-    Measurement instance16 = new Measurement("c8", "i8", METRIC_MEMORY.text(), previousInstant, 60);
+    Measurement instance9 = new Measurement("c1", "i1", "memory", previousInstant, 90);
+    Measurement instance10 = new Measurement("c2", "i2", "memory", previousInstant, 9);
+    Measurement instance11 = new Measurement("c3", "i3", "memory", previousInstant, 50);
+    Measurement instance12 = new Measurement("c4", "i4", "memory", previousInstant, 60);
+    Measurement instance13 = new Measurement("c5", "i5", "memory", previousInstant, 20);
+    Measurement instance14 = new Measurement("c6", "i6", "memory", previousInstant, 80);
+    Measurement instance15 = new Measurement("c7", "i7", "memory", previousInstant, 11);
+    Measurement instance16 = new Measurement("c8", "i8", "memory", previousInstant, 60);
 
     metrics = new ArrayList<>();
     metrics.add(instance1);
@@ -90,19 +87,19 @@ public class BelowThresholdDetectorTest {
 
     when(context.measurements()).thenReturn(MeasurementsTable.of(metrics));
     HashMap<String, Object> conf = new HashMap();
-    conf.put(Utils.getCompositeName(LOW_THRESHOLD_CONF, METRIC_MEMORY.text()), 15.0);
-    conf.put(Utils.getCompositeName(BELOW_THRESHOLD_NO_CHECKPOINTS, METRIC_MEMORY.text()), 1.0);
+    conf.put(Utils.getCompositeName(LOW_THRESHOLD_CONF, "memory"), 15.0);
+    conf.put(Utils.getCompositeName(BELOW_THRESHOLD_NO_CHECKPOINTS, "memory"), 1.0);
     policyConf = new PolicyConfig(null, conf);
 
-    detector = new BelowThresholdDetector(policyConf, METRIC_MEMORY.text());
+    detector = new BelowThresholdDetector(policyConf, "memory");
     detector.initialize(context);
 
     Collection<Symptom> symptoms = detector.detect(metrics);
     SymptomsTable symptomsTable = SymptomsTable.of(symptoms);
 
     assertEquals(2, symptomsTable.size());
-    assertTrue(symptomsTable.type(Utils.getCompositeName(SYMPTOM_LOW ,METRIC_MEMORY.text())).assignment("i1").size() > 0);
-    assertTrue(symptomsTable.type(Utils.getCompositeName(SYMPTOM_LOW ,METRIC_MEMORY.text())).assignment("i7").size() > 0);
+    assertTrue(symptomsTable.type(Utils.getCompositeName(SYMPTOM_LOW ,"memory")).assignment("i1").size() > 0);
+    assertTrue(symptomsTable.type(Utils.getCompositeName(SYMPTOM_LOW ,"memory")).assignment("i7").size() > 0);
 
   }
 
@@ -111,17 +108,17 @@ public class BelowThresholdDetectorTest {
 
     when(context.measurements()).thenReturn(MeasurementsTable.of(metrics2));
     HashMap<String, Object> conf = new HashMap();
-    conf.put(Utils.getCompositeName(LOW_THRESHOLD_CONF, METRIC_MEMORY.text()), 15.0);
-    conf.put(Utils.getCompositeName(BELOW_THRESHOLD_NO_CHECKPOINTS, METRIC_MEMORY.text()), 2.0);
+    conf.put(Utils.getCompositeName(LOW_THRESHOLD_CONF, "memory"), 15.0);
+    conf.put(Utils.getCompositeName(BELOW_THRESHOLD_NO_CHECKPOINTS, "memory"), 2.0);
     policyConf = new PolicyConfig(null, conf);
 
-    detector = new BelowThresholdDetector(policyConf, METRIC_MEMORY.text());
+    detector = new BelowThresholdDetector(policyConf, "memory");
     detector.initialize(context);
 
     Collection<Symptom> symptoms = detector.detect(metrics);
     SymptomsTable symptomsTable = SymptomsTable.of(symptoms);
     assertEquals(1, symptomsTable.size());
-    assertTrue(symptomsTable.type(Utils.getCompositeName(SYMPTOM_LOW ,METRIC_MEMORY.text())).assignment("i7").size() > 0);
+    assertTrue(symptomsTable.type(Utils.getCompositeName(SYMPTOM_LOW ,"memory")).assignment("i7").size() > 0);
 
   }
 

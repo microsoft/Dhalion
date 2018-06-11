@@ -20,7 +20,6 @@ import java.util.HashMap;
 import static com.microsoft.dhalion.detectors.AboveThresholdDetector.ABOVE_THRESHOLD_NO_CHECKPOINTS;
 import static com.microsoft.dhalion.detectors.AboveThresholdDetector.HIGH_THRESHOLD_CONF;
 import static com.microsoft.dhalion.detectors.AboveThresholdDetector.SYMPTOM_HIGH;
-import static com.microsoft.dhalion.examples.MetricName.METRIC_CPU;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -43,23 +42,23 @@ public class AboveThresholdDetectorTest {
     context = mock(ExecutionContext.class);
     when(context.checkpoint()).thenReturn(currentInstant);
 
-    Measurement instance1 = new Measurement("c1", "i1", METRIC_CPU.text(), currentInstant, 10);
-    Measurement instance2 = new Measurement("c2", "i2", METRIC_CPU.text(), currentInstant, 91);
-    Measurement instance3 = new Measurement("c3", "i3", METRIC_CPU.text(), currentInstant, 50);
-    Measurement instance4 = new Measurement("c4", "i4", METRIC_CPU.text(), currentInstant, 60);
-    Measurement instance5 = new Measurement("c5", "i5", METRIC_CPU.text(), currentInstant, 95);
-    Measurement instance6 = new Measurement("c6", "i6", METRIC_CPU.text(), currentInstant, 80);
-    Measurement instance7 = new Measurement("c7", "i7", METRIC_CPU.text(), currentInstant, 9);
-    Measurement instance8 = new Measurement("c8", "i8", METRIC_CPU.text(), currentInstant, 60);
+    Measurement instance1 = new Measurement("c1", "i1", "cpu", currentInstant, 10);
+    Measurement instance2 = new Measurement("c2", "i2", "cpu", currentInstant, 91);
+    Measurement instance3 = new Measurement("c3", "i3", "cpu", currentInstant, 50);
+    Measurement instance4 = new Measurement("c4", "i4", "cpu", currentInstant, 60);
+    Measurement instance5 = new Measurement("c5", "i5", "cpu", currentInstant, 95);
+    Measurement instance6 = new Measurement("c6", "i6", "cpu", currentInstant, 80);
+    Measurement instance7 = new Measurement("c7", "i7", "cpu", currentInstant, 9);
+    Measurement instance8 = new Measurement("c8", "i8", "cpu", currentInstant, 60);
 
-    Measurement instance9 = new Measurement("c1", "i1", METRIC_CPU.text(), previousInstant, 10);
-    Measurement instance10 = new Measurement("c2", "i2", METRIC_CPU.text(), previousInstant, 9);
-    Measurement instance11 = new Measurement("c3", "i3", METRIC_CPU.text(), previousInstant, 50);
-    Measurement instance12 = new Measurement("c4", "i4", METRIC_CPU.text(), previousInstant, 60);
-    Measurement instance13 = new Measurement("c5", "i5", METRIC_CPU.text(), previousInstant, 95);
-    Measurement instance14 = new Measurement("c6", "i6", METRIC_CPU.text(), previousInstant, 80);
-    Measurement instance15 = new Measurement("c7", "i7", METRIC_CPU.text(), previousInstant, 9);
-    Measurement instance16 = new Measurement("c8", "i8", METRIC_CPU.text(), previousInstant, 60);
+    Measurement instance9 = new Measurement("c1", "i1", "cpu", previousInstant, 10);
+    Measurement instance10 = new Measurement("c2", "i2", "cpu", previousInstant, 9);
+    Measurement instance11 = new Measurement("c3", "i3", "cpu", previousInstant, 50);
+    Measurement instance12 = new Measurement("c4", "i4", "cpu", previousInstant, 60);
+    Measurement instance13 = new Measurement("c5", "i5", "cpu", previousInstant, 95);
+    Measurement instance14 = new Measurement("c6", "i6", "cpu", previousInstant, 80);
+    Measurement instance15 = new Measurement("c7", "i7", "cpu", previousInstant, 9);
+    Measurement instance16 = new Measurement("c8", "i8", "cpu", previousInstant, 60);
 
     metrics = new ArrayList<>();
     metrics.add(instance1);
@@ -86,11 +85,11 @@ public class AboveThresholdDetectorTest {
   public void testThresholdBasedDetector() {
     when(context.measurements()).thenReturn(MeasurementsTable.of(metrics));
     HashMap<String, Object> conf = new HashMap();
-    conf.put(Utils.getCompositeName(HIGH_THRESHOLD_CONF, METRIC_CPU.text()), 90.0);
-    conf.put(Utils.getCompositeName(ABOVE_THRESHOLD_NO_CHECKPOINTS, METRIC_CPU.text()), 1.0);
+    conf.put(Utils.getCompositeName(HIGH_THRESHOLD_CONF, "cpu"), 90.0);
+    conf.put(Utils.getCompositeName(ABOVE_THRESHOLD_NO_CHECKPOINTS, "cpu"), 1.0);
     policyConf = new PolicyConfig(null, conf);
 
-    detector = new AboveThresholdDetector(policyConf, METRIC_CPU.text());
+    detector = new AboveThresholdDetector(policyConf, "cpu");
     detector.initialize(context);
 
     Collection<Symptom> symptoms = detector.detect(metrics);
@@ -98,20 +97,20 @@ public class AboveThresholdDetectorTest {
 
     assertEquals(2, symptomsTable.size());
     assertTrue(symptomsTable.type(Utils.getCompositeName(
-        SYMPTOM_HIGH, METRIC_CPU.text())).assignment("i2").size() > 0);
+        SYMPTOM_HIGH, "cpu")).assignment("i2").size() > 0);
     assertTrue(symptomsTable.type(Utils.getCompositeName(
-        SYMPTOM_HIGH, METRIC_CPU.text())).assignment("i5").size() > 0);
+        SYMPTOM_HIGH, "cpu")).assignment("i5").size() > 0);
   }
 
   @Test
   public void testThresholdBasedDetector2() {
     when(context.measurements()).thenReturn(MeasurementsTable.of(metrics2));
     HashMap<String, Object> conf = new HashMap();
-    conf.put(Utils.getCompositeName(HIGH_THRESHOLD_CONF, METRIC_CPU.text()), 90.0);
-    conf.put(Utils.getCompositeName(ABOVE_THRESHOLD_NO_CHECKPOINTS, METRIC_CPU.text()), 2.0);
+    conf.put(Utils.getCompositeName(HIGH_THRESHOLD_CONF, "cpu"), 90.0);
+    conf.put(Utils.getCompositeName(ABOVE_THRESHOLD_NO_CHECKPOINTS, "cpu"), 2.0);
     policyConf = new PolicyConfig(null, conf);
 
-    detector = new AboveThresholdDetector(policyConf, METRIC_CPU.text());
+    detector = new AboveThresholdDetector(policyConf, "cpu");
     detector.initialize(context);
 
     Collection<Symptom> symptoms = detector.detect(metrics);
@@ -119,6 +118,6 @@ public class AboveThresholdDetectorTest {
 
     assertEquals(1, symptomsTable.size());
     assertTrue(symptomsTable.type(Utils.getCompositeName(
-        SYMPTOM_HIGH, METRIC_CPU.text())).assignment("i5").size() > 0);
+        SYMPTOM_HIGH, "cpu")).assignment("i5").size() > 0);
   }
 }
