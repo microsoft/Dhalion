@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.microsoft.dhalion.examples.MetricName.METRIC_CPU;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -32,25 +31,25 @@ public class BasicSensorTest {
         .put(ConfigName.CONF_COMPONENT_NAMES, "NodeB")
         .build();
 
-    Measurement measurement1 = new Measurement("NodeB", "I1", METRIC_CPU.text(), startTS, 2);
-    Measurement measurement2 = new Measurement("NodeB", "I2", METRIC_CPU.text(), startTS, 4);
+    Measurement measurement1 = new Measurement("NodeB", "I1", "cpu", startTS, 2);
+    Measurement measurement2 = new Measurement("NodeB", "I2", "cpu", startTS, 4);
     MetricsProvider metricsProvider = mock(MetricsProvider.class);
     when(metricsProvider.getMeasurements(startTS,
                                          Duration.ofMinutes(1),
-                                         Collections.singletonList(METRIC_CPU.text()),
+                                         Collections.singletonList("cpu"),
                                          Collections.singletonList("NodeB")))
         .thenReturn(Arrays.asList(measurement1, measurement2));
 
     ExecutionContext context = mock(ExecutionContext.class);
     when(context.checkpoint()).thenReturn(startTS);
 
-    BasicSensor sensor = new BasicSensor(sysConfig, METRIC_CPU.text(), metricsProvider);
+    BasicSensor sensor = new BasicSensor(sysConfig, "cpu", metricsProvider);
     sensor.initialize(context);
 
     Collection<Measurement> metrics = sensor.fetch();
     MeasurementsTable metricsTable = MeasurementsTable.of(metrics);
     assertEquals(2, metrics.size());
-    assertEquals(2, metricsTable.type(METRIC_CPU.text()).size());
+    assertEquals(2, metricsTable.type("cpu").size());
     assertEquals(1, metricsTable.component("NodeB").instance("I1").size());
     assertEquals(1, metricsTable.component("NodeB").instance("I2").size());
 
@@ -66,12 +65,12 @@ public class BasicSensorTest {
         .put(ConfigName.CONF_COMPONENT_NAMES, "NodeB")
         .build();
 
-    Measurement measurement1 = new Measurement("NodeB", "I1", METRIC_CPU.text(), startTS, 2);
-    Measurement measurement2 = new Measurement("NodeB", "I2", METRIC_CPU.text(), startTS, 4);
+    Measurement measurement1 = new Measurement("NodeB", "I1", "cpu", startTS, 2);
+    Measurement measurement2 = new Measurement("NodeB", "I2", "cpu", startTS, 4);
     MetricsProvider metricsProvider = mock(MetricsProvider.class);
     when(metricsProvider.getMeasurements(startTS,
                                          Duration.ofMinutes(1),
-                                         Collections.singletonList(METRIC_CPU.text()),
+                                         Collections.singletonList("cpu"),
                                          Collections.singletonList("NodeB")))
         .thenReturn(Arrays.asList(measurement1, measurement2));
 
@@ -79,13 +78,13 @@ public class BasicSensorTest {
     when(context.checkpoint()).thenReturn(startTS);
     when(context.previousCheckpoint()).thenReturn(startTS.minus(1, ChronoUnit.MINUTES));
 
-    BasicSensor sensor = new BasicSensor(sysConfig, METRIC_CPU.text(), metricsProvider);
+    BasicSensor sensor = new BasicSensor(sysConfig, "cpu", metricsProvider);
     sensor.initialize(context);
 
     Collection<Measurement> metrics = sensor.fetch();
     MeasurementsTable metricsTable = MeasurementsTable.of(metrics);
     assertEquals(2, metrics.size());
-    assertEquals(2, metricsTable.type(METRIC_CPU.text()).size());
+    assertEquals(2, metricsTable.type("cpu").size());
     assertEquals(1, metricsTable.component("NodeB").instance("I1").size());
     assertEquals(1, metricsTable.component("NodeB").instance("I2").size());
 
