@@ -111,8 +111,8 @@ public class HealthPolicyImpl implements IHealthPolicy {
     }
 
     sensors.stream().map(ISensor::fetch)
-        .filter(Objects::nonNull)
-        .forEach(measurements::addAll);
+           .filter(Objects::nonNull)
+           .forEach(measurements::addAll);
 
     return measurements;
   }
@@ -125,8 +125,8 @@ public class HealthPolicyImpl implements IHealthPolicy {
     }
 
     detectors.stream().map(detector -> detector.detect(measurements))
-        .filter(Objects::nonNull)
-        .forEach(symptoms::addAll);
+             .filter(Objects::nonNull)
+             .forEach(symptoms::addAll);
 
     return symptoms;
   }
@@ -139,18 +139,10 @@ public class HealthPolicyImpl implements IHealthPolicy {
     }
 
     diagnosers.stream().map(diagnoser -> diagnoser.diagnose(symptoms))
-        .filter(Objects::nonNull)
-        .forEach(diagnosis::addAll);
+              .filter(Objects::nonNull)
+              .forEach(diagnosis::addAll);
 
     return diagnosis;
-  }
-
-  protected IResolver selectResolver(Collection<Diagnosis> diagnosis) {
-    if (resolvers == null) {
-      return null;
-    }
-
-    return resolvers.stream().findFirst().orElse(null);
   }
 
   @Override
@@ -160,12 +152,14 @@ public class HealthPolicyImpl implements IHealthPolicy {
       oneTimeDelay = null;
     }
 
-    IResolver resolver = selectResolver(diagnosis);
-
     Collection<Action> actions = new ArrayList<>();
-    if (resolver != null) {
-      actions = resolver.resolve(diagnosis);
+    if (resolvers == null) {
+      return actions;
     }
+
+    resolvers.stream().map(resolver -> resolver.resolve(diagnosis))
+             .filter(Objects::nonNull)
+             .forEach(actions::addAll);
 
     lastExecutionTimestamp = clock.now();
     return actions;
