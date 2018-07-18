@@ -120,7 +120,6 @@ public class PoliciesExecutor {
     this.executor.shutdownNow();
   }
 
-
   public static class ExecutionContext {
     private final MeasurementsTable.Builder measurementsTableBuilder;
     private final SymptomsTable.Builder symptomsTableBuilder;
@@ -139,7 +138,7 @@ public class PoliciesExecutor {
     }
 
     private void captureCheckpoint() {
-      previousCheckpoint = checkpoint != null ? checkpoint : Instant.MIN;
+      previousCheckpoint = checkpoint != null ? checkpoint : Instant.EPOCH;
       checkpoint = policy.getNextCheckpoint();
     }
 
