@@ -1,20 +1,15 @@
+/*
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ *
+ * This program is made available under the terms of the MIT License.
+ * See the LICENSE file in the project root for more information.
+ */
+
 package com.microsoft.dhalion;
-
-import java.util.ArrayList;
-
-import static java.awt.SystemColor.text;
 
 public class Utils {
 
   public static String getCompositeName(String... names) {
-    if (names.length > 0) {
-      String text = names[0];
-      for (int i = 1; i < names.length; i++) {
-        text = text + "_" + names[i];
-      }
-      return text;
-    }
-    return "";
+    return names.length > 0 ? String.join("_", names) : "";
   }
-
 }
