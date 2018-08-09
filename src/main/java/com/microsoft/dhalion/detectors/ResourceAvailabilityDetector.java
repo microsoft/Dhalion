@@ -7,11 +7,11 @@
 
 package com.microsoft.dhalion.detectors;
 
+import com.microsoft.dhalion.conf.PolicyConfig;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.MeasurementsTable;
 import com.microsoft.dhalion.core.Symptom;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,8 +25,7 @@ import java.util.logging.Logger;
  * of resources needed ({@code demandMetric}).
  * <p></p>
  * The user needs to provide names/types of the {@link Measurement}s representing the freeMetric and the
- * demandMetric, duration over which the resource availability should be evaluated, and the {@link Symptom} type/name
- * to be generated if an issue is observed.
+ * demandMetric, and the {@link Symptom} type/name to be generated if an issue is observed.
  * <p></p>
  * The detector evaluates identifies all unique instances and requests resource availability evaluation for each of
  * the instances.
@@ -36,25 +35,30 @@ public abstract class ResourceAvailabilityDetector extends Detector {
 
   public static final String FREE_METRIC_NAME_KEY = ".free.metric.name";
   public static final String DEMAND_METRIC_NAME_KEY = ".demand.metric.name";
-  public static final String DURATION_KEY = ".duration";
+  public static final String THRESHOLD_RATIO_CONFIG_KEY = ".threshold.ratio";
 
   private final String freeMetric;
   private final String demandMetric;
-  private final Duration duration;
   private final String symptomType;
 
-  public ResourceAvailabilityDetector(String freeMetric, String demandMetric, Duration duration, String symptomType) {
+  public ResourceAvailabilityDetector(PolicyConfig policyConf, String confPrefix, String symptomType) {
+    this.freeMetric = (String) policyConf.getConfig(confPrefix + FREE_METRIC_NAME_KEY);
+    this.demandMetric = (String) policyConf.getConfig(confPrefix + DEMAND_METRIC_NAME_KEY);
+    this.symptomType = symptomType;
+  }
+
+  public ResourceAvailabilityDetector(String freeMetric, String demandMetric, String symptomType) {
     this.freeMetric = freeMetric;
     this.demandMetric = demandMetric;
-    this.duration = duration;
     this.symptomType = symptomType;
   }
 
   @Override
   public Collection<Symptom> detect(Collection<Measurement> measurements) {
     Instant now = context.checkpoint();
+    Instant previous = context.checkpoint();
 
-    MeasurementsTable filteredMeasurements = context.measurements().between(now.minus(duration), now);
+    MeasurementsTable filteredMeasurements = context.measurements().between(previous, now);
     if (filteredMeasurements.size() == 0) {
       LOG.fine("Did not find any measurements to evaluate resource availability");
       return Collections.emptyList();
@@ -88,7 +92,6 @@ public abstract class ResourceAvailabilityDetector extends Detector {
     return "ResourceAvailabilityDetector{" +
         "freeMetric='" + freeMetric + '\'' +
         ", demandMetric='" + demandMetric + '\'' +
-        ", duration=" + duration +
         ", symptomType='" + symptomType + '\'' +
         "} ";
   }

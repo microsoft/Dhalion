@@ -11,7 +11,6 @@ import com.microsoft.dhalion.conf.PolicyConfig;
 import com.microsoft.dhalion.core.Symptom;
 
 import javax.inject.Inject;
-import java.time.Duration;
 import java.util.logging.Logger;
 
 /**
@@ -22,19 +21,15 @@ import java.util.logging.Logger;
  */
 public class ExcessCpuDetector extends ResourceAvailabilityDetector {
   private static final Logger LOG = Logger.getLogger(ExcessCpuDetector.class.getName());
-  public static final String CONFIG_KEY_PREFIX = ExcessCpuDetector.class.getSimpleName();
-  public static final String SYMPTOM_TYPE = ExcessCpuDetector.class.getSimpleName();
+  private static final String SYMPTOM_TYPE = ExcessCpuDetector.class.getSimpleName();
+  static final String CONFIG_KEY_PREFIX = ExcessCpuDetector.class.getSimpleName();
 
   private final double thresholdRatio;
 
   @Inject
   public ExcessCpuDetector(PolicyConfig policyConfig) {
-    super((String) policyConfig.getConfig(CONFIG_KEY_PREFIX + FREE_METRIC_NAME_KEY),
-          (String) policyConfig.getConfig(CONFIG_KEY_PREFIX + DEMAND_METRIC_NAME_KEY),
-          Duration.ofMillis((Long) policyConfig.getConfig(CONFIG_KEY_PREFIX + DURATION_KEY)),
-          SYMPTOM_TYPE);
-
-    thresholdRatio = (double) policyConfig.getConfig(CONFIG_KEY_PREFIX + ".threshold.ratio", 2);
+    super(policyConfig, CONFIG_KEY_PREFIX, SYMPTOM_TYPE);
+    thresholdRatio = (double) policyConfig.getConfig(CONFIG_KEY_PREFIX + THRESHOLD_RATIO_CONFIG_KEY, 2.0);
     LOG.info("Detector created: " + this.toString());
   }
 
@@ -48,7 +43,7 @@ public class ExcessCpuDetector extends ResourceAvailabilityDetector {
       return true;
     }
 
-    return (free / demand) > thresholdRatio;
+    return (free / demand) >= thresholdRatio;
   }
 
   @Override
