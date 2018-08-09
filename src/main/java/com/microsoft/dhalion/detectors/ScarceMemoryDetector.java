@@ -11,7 +11,6 @@ import com.microsoft.dhalion.conf.PolicyConfig;
 import com.microsoft.dhalion.core.Symptom;
 
 import javax.inject.Inject;
-import java.time.Duration;
 import java.util.logging.Logger;
 
 /**
@@ -29,12 +28,8 @@ public class ScarceMemoryDetector extends ResourceAvailabilityDetector {
 
   @Inject
   public ScarceMemoryDetector(PolicyConfig policyConfig) {
-    super((String) policyConfig.getConfig(CONFIG_KEY_PREFIX + FREE_METRIC_NAME_KEY),
-          (String) policyConfig.getConfig(CONFIG_KEY_PREFIX + DEMAND_METRIC_NAME_KEY),
-          Duration.ofMillis((Long) policyConfig.getConfig(CONFIG_KEY_PREFIX + DURATION_KEY)),
-          SYMPTOM_TYPE);
-
-    thresholdRatio = (double) policyConfig.getConfig(CONFIG_KEY_PREFIX + ".threshold.ratio", 1);
+    super(policyConfig, CONFIG_KEY_PREFIX, SYMPTOM_TYPE);
+    thresholdRatio = (double) policyConfig.getConfig(CONFIG_KEY_PREFIX + THRESHOLD_RATIO_CONFIG_KEY, 1.5);
     LOG.info("Detector created: " + this.toString());
   }
 
@@ -48,7 +43,7 @@ public class ScarceMemoryDetector extends ResourceAvailabilityDetector {
       return true;
     }
 
-    return demand / free > thresholdRatio;
+    return demand / free >= thresholdRatio;
   }
 
   @Override
