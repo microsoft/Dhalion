@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  * memory to service pending jobs. The detector compares amount of free resources ({@code freeMetric}) and the amount
  * of resources needed ({@code demandMetric}).
  * <p></p>
- * The user needs to provide names/types of the {@link Measurement}s representing the freeMetric and the
+ * The user needs to provide names/types of the {@link Measurement}s representing the {@code freeMetric} and the
  * demandMetric, and the {@link Symptom} type/name to be generated if an issue is observed.
  * <p></p>
  * The detector evaluates identifies all unique instances and requests resource availability evaluation for each of
@@ -72,6 +72,10 @@ public abstract class ResourceAvailabilityDetector extends Detector {
       if (evaluate(instance, totalFree, totalDemand)) {
         assignments.add(instance);
       }
+    }
+
+    if (assignments.isEmpty()) {
+      return Collections.emptyList();
     }
 
     Symptom symptom = new Symptom(symptomType, now, assignments);
