@@ -22,13 +22,12 @@ import java.util.logging.Logger;
 public class ScarceMemoryDetector extends ResourceAvailabilityDetector {
   private static final Logger LOG = Logger.getLogger(ScarceMemoryDetector.class.getName());
   public static final String CONFIG_KEY_PREFIX = ScarceMemoryDetector.class.getSimpleName();
-  public static final String SYMPTOM_TYPE = ScarceMemoryDetector.class.getSimpleName();
 
   private final double thresholdRatio;
 
   @Inject
   public ScarceMemoryDetector(PolicyConfig policyConfig) {
-    super(policyConfig, CONFIG_KEY_PREFIX, SYMPTOM_TYPE);
+    super(policyConfig, CONFIG_KEY_PREFIX, SymptomName.SCARCE_MEMORY.text());
     thresholdRatio = (double) policyConfig.getConfig(CONFIG_KEY_PREFIX + THRESHOLD_RATIO_CONFIG_KEY, 1.5);
     LOG.info("Detector created: " + this.toString());
   }

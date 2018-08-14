@@ -21,15 +21,13 @@ import java.util.logging.Logger;
  */
 public class ScarceCpuDetector extends ResourceAvailabilityDetector {
   private static final Logger LOG = Logger.getLogger(ScarceCpuDetector.class.getName());
-  private static final String SYMPTOM_TYPE = ScarceCpuDetector.class.getSimpleName();
-
-  static final String CONFIG_KEY_PREFIX = ScarceCpuDetector.class.getSimpleName();
+  public static final String CONFIG_KEY_PREFIX = ScarceCpuDetector.class.getSimpleName();
 
   private final double thresholdRatio;
 
   @Inject
   public ScarceCpuDetector(PolicyConfig policyConfig) {
-    super(policyConfig, CONFIG_KEY_PREFIX, SYMPTOM_TYPE);
+    super(policyConfig, CONFIG_KEY_PREFIX, SymptomName.SCARCE_CPU.text());
     thresholdRatio = (double) policyConfig.getConfig(CONFIG_KEY_PREFIX + THRESHOLD_RATIO_CONFIG_KEY, 1.5);
     LOG.info("Detector created: " + this.toString());
   }

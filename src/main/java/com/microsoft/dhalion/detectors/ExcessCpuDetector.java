@@ -21,14 +21,13 @@ import java.util.logging.Logger;
  */
 public class ExcessCpuDetector extends ResourceAvailabilityDetector {
   private static final Logger LOG = Logger.getLogger(ExcessCpuDetector.class.getName());
-  private static final String SYMPTOM_TYPE = ExcessCpuDetector.class.getSimpleName();
-  static final String CONFIG_KEY_PREFIX = ExcessCpuDetector.class.getSimpleName();
+  public static final String CONFIG_KEY_PREFIX = ExcessCpuDetector.class.getSimpleName();
 
   private final double thresholdRatio;
 
   @Inject
   public ExcessCpuDetector(PolicyConfig policyConfig) {
-    super(policyConfig, CONFIG_KEY_PREFIX, SYMPTOM_TYPE);
+    super(policyConfig, CONFIG_KEY_PREFIX, SymptomName.EXCESS_CPU.text());
     thresholdRatio = (double) policyConfig.getConfig(CONFIG_KEY_PREFIX + THRESHOLD_RATIO_CONFIG_KEY, 2.0);
     LOG.info("Detector created: " + this.toString());
   }
