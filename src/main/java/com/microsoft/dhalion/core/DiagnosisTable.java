@@ -110,6 +110,13 @@ public class DiagnosisTable extends OutcomeTable<Diagnosis> {
   }
 
   /**
+   * @return the most recent {@link Diagnosis}, if present
+   */
+  public Diagnosis latest() {
+    return sort(false, SortKey.TIME_STAMP).last();
+  }
+
+  /**
    * Sorts the {@link Diagnosis} in this collection in the order of the specified keys
    *
    * @param descending false for ascending order, true for descending

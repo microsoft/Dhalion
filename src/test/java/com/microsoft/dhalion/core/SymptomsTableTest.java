@@ -200,6 +200,19 @@ public class SymptomsTableTest {
   }
 
   @Test
+  public void latest() {
+    Symptom symptom = testTable.latest();
+    assertEquals("c3", symptom.assignments().iterator().next());
+    assertEquals(3, symptom.id());
+    assertEquals(60, symptom.instant().toEpochMilli());
+
+    symptom = testTable.type("s1").latest();
+    assertEquals("c3", symptom.assignments().iterator().next());
+    assertEquals(3, symptom.id());
+    assertEquals(50, symptom.instant().toEpochMilli());
+  }
+
+  @Test
   public void get() {
     Collection<Symptom> result = testTable.get();
     assertEquals(18, result.size());
