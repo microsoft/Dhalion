@@ -110,6 +110,13 @@ public class ActionTable extends OutcomeTable<Action> {
   }
 
   /**
+   * @return the most recent {@link Action}, if present
+   */
+  public Action latest() {
+    return sort(false, SortKey.TIME_STAMP).last();
+  }
+
+  /**
    * Sorts the {@link Action}s in this collection in the order of the specified keys
    *
    * @param descending false for ascending order, true for descending

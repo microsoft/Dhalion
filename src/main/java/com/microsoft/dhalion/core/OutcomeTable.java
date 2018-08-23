@@ -6,6 +6,7 @@
  */
 package com.microsoft.dhalion.core;
 
+import com.microsoft.dhalion.core.MeasurementsTable.SortKey;
 import tech.tablesaw.api.CategoryColumn;
 import tech.tablesaw.api.IntColumn;
 import tech.tablesaw.api.LongColumn;

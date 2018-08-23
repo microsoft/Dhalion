@@ -317,6 +317,13 @@ public class MeasurementsTable {
   }
 
   /**
+   * @return the most recent {@link Measurement}, if present
+   */
+  public Measurement latest() {
+    return sort(false, SortKey.TIME_STAMP).last();
+  }
+
+  /**
    * @param n the number of measurements to return
    * @return the last n {@link Measurement}, if present
    */

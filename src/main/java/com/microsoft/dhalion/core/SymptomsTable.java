@@ -118,6 +118,13 @@ public class SymptomsTable extends OutcomeTable<Symptom> {
   }
 
   /**
+   * @return the most recent {@link Symptom}, if present
+   */
+  public Symptom latest() {
+    return sort(false, SortKey.TIME_STAMP).last();
+  }
+
+  /**
    * Sorts the {@link Symptom}s in this collection in the order of the specified keys
    *
    * @param descending false for ascending order, true for descending

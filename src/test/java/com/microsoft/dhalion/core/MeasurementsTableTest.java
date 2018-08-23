@@ -178,6 +178,24 @@ public class MeasurementsTableTest {
   }
 
   @Test
+  public void latest() {
+    Measurement measurement;
+
+    measurement = testTable.latest();
+    assertEquals("c3", measurement.component());
+    assertEquals(240, measurement.instant().toEpochMilli());
+
+    measurement = testTable.type("m1").latest();
+    assertEquals("c3", measurement.component());
+    assertEquals(220, measurement.instant().toEpochMilli());
+
+    Instant oldest = Instant.ofEpochMilli(100);
+    Instant newest = Instant.ofEpochMilli(170);
+    measurement = testTable.between(oldest, newest).latest();
+    assertEquals(170, measurement.instant().toEpochMilli());
+  }
+
+  @Test
   public void lastN() {
     MeasurementsTable measurement = testTable.last(3);
     assertEquals(3, measurement.size());
