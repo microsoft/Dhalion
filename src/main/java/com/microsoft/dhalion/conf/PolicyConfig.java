@@ -34,6 +34,22 @@ public class PolicyConfig {
     return getConfig(configName, null);
   }
 
+  public int intValue(String configKey, int defaultValue) {
+    int result = defaultValue;
+    if (getConfig(configKey) != null) {
+      result = (int) getConfig(configKey);
+    }
+    return result;
+  }
+
+  public String stringValue(String configKey, String defaultValue) {
+    String result = defaultValue;
+    if (getConfig(configKey) != null) {
+      result = (String) getConfig(configKey);
+    }
+    return result;
+  }
+
   public Object getConfig(String configName, Object defaultValue) {
     Object value = configs.get(configName);
     if (value == null) {
