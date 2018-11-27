@@ -56,7 +56,7 @@ public abstract class ResourceAvailabilityDetector extends Detector {
   @Override
   public Collection<Symptom> detect(Collection<Measurement> measurements) {
     Instant now = context.checkpoint();
-    Instant previous = context.checkpoint();
+    Instant previous = context.previousCheckpoint();
 
     MeasurementsTable filteredMeasurements = context.measurements().between(previous, now);
     if (filteredMeasurements.size() == 0) {
