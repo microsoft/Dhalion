@@ -13,7 +13,6 @@ import com.microsoft.dhalion.conf.ConfigBuilder;
 import com.microsoft.dhalion.conf.Key;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.MeasurementsTable;
-import com.microsoft.dhalion.examples.CSVMetricsProvider;
 import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 import org.junit.Test;
 
@@ -23,11 +22,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.microsoft.dhalion.examples.MetricName.METRIC_CPU;
+import static com.microsoft.dhalion.examples.MetricName.METRIC_MEMORY;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -100,5 +99,45 @@ public class BasicSensorTest {
 
     Set<Double> uniqueIds = metrics.stream().map(Measurement::value).collect(Collectors.toSet());
     assertEquals(2, uniqueIds.size());
+  }
+
+  @Test
+  public void testWithMultipleMetrics() {
+    Instant startTS = Instant.parse("2019-01-08T01:37:36.934Z");
+
+    Config sysConfig = new ConfigBuilder("")
+        .put(Key.CONF_COMPONENT_NAMES, "NodeB")
+        .build();
+
+    Collection<String> metricTypes = Arrays.asList(METRIC_CPU.text(), METRIC_MEMORY.text());
+
+    Measurement measurement1 = new Measurement("NodeB", "I1", METRIC_CPU.text(), startTS, 2);
+    Measurement measurement2 = new Measurement("NodeB", "I2", METRIC_CPU.text(), startTS, 4);
+    Measurement measurement3 = new Measurement("NodeB", "I1", METRIC_MEMORY.text(), startTS, 12);
+    Measurement measurement4 = new Measurement("NodeB", "I2", METRIC_MEMORY.text(), startTS, 40);
+
+    MetricsProvider metricsProvider = mock(MetricsProvider.class);
+    when(metricsProvider.getMeasurements(startTS,
+        Duration.ofMinutes(1),
+        metricTypes,
+        Collections.singletonList("NodeB")))
+        .thenReturn(Arrays.asList(measurement1, measurement2, measurement3, measurement4));
+
+    ExecutionContext context = mock(ExecutionContext.class);
+    when(context.checkpoint()).thenReturn(startTS);
+
+    BasicSensor sensor = new BasicSensor(sysConfig, metricTypes, metricsProvider);
+    sensor.initialize(context);
+
+    Collection<Measurement> metrics = sensor.fetch();
+    MeasurementsTable metricsTable = MeasurementsTable.of(metrics);
+    assertEquals(4, metrics.size());
+    assertEquals(2, metricsTable.type(METRIC_CPU.text()).size());
+    assertEquals(2, metricsTable.type(METRIC_MEMORY.text()).size());
+    assertEquals(2, metricsTable.component("NodeB").instance("I1").size());
+    assertEquals(2, metricsTable.component("NodeB").instance("I2").size());
+
+    Set<Double> uniqueIds = metrics.stream().map(Measurement::value).collect(Collectors.toSet());
+    assertEquals(4, uniqueIds.size());
   }
 }

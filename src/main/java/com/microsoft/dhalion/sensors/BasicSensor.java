@@ -28,14 +28,14 @@ import java.util.logging.Logger;
  * being consumed by the detectors. Every time the Basic Sensor is invoked it returns metrics that correspond to the
  * time window between the timestamp of the previous policy invocation and the current timestamp.
  * <p>
- * The Basic Sensor takes as input a metric name, the metrics provider, and a set of components.
- * It collects the values of the given metric for these components.
+ * The Basic Sensor takes as input a metric name or a set of metric names, the metrics provider,
+ * and a set of components. It collects the values of the given metric/metrics for these components.
  */
 public class BasicSensor implements ISensor {
   private static final Logger LOG = Logger.getLogger(BasicSensor.class.getName());
   private static final Duration DEFAULT_METRIC_DURATION = Duration.ofSeconds(60);
 
-  private final String metricName;
+  private final Collection<String> metricNames;
   private final Collection<String> components;
 
   protected ExecutionContext context;
@@ -45,11 +45,22 @@ public class BasicSensor implements ISensor {
     this(sysconfig, metricName, metricsProvider, null);
   }
 
+  public BasicSensor(Config sysConfig, Collection<String> metricNames, MetricsProvider metricsProvider) {
+    this(sysConfig, metricNames, metricsProvider, null);
+  }
+
   public BasicSensor(Config policyConf,
                      String metricName,
                      MetricsProvider metricsProvider,
                      Collection<String> components) {
-    this.metricName = metricName;
+    this(policyConf, Collections.singletonList(metricName), metricsProvider, components);
+  }
+
+  public BasicSensor(Config policyConf,
+      Collection<String> metricNames,
+      MetricsProvider metricsProvider,
+      Collection<String> components) {
+    this.metricNames = metricNames;
     this.metricsProvider = metricsProvider;
 
     if (components != null) {
@@ -71,7 +82,7 @@ public class BasicSensor implements ISensor {
 
   @Override
   public Collection<String> getMetricTypes() {
-    return Collections.singletonList(metricName);
+    return metricNames;
   }
 
   /**
