@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -51,6 +52,13 @@ public class CSVMetricsProvider implements MetricsProvider {
       }
     }
     return measurements;
+  }
+
+  public Set<String> getMetricTypes() {
+    Set<String> metricTypes = new HashSet<>();
+    metricTypes.add(NodeStat.MEMORY_UTILIZATION);
+    metricTypes.add(NodeStat.CPU_UTILIZATION);
+    return metricTypes;
   }
 
   private Collection<Measurement> getMeasurements(String metric, Instant startTS, Duration duration, String

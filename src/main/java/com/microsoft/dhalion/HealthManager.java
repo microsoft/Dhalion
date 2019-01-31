@@ -102,19 +102,15 @@ public class HealthManager {
     cb.loadConfig(conf).loadPolicyConf();
     config = cb.build();
 
-    //Read the MetricsProvider class
-    String metricsProviderClass = (String) conf.get(Key.METRICS_PROVIDER_CLASS.value());
-    Class<MetricsProvider> mpClass
-        = (Class<MetricsProvider>) this.getClass().getClassLoader().loadClass(metricsProviderClass);
     injector = injector.createChildInjector(new AbstractModule() {
       @Override
       protected void configure() {
         bind(Config.class).toInstance(config);
-        bind(mpClass).in(Singleton.class);
+        bind(CompositeMetricsProvider.class).in(Singleton.class);
       }
     });
 
-    metricsProvider = injector.getInstance(mpClass);
+    metricsProvider = injector.getInstance(CompositeMetricsProvider.class);
 
     injector = injector.createChildInjector(new AbstractModule() {
       @Override

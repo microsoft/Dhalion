@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 /**
  * A {@link MetricsProvider} implements common utility methods to produce {@link Measurement}s. In some cases it will
@@ -41,6 +42,15 @@ public interface MetricsProvider {
                                                   Duration duration,
                                                   Collection<String> metrics,
                                                   Collection<String> components) {
+    throw new UnsupportedOperationException("This method is not implemented in the metrics provider");
+  }
+
+  /**
+   * Returns metric types which are supported by metrics provider.
+   *
+   * @return set of metrics types.
+   */
+  default Set<String> getMetricTypes() {
     throw new UnsupportedOperationException("This method is not implemented in the metrics provider");
   }
 
